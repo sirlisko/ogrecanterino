@@ -1,0 +1,33 @@
+{
+  "name": "@ogre/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/main.ts",
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc -p .",
+    "db:generate": "drizzle-kit generate",
+    "import:library": "tsx --env-file-if-exists=../../.env scripts/import-library.ts",
+    "import:scenes": "tsx --env-file-if-exists=../../.env scripts/import-scenes.ts"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.6",
+    "drizzle-kit": "^0.31.11"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "@fastify/cookie": "^11.1.5",
+    "@fastify/multipart": "^10.1.6",
+    "@fastify/static": "^10.1.8",
+    "@fastify/websocket": "^11.3.4",
+    "@ogre/shared": "workspace:*",
+    "better-sqlite3": "^13.0.3",
+    "csv-parse": "^7.0.3",
+    "discord.js": "^14.27.0",
+    "drizzle-orm": "^0.45.4",
+    "fastify": "^5.12.7",
+    "tsx": "^4.23.15",
+    "zod": "^4.6.7"
+  }
+}
