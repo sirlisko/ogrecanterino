@@ -13,7 +13,7 @@ export function PadPicker({
 }) {
   return (
     <Dialog title={`Choose a sound for pad ${slot}`} onClose={onClose} wide>
-      <div className="max-h-[60dvh] overflow-y-auto">
+      <div className="-m-1 max-h-[60dvh] overflow-y-auto p-1">
         <SoundBrowser
           compact
           initialCategory="effect"
