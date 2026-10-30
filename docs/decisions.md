@@ -32,9 +32,11 @@ accident.
 
 ### Previews never reach Discord
 
-Previews (library, editor, non-live scenes, pad picker) play through a preview gain wired straight
-to the speakers, skipping master and therefore the Discord stream. They ignore "Mute this device",
-because previews are for the GM's ears only.
+Previews (library, editor, non-live scenes, pad picker) play through a parallel preview path wired
+straight to the speakers, so they never reach the Discord stream. That path mirrors the master and
+bus volumes, and scene previews also apply the card and scene volume, so a track auditions as loud
+as it will play; a fixed-level preview sounded louder than the scene and ignored the mixer. They
+ignore "Mute this device", because previews are for the GM's ears only.
 
 ### One save model: autosave
 
