@@ -1,10 +1,23 @@
-import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
+import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react'
 import { Icon } from './Icon.tsx'
 
 export function Menu({ label, children }: { label: string; children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
+  const menu = useRef<HTMLDivElement>(null)
   const id = useId()
+
+  useEffect(() => {
+    if (open) items(menu.current)[0]?.focus()
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -15,6 +28,7 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
         // Keep Escape from also reaching the global "fade out" hotkey.
         e.stopPropagation()
         setOpen(false)
+        if (e instanceof KeyboardEvent) trigger.current?.focus()
       }
     }
     document.addEventListener('pointerdown', close)
@@ -28,8 +42,10 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
   return (
     <div ref={ref} className="relative" onClick={() => setOpen(false)}>
       <button
+        ref={trigger}
         type="button"
         aria-label={label}
+        aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={id}
         onClick={(e) => {
@@ -42,8 +58,10 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
       </button>
       {open && (
         <div
+          ref={menu}
           id={id}
           role="menu"
+          onKeyDown={onMenuKey}
           className="absolute right-0 z-40 mt-1 min-w-40 overflow-hidden rounded-lg bg-peat-700 py-1 shadow-xl ring-1 ring-peat-600"
         >
           {children}
@@ -51,6 +69,24 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
       )}
     </div>
   )
+}
+
+const items = (menu: HTMLElement | null) => [
+  ...(menu?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []),
+]
+
+function onMenuKey(e: ReactKeyboardEvent<HTMLDivElement>) {
+  const list = items(e.currentTarget)
+  const i = list.indexOf(document.activeElement as HTMLElement)
+  const target = {
+    ArrowDown: list[(i + 1) % list.length],
+    ArrowUp: list[(i - 1 + list.length) % list.length],
+    Home: list[0],
+    End: list[list.length - 1],
+  }[e.key]
+  if (!target) return
+  e.preventDefault()
+  target.focus()
 }
 
 export function MenuItem({
