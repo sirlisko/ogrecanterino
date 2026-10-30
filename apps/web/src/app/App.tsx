@@ -8,9 +8,11 @@ import { PlayerPage } from '../features/player/PlayerPage.tsx'
 import { ScenesPage } from '../features/scenes/ScenesPage.tsx'
 import { TablePage } from '../features/table/TablePage.tsx'
 import { Layout } from './Layout.tsx'
+import { usePlayingGuards } from './usePlayingGuards.ts'
 
 export function App() {
   const me = useMe()
+  usePlayingGuards()
   if (me.isPending)
     return (
       <div className="grid min-h-dvh place-items-center">
