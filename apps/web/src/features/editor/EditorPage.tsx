@@ -85,7 +85,7 @@ export function EditorPage() {
           >
             <h2 className="mb-3 font-display text-2xl font-bold">Library</h2>
             <p className="mb-3 text-sm text-ink-muted">
-              Drag sounds into a section, or use the +M, +A and +E buttons.
+              Drag sounds into a section, or add them with the buttons on each row.
             </p>
             <LibraryPanel
               onAdd={(sound, section) =>

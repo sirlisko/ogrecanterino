@@ -33,18 +33,17 @@ export function LibraryPanel({ onAdd }: { onAdd: (sound: Sound, section: SceneSe
       compact
       wrapRow={(sound, row) => <DraggableSound sound={sound}>{row}</DraggableSound>}
       actions={(sound) => (
-        <div className="flex gap-0.5">
+        <div className="flex flex-wrap justify-end gap-0.5">
           {(['music', 'ambiences', 'effects'] as const).map((section) => (
             <button
               key={section}
               type="button"
               onClick={() => onAdd(sound, section)}
               aria-label={`Add ${sound.title} to ${SECTION_META[section].title}`}
-              title={`Add to ${SECTION_META[section].title}`}
-              className="h-7 rounded-md px-2 text-sm font-medium hover:bg-peat-700"
+              className="h-7 rounded-md px-2 text-sm whitespace-nowrap hover:bg-peat-700"
               style={{ color: SECTION_META[section].color }}
             >
-              +{SECTION_META[section].title[0]}
+              + {SECTION_META[section].title}
             </button>
           ))}
         </div>
