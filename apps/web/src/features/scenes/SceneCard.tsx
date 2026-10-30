@@ -9,10 +9,12 @@ export function SceneCard({
   scene,
   canEdit,
   mine,
+  position,
 }: {
   scene: Scene
   canEdit: boolean
   mine: boolean
+  position?: number
 }) {
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
@@ -39,6 +41,11 @@ export function SceneCard({
           className="block font-display text-xl leading-tight font-bold outline-none"
         >
           <span className="absolute inset-0" aria-hidden />
+          {position !== undefined && (
+            <span className="mr-2 font-sans text-base font-normal text-ink-muted tabular">
+              {position}
+            </span>
+          )}
           {scene.name}
         </Link>
         <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-ink-muted">

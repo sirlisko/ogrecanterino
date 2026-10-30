@@ -3,8 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, json } from './client.ts'
 import { keys } from './keys.ts'
 
-export const useScenes = () =>
-  useQuery({ queryKey: keys.scenes, queryFn: () => api<Scene[]>('/api/scenes') })
+export const scenesQuery = { queryKey: keys.scenes, queryFn: () => api<Scene[]>('/api/scenes') }
+
+export const useScenes = () => useQuery(scenesQuery)
 
 export const sceneQuery = (id: string) => ({
   queryKey: keys.scene(id),
