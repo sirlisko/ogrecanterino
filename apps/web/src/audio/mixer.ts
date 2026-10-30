@@ -1,6 +1,7 @@
 import { rampTo, toGain } from './volume.ts'
 
 export type BusName = 'music' | 'ambience' | 'effect'
+export type MeterName = BusName | 'master'
 
 /** About -10 dB: music stays audible under a speaking voice. */
 const DUCK_GAIN = 0.3
@@ -21,6 +22,8 @@ export class Mixer {
   readonly previewBuses: Record<BusName, GainNode>
   /** Sits after the music bus so narration can pull music down without touching its volume. */
   private readonly duck = this.ctx.createGain()
+  private readonly meters: Record<MeterName, AnalyserNode>
+  private readonly samples = new Float32Array(1024)
 
   constructor() {
     this.master.connect(this.monitor).connect(this.ctx.destination)
@@ -37,6 +40,28 @@ export class Mixer {
       ambience: this.bus(this.preview),
       effect: this.bus(this.preview),
     }
+    // Music is metered after the duck, so the meter shows what actually reaches master.
+    this.meters = {
+      master: this.meter(this.master),
+      music: this.meter(this.duck),
+      ambience: this.meter(this.buses.ambience),
+      effect: this.meter(this.buses.effect),
+    }
+  }
+
+  private meter(source: AudioNode) {
+    const analyser = this.ctx.createAnalyser()
+    analyser.fftSize = this.samples.length
+    source.connect(analyser)
+    return analyser
+  }
+
+  /** Current peak of a channel, as linear amplitude. */
+  peak(name: MeterName): number {
+    this.meters[name].getFloatTimeDomainData(this.samples)
+    let max = 0
+    for (const s of this.samples) max = Math.max(max, Math.abs(s))
+    return max
   }
 
   private bus(output: AudioNode = this.master) {

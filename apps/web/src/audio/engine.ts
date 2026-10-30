@@ -1,7 +1,7 @@
 import type { Card, Scene, SceneSection, Sound } from '@ogre/shared'
 import { BufferCache } from './buffers.ts'
 import { EffectBoard } from './effects.ts'
-import { Mixer, type BusName } from './mixer.ts'
+import { Mixer, type BusName, type MeterName } from './mixer.ts'
 import { ScenePlayback } from './scenePlayback.ts'
 import { createVoice, preload } from './sources.ts'
 import { saveVolumes, usePlayer } from './store.ts'
@@ -235,6 +235,10 @@ class Engine {
     saveVolumes(volumes)
     if (bus === 'master') this.mixer?.setMasterVolume(volume)
     else this.mixer?.setBusVolume(bus, volume)
+  }
+
+  peak(name: MeterName): number {
+    return this.mixer?.peak(name) ?? 0
   }
 
   setMonitor(on: boolean) {
