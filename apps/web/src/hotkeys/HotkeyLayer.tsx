@@ -1,6 +1,6 @@
 import type { Pad } from '@ogre/shared'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { keys } from '../api/keys.ts'
 import { sceneQuery } from '../api/scenes.ts'
 import { engine } from '../audio/engine.ts'
@@ -8,10 +8,11 @@ import { usePlayer } from '../audio/store.ts'
 import { flash } from '../ui/flash.ts'
 import { actionFor, isTypingTarget, type HotkeyAction } from './keymap.ts'
 import { HotkeyHelp } from './HotkeyHelp.tsx'
+import { toggleHotkeyHelp, useHotkeyHelp } from './helpStore.ts'
 
 export function HotkeyLayer() {
   const qc = useQueryClient()
-  const [help, setHelp] = useState(false)
+  const help = useHotkeyHelp((s) => s.open)
 
   useEffect(() => {
     const run = (action: HotkeyAction) => {
@@ -51,7 +52,7 @@ export function HotkeyLayer() {
         case 'focusSearch':
           return document.querySelector<HTMLInputElement>('[data-hotkey-search]')?.focus()
         case 'help':
-          return setHelp((h) => !h)
+          return toggleHotkeyHelp()
       }
     }
 
@@ -69,5 +70,5 @@ export function HotkeyLayer() {
     return () => window.removeEventListener('keydown', onKey)
   }, [qc])
 
-  return help ? <HotkeyHelp onClose={() => setHelp(false)} /> : null
+  return help ? <HotkeyHelp onClose={() => useHotkeyHelp.setState({ open: false })} /> : null
 }

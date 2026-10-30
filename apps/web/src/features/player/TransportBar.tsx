@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { formatTime } from '../../ui/format.ts'
+import { toggleHotkeyHelp } from '../../hotkeys/helpStore.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
 import { PadsPopover } from '../pads/PadsPopover.tsx'
 import { MixerPopover } from './MixerPopover.tsx'
@@ -104,6 +105,15 @@ export function TransportBar() {
           <DiscordControl />
           <PadsPopover />
           <MixerPopover />
+          <button
+            type="button"
+            onClick={toggleHotkeyHelp}
+            aria-label="Keyboard shortcuts (?)"
+            title="Keyboard shortcuts (?)"
+            className="hidden h-9 w-9 place-items-center rounded-full text-ink-muted ring-1 ring-peat-600 hover:text-ink md:grid"
+          >
+            ?
+          </button>
         </div>
       </div>
     </div>
