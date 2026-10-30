@@ -10,7 +10,12 @@ import { Layout } from './Layout.tsx'
 
 export function App() {
   const me = useMe()
-  if (me.isPending) return null
+  if (me.isPending)
+    return (
+      <div className="grid min-h-dvh place-items-center">
+        <img src="/logo.png" alt="Loading" className="h-16 w-16 animate-breathe" />
+      </div>
+    )
   if (!me.data) {
     return (
       <Routes>
