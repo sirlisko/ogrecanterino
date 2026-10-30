@@ -1,23 +1,18 @@
 export function LoginHero() {
   return (
-    <div className="flex flex-col items-center text-center">
-      <div className="relative">
-        <div className="absolute -inset-10 rounded-full bg-arcane/25 blur-3xl" aria-hidden />
-        <img
-          src="/logo.png"
-          alt="The Ogre Ballerino in sunglasses under a mirror ball"
-          className="relative h-56 w-56 -rotate-3 drop-shadow-2xl transition-transform duration-300 hover:rotate-2 hover:scale-105 motion-reduce:transition-none"
-        />
-      </div>
-      <h1 className="mt-8 font-display text-5xl leading-none font-bold sm:text-6xl">
-        Ogre Canterino
+    <div>
+      <h1 className="font-display text-7xl leading-[0.82] font-bold tracking-tight sm:text-8xl lg:text-[9.5rem]">
+        <span className="block">Ogre</span>
+        <span className="block">Canterino</span>
       </h1>
-      <p className="mt-3 font-display text-xl text-ink-muted italic">
+      <p className="mt-6 font-display text-2xl text-ink-muted italic">
         The Ogre Ballerino’s audio compendium
       </p>
-      <p className="mt-5 max-w-xs text-ink-muted">
+      <p className="mt-4 max-w-sm text-lg text-ink-muted">
         <span className="text-brass">Music</span>, <span className="text-lichen">ambience</span> and{' '}
-        <span className="text-arcane">effects</span> for your table, live or over Discord.
+        <span className="text-arcane">effects</span> for your table,
+        <br />
+        live or over Discord.
       </p>
     </div>
   )

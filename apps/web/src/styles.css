@@ -63,8 +63,32 @@
   animation: progress linear forwards;
 }
 
+.login-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34vmax;
+  height: 160vmax;
+  translate: -50% 0;
+  transform-origin: 50% 0;
+  rotate: var(--beam-angle);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  background: linear-gradient(to bottom, var(--beam-color), transparent 70%);
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  animation: beam-in 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes beam-in {
+  from {
+    rotate: calc(var(--beam-angle) - 40deg);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-breathe {
+  .animate-breathe,
+  .login-beam {
     animation: none;
   }
 }
