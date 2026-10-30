@@ -15,7 +15,7 @@ import prism from 'prism-media'
 import { httpError } from '../http/auth.ts'
 import type { DiscordBot } from './bot.ts'
 import { createLiveBuffer } from './liveBuffer.ts'
-import { createOpusSplitter } from './opusSplit.ts'
+import { createOpusRepacketizer } from './opusSplit.ts'
 
 // 300 ms: absorbs the browser's 100 ms chunk bursts plus network jitter.
 const MAX_BUFFERED_FRAMES = 15
@@ -120,10 +120,10 @@ export class VoiceSessions {
     session.input?.end()
     const input = new PassThrough()
     session.input = input
-    // The browser already sends Opus: demux the WebM and split 60 ms packets into 20 ms ones, no re-encoding.
+    // The browser already sends Opus: demux the WebM and re-pack it into 20 ms packets, no re-encoding.
     const packets = input
       .pipe(new prism.opus.WebmDemuxer())
-      .pipe(createOpusSplitter())
+      .pipe(createOpusRepacketizer())
       .pipe(createLiveBuffer(MAX_BUFFERED_FRAMES))
     session.player.play(createAudioResource(packets, { inputType: StreamType.Opus }))
     return {

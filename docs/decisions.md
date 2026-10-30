@@ -112,4 +112,5 @@ does nothing more.
 All mixing happens in Web Audio in the GM's browser. The Discord bot only relays that browser's
 Opus stream, so the table and Discord always hear the same mix and the server never re-encodes.
 Chromium's MediaRecorder emits 60 ms Opus packets, which the server splits into the 20 ms frames
-`@discordjs/voice` expects.
+`@discordjs/voice` expects. WebKit (Safari and every iOS browser) emits 2.5 ms frames instead, which
+the server joins eight at a time; sent one per tick, they played as distorted, near-silent audio.
