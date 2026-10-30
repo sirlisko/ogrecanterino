@@ -1,7 +1,8 @@
 import type { Sound } from '@ogre/shared'
 import { useState } from 'react'
-import { fetchSoundUsage, useDeleteSound } from '../../api/sounds.ts'
 import { useFavourites, useMe, useToggleFavourite } from '../../api/me.ts'
+import { fetchSoundUsage, useDeleteSound } from '../../api/sounds.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { PAD_SLOTS, usePadSlots } from '../pads/usePadSlots.ts'
 import { deleteSoundMessage } from './deleteMessage.ts'
 import { EditSoundDialog } from './EditSoundDialog.tsx'
@@ -28,7 +29,7 @@ export function LibraryActions({ sound }: { sound: Sound }) {
         onClick={() => toggleFav.mutate({ soundId: sound.id, on: !fav })}
         className={`grid h-8 w-8 place-items-center rounded-full text-lg hover:bg-peat-700 ${fav ? 'text-brass' : 'text-peat-400'}`}
       >
-        {fav ? '★' : '☆'}
+        <Icon name="star" outline={!fav} className="h-5 w-5" />
       </button>
       <select
         aria-label={`Pin ${sound.title} to a quick pad`}
@@ -68,7 +69,7 @@ export function LibraryActions({ sound }: { sound: Sound }) {
           }}
           className="grid h-8 w-8 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
         >
-          ✕
+          <Icon name="close" />
         </button>
       )}
     </div>

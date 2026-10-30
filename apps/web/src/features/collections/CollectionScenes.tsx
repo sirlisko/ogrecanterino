@@ -45,7 +45,8 @@ export function CollectionScenes({
       </div>
       {ordered.length === 0 ? (
         <p className="mt-10 max-w-prose text-ink-muted">
-          No scenes in this collection yet. Add them with Edit collection, or from a scene's ⋯ menu.
+          No scenes in this collection yet. Add them with Edit collection, or from a scene's actions
+          menu.
         </p>
       ) : visible.length === 0 ? (
         <p className="mt-10 text-ink-muted">No scenes match. Clear the search.</p>

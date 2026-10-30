@@ -1,6 +1,7 @@
 import type { Sound } from '@ogre/shared'
 import type { ReactNode } from 'react'
 import { formatTime } from '../../ui/format.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { STRUCTURAL_TAGS } from './filters.ts'
 
 const CATEGORY_COLOR = {
@@ -38,7 +39,7 @@ export function SoundRow({
           ['--tw-ring-color' as string]: color,
         }}
       >
-        {previewing ? '■' : '▶'}
+        <Icon name={previewing ? 'stop' : 'play'} className="h-3.5 w-3.5" />
       </button>
       <div className="min-w-0 flex-1">
         <p className="truncate">{sound.title}</p>

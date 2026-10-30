@@ -5,6 +5,7 @@ import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
+import { Icon } from '../../ui/Icon.tsx'
 
 const SECONDS = (ms: number) => Math.round(ms / 1000)
 
@@ -40,7 +41,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           aria-label={`Reorder ${card.label}`}
           className="cursor-grab touch-none px-1 text-peat-400 hover:text-ink"
         >
-          ⠿
+          <Icon name="grip" />
         </button>
         <input
           type="checkbox"
@@ -70,7 +71,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           aria-label={previewing ? `Stop ${card.label}` : `Preview ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-xs text-ink-muted hover:bg-peat-700 hover:text-ink disabled:opacity-40"
         >
-          {previewing ? '■' : '▶'}
+          <Icon name={previewing ? 'stop' : 'play'} className="h-3 w-3" />
         </button>
         <button
           type="button"
@@ -78,7 +79,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           aria-label={`Remove ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
         >
-          ✕
+          <Icon name="close" />
         </button>
       </div>
       {section === 'ambiences' && (

@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
+import { Icon } from './Icon.tsx'
 
 export function Menu({ label, children }: { label: string; children: ReactNode }) {
   const [open, setOpen] = useState(false)
@@ -37,7 +38,7 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
         }}
         className="grid h-9 w-9 place-items-center rounded-full bg-peat-950/70 text-lg text-ink hover:bg-peat-700"
       >
-        ⋯
+        <Icon name="more" className="h-5 w-5" />
       </button>
       {open && (
         <div

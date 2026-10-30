@@ -2,8 +2,9 @@ import type { Scene } from '@ogre/shared'
 import { Link, useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
-import { SceneMenu } from './SceneMenu.tsx'
+import { Icon } from '../../ui/Icon.tsx'
 import { sceneGradient } from './sceneArt.ts'
+import { SceneMenu } from './SceneMenu.tsx'
 
 export function SceneCard({
   scene,
@@ -75,9 +76,9 @@ export function SceneCard({
         }`}
       >
         {playing ? (
-          <span className="animate-breathe text-lg">♪</span>
+          <Icon name="note" className="h-5 w-5 animate-breathe" />
         ) : (
-          <span className="ml-0.5">▶</span>
+          <Icon name="play" className="ml-0.5 h-4 w-4" />
         )}
       </button>
       <div className="absolute top-3 right-3 z-10">

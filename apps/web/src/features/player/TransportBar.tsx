@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
-import { formatTime } from '../../ui/format.ts'
 import { toggleHotkeyHelp } from '../../hotkeys/helpStore.ts'
+import { formatTime } from '../../ui/format.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
 import { PadsPopover } from '../pads/PadsPopover.tsx'
@@ -66,7 +68,7 @@ export function TransportBar() {
             onClick={() => engine.music?.previous()}
             disabled={!scene}
           >
-            ⏮
+            <Icon name="previous" />
           </TransportButton>
           <button
             type="button"
@@ -76,14 +78,14 @@ export function TransportBar() {
             onClick={() => engine.music?.toggle()}
             className="grid h-11 w-11 place-items-center rounded-full bg-brass text-peat-950 disabled:opacity-40"
           >
-            {music.playing ? '❚❚' : '▶'}
+            <Icon name={music.playing ? 'pause' : 'play'} className="h-5 w-5" />
           </button>
           <TransportButton
             label="Next track (N)"
             onClick={() => engine.music?.next()}
             disabled={!scene}
           >
-            ⏭
+            <Icon name="next" />
           </TransportButton>
         </div>
 
@@ -144,7 +146,7 @@ function TransportButton({
   label: string
   onClick: () => void
   disabled?: boolean
-  children: string
+  children: ReactNode
 }) {
   return (
     <button

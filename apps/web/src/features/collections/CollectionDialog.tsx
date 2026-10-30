@@ -20,6 +20,7 @@ import { useDeleteCollection, useSaveCollection } from '../../api/collections.ts
 import { useScenes } from '../../api/scenes.ts'
 import { Button } from '../../ui/Button.tsx'
 import { Dialog, fieldClass } from '../../ui/Dialog.tsx'
+import { Icon } from '../../ui/Icon.tsx'
 import { setActiveCollection } from './activeCollection.ts'
 
 const EMPTY: CollectionInput = {
@@ -201,7 +202,7 @@ function SceneItem({
         aria-label={`Reorder ${name}`}
         className="cursor-grab touch-none px-1 text-peat-400 hover:text-ink"
       >
-        ⠿
+        <Icon name="grip" />
       </button>
       <span className="w-6 text-right text-ink-muted tabular">{index + 1}</span>
       <span className={`min-w-0 flex-1 truncate ${scene ? '' : 'text-peat-400 italic'}`}>
@@ -213,7 +214,7 @@ function SceneItem({
         aria-label={`Remove ${name}`}
         className="grid h-7 w-7 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
       >
-        ✕
+        <Icon name="close" />
       </button>
     </li>
   )

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { Icon } from '../../ui/Icon.tsx'
 
 const SHOW_MS = 8000
 
@@ -33,7 +34,7 @@ export function ResumeToast() {
         aria-label="Dismiss"
         className="grid h-8 w-8 place-items-center rounded-full text-ink-muted hover:text-ink"
       >
-        ✕
+        <Icon name="close" />
       </button>
     </div>
   )

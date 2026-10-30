@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core'
 import type { SceneSection, Sound } from '@ogre/shared'
 import type { ReactNode } from 'react'
+import { Icon } from '../../ui/Icon.tsx'
 import { SoundBrowser } from '../library/SoundBrowser.tsx'
 import { SECTION_META } from './SectionEditor.tsx'
 
@@ -20,7 +21,7 @@ function DraggableSound({ sound, children }: { sound: Sound; children: ReactNode
         aria-label={`Drag ${sound.title} into the scene`}
         className="cursor-grab touch-none px-1 text-peat-400 hover:text-ink"
       >
-        ⠿
+        <Icon name="grip" />
       </button>
       <div className="min-w-0 flex-1">{children}</div>
     </div>

@@ -4,6 +4,7 @@ import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { formatTime } from '../../ui/format.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { EmptyLane, IconButton, Lane } from './Lane.tsx'
 
 interface Props {
@@ -38,7 +39,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
             active={settings.shuffle}
             onClick={() => onSettings({ shuffle: !settings.shuffle })}
           >
-            ⤮
+            <Icon name="shuffle" />
           </IconButton>
           <IconButton
             label={
@@ -49,7 +50,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
             active={!settings.musicIsPlaylist}
             onClick={() => onSettings({ musicIsPlaylist: !settings.musicIsPlaylist })}
           >
-            ↻
+            <Icon name="repeat" />
           </IconButton>
         </>
       }
@@ -88,7 +89,10 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                       : 'bg-peat-700 hover:bg-brass hover:text-peat-950'
                   }`}
                 >
-                  {previewing ? '■' : sounding ? '❚❚' : '▶'}
+                  <Icon
+                    name={previewing ? 'stop' : sounding ? 'pause' : 'play'}
+                    className="h-3.5 w-3.5"
+                  />
                 </button>
                 <span
                   className={`min-w-0 flex-1 truncate ${card.enabled ? '' : 'text-peat-400 line-through'}`}

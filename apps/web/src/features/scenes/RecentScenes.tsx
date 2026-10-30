@@ -2,6 +2,7 @@ import type { Scene } from '@ogre/shared'
 import { useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { useRecentScenes } from './recentScenes.ts'
 
 export function RecentScenes({ scenes }: { scenes: Scene[] }) {
@@ -32,7 +33,7 @@ export function RecentScenes({ scenes }: { scenes: Scene[] }) {
                   aria-hidden
                   className={`grid h-6 w-6 place-items-center rounded-full text-xs ${playing ? 'bg-brass text-peat-950' : 'bg-peat-700'}`}
                 >
-                  {playing ? '♪' : '▶'}
+                  <Icon name={playing ? 'note' : 'play'} className="h-3 w-3" />
                 </span>
                 {s.name}
               </button>

@@ -2,6 +2,7 @@ import type { Scene } from '@ogre/shared'
 import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { combatSceneIdFor } from '../collections/setlist.ts'
 import { useActiveCollectionData } from '../collections/useSetlist.ts'
 
@@ -24,7 +25,7 @@ export function TableControls({ scene }: { scene: Scene }) {
         onClick={() => engine.music?.previous()}
         className={big}
       >
-        ⏮
+        <Icon name="previous" className="h-6 w-6" />
       </button>
       <button
         type="button"
@@ -32,7 +33,7 @@ export function TableControls({ scene }: { scene: Scene }) {
         onClick={() => engine.music?.toggle()}
         className={`${big} bg-brass text-peat-950 ring-0`}
       >
-        {music.playing ? '❚❚' : '▶'}
+        <Icon name={music.playing ? 'pause' : 'play'} className="h-7 w-7" />
       </button>
       <button
         type="button"
@@ -40,7 +41,7 @@ export function TableControls({ scene }: { scene: Scene }) {
         onClick={() => engine.music?.next()}
         className={big}
       >
-        ⏭
+        <Icon name="next" className="h-6 w-6" />
       </button>
       <p className="min-w-0 flex-1 truncate text-lg text-ink-muted">
         {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
