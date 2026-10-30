@@ -3,7 +3,7 @@ import { BufferCache } from './buffers.ts'
 import { EffectBoard } from './effects.ts'
 import { Mixer, type BusName } from './mixer.ts'
 import { ScenePlayback } from './scenePlayback.ts'
-import { createVoice } from './sources.ts'
+import { createVoice, preload } from './sources.ts'
 import { saveVolumes, usePlayer } from './store.ts'
 import type { Voice } from './voice.ts'
 
@@ -89,6 +89,17 @@ class Engine {
     usePlayer.setState({ sceneId: scene.id, scene, combat: false, ambience: {} })
     playback.start(previous ? fade : 1)
     await previous?.stop(fade)
+  }
+
+  /** Decodes a scene's short sounds ahead of time, so stepping to it starts without a gap. */
+  preloadScene(scene: Scene) {
+    if (!this.mixer) return
+    const { music, ambiences, effects } = scene.data
+    const firstTrack = music.find((c) => c.enabled && c.soundId)
+    for (const card of [firstTrack, ...ambiences, ...effects]) {
+      const sound = card?.enabled && card.soundId ? this.lookup(card.soundId) : undefined
+      if (sound) preload(this.factory(), sound)
+    }
   }
 
   async resumeFaded() {

@@ -1,5 +1,6 @@
 import type { Scene } from '@ogre/shared'
 import type { QueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { collectionsQuery, useCollections } from '../../api/collections.ts'
 import { scenesQuery, useScenes } from '../../api/scenes.ts'
@@ -17,9 +18,13 @@ export function useSetlist() {
   const collection = useActiveCollectionData()
   const scenes = useScenes().data ?? []
   const playingId = usePlayer((s) => s.sceneId)
+  const next = adjacentScene(collection, scenes, playingId, 1)
+  useEffect(() => {
+    if (next && playingId) engine.preloadScene(next)
+  }, [next, playingId])
   return {
     collection,
-    next: adjacentScene(collection, scenes, playingId, 1),
+    next,
     previous: adjacentScene(collection, scenes, playingId, -1),
   }
 }
