@@ -2,6 +2,7 @@ import type { Scene } from '@ogre/shared'
 import { useMemo, useState } from 'react'
 import { useMe } from '../../api/me.ts'
 import { Chip } from '../../ui/Chip.tsx'
+import { RecentScenes } from './RecentScenes.tsx'
 import { SceneGrid } from './SceneGrid.tsx'
 import { SceneSearch, matchesQuery } from './SceneSearch.tsx'
 import { topTags } from './topTags.ts'
@@ -31,6 +32,7 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
 
   return (
     <>
+      <RecentScenes scenes={scenes} />
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <SceneSearch value={query} onChange={setQuery} />
         {(['all', 'mine', 'shared'] as const).map((o) => (
