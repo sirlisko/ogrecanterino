@@ -5,7 +5,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 import { App } from './app/App.tsx'
 import './styles.css'
 
-// A data router is required for useBlocker (unsaved-changes guard in the editor).
 const router = createBrowserRouter([{ path: '*', element: <App /> }])
 
 const queryClient = new QueryClient({

@@ -1,44 +1,37 @@
 import { DndContext } from '@dnd-kit/core'
-import { emptySceneData, type Scene, type SceneData, sceneSections } from '@ogre/shared'
-import { useEffect, useState } from 'react'
-import { Link, useBlocker, useParams } from 'react-router'
-import { useMe } from '../../api/me.ts'
-import { useSaveScene, useScene } from '../../api/scenes.ts'
-import { engine } from '../../audio/engine.ts'
-import { Button } from '../../ui/Button.tsx'
+import { emptySceneData, type SceneData, sceneSections } from '@ogre/shared'
+import { useEffect } from 'react'
+import { Link, useParams } from 'react-router'
+import { useLiveScene } from '../player/useLiveScene.ts'
 import { cardForSound, insertCard, removeCard, updateCard } from './cards.ts'
 import { LibraryPanel } from './LibraryPanel.tsx'
+import { SaveIndicator } from './SaveIndicator.tsx'
 import { SceneDetailsForm } from './SceneDetailsForm.tsx'
 import { SectionEditor } from './SectionEditor.tsx'
 import { useSceneDnd } from './useSceneDnd.ts'
 
 export function EditorPage() {
   const { id } = useParams()
-  const query = useScene(id)
-  const me = useMe().data
-  const save = useSaveScene()
-  const [draft, setDraft] = useState<Scene | null>(null)
-  const [dirty, setDirty] = useState(false)
+  const live = useLiveScene(id)
+  const draft = live.scene
+  const dnd = useSceneDnd(draft?.data ?? emptySceneData(), (data) => live.updateData(() => data))
+  const { flush } = live
 
   useEffect(() => {
-    if (query.data) setDraft(query.data)
-  }, [query.data?.id])
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        flush()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [flush])
 
-  useBlocker(({ currentLocation, nextLocation }) => {
-    if (!dirty || currentLocation.pathname === nextLocation.pathname) return false
-    return !confirm('You have unsaved changes. Leave without saving?')
-  })
-
-  const setData = (data: SceneData) => {
-    setDraft((d) => (d ? { ...d, data } : d))
-    setDirty(true)
-  }
-  const dnd = useSceneDnd(draft?.data ?? emptySceneData(), setData)
-
-  if (query.isPending) return <p className="text-ink-muted">Loading scene…</p>
+  if (live.isPending) return <p className="text-ink-muted">Loading scene…</p>
   if (!draft)
     return <p className="text-ink-muted">This scene doesn't exist or isn't shared with you.</p>
-  if (me && me.role !== 'admin' && draft.ownerId !== me.id) {
+  if (!live.canEdit) {
     return (
       <p className="text-ink-muted">
         Only {draft.ownerName} can edit this scene. Duplicate it from the scenes page to make your
@@ -47,44 +40,30 @@ export function EditorPage() {
     )
   }
 
-  const onSave = async () => {
-    const { name, tags, visibility, combatSceneId, data } = draft
-    const saved = await save.mutateAsync({
-      id: draft.id,
-      input: { name, tags, visibility, combatSceneId, data },
-    })
-    engine.updateScene(saved)
-    setDirty(false)
-  }
+  const setData = (fn: (d: SceneData) => SceneData) => live.updateData(fn)
 
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-4xl font-bold">Edit scene</h1>
         <div className="ml-auto flex items-center gap-2">
-          {save.error && <span className="text-danger">{save.error.message}</span>}
-          {dirty && !save.isPending && (
-            <span className="text-sm text-ink-muted">Unsaved changes</span>
-          )}
+          <SaveIndicator
+            status={draft.name.trim() ? live.saveStatus : 'unnamed'}
+            error={live.saveError?.message}
+          />
           <Link
             to={`/scenes/${draft.id}`}
-            className="rounded-lg px-4 py-2 text-ink-muted ring-1 ring-peat-600 hover:text-ink"
+            className="rounded-lg bg-brass px-4 py-2 font-medium text-peat-950 hover:bg-[#e6ba5e]"
           >
             Open player
           </Link>
-          <Button variant="primary" onClick={onSave} disabled={!dirty || save.isPending}>
-            {save.isPending ? 'Saving…' : 'Save scene'}
-          </Button>
         </div>
       </div>
 
       <SceneDetailsForm
         key={draft.id}
         scene={draft}
-        onChange={(patch) => {
-          setDraft((d) => (d ? { ...d, ...patch } : d))
-          setDirty(true)
-        }}
+        onChange={(patch) => live.update((s) => ({ ...s, ...patch }))}
       />
 
       <DndContext sensors={dnd.sensors} onDragEnd={dnd.onDragEnd}>
@@ -95,8 +74,8 @@ export function EditorPage() {
                 key={section}
                 section={section}
                 cards={draft.data[section]}
-                onChange={(cid, patch) => setData(updateCard(draft.data, section, cid, patch))}
-                onRemove={(cid) => setData(removeCard(draft.data, section, cid))}
+                onChange={(cid, patch) => setData((d) => updateCard(d, section, cid, patch))}
+                onRemove={(cid) => setData((d) => removeCard(d, section, cid))}
               />
             ))}
           </div>
@@ -110,7 +89,7 @@ export function EditorPage() {
             </p>
             <LibraryPanel
               onAdd={(sound, section) =>
-                setData(insertCard(draft.data, section, cardForSound(sound, section)))
+                setData((d) => insertCard(d, section, cardForSound(sound, section)))
               }
             />
           </aside>
