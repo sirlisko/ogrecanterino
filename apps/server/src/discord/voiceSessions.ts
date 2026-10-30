@@ -14,7 +14,11 @@ import {
 import prism from 'prism-media'
 import { httpError } from '../http/auth.ts'
 import type { DiscordBot } from './bot.ts'
+import { createLiveBuffer } from './liveBuffer.ts'
 import { createOpusSplitter } from './opusSplit.ts'
+
+// 300 ms: absorbs the browser's 100 ms chunk bursts plus network jitter.
+const MAX_BUFFERED_FRAMES = 15
 
 interface VoiceSession {
   guildId: string
@@ -80,7 +84,10 @@ export class VoiceSessions {
     }
     const player =
       existing?.player ??
-      createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Play } })
+      createAudioPlayer({
+        // A live stream briefly runs dry between chunks; play silence rather than stopping.
+        behaviors: { noSubscriber: NoSubscriberBehavior.Play, maxMissedFrames: Infinity },
+      })
     connection.subscribe(player)
     connection.on(VoiceConnectionStatus.Disconnected, () => {
       // Recover from channel moves; give up if the bot was kicked.
@@ -114,7 +121,10 @@ export class VoiceSessions {
     const input = new PassThrough()
     session.input = input
     // The browser already sends Opus: demux the WebM and split 60 ms packets into 20 ms ones, no re-encoding.
-    const packets = input.pipe(new prism.opus.WebmDemuxer()).pipe(createOpusSplitter())
+    const packets = input
+      .pipe(new prism.opus.WebmDemuxer())
+      .pipe(createOpusSplitter())
+      .pipe(createLiveBuffer(MAX_BUFFERED_FRAMES))
     session.player.play(createAudioResource(packets, { inputType: StreamType.Opus }))
     return {
       write: (chunk: Buffer) => input.write(chunk),
