@@ -11,7 +11,7 @@ export function LibraryPage() {
       <div className="mb-5 flex flex-wrap items-end gap-4">
         <h1 className="font-display text-4xl font-bold">Library</h1>
         <Button variant="primary" className="ml-auto" onClick={() => setUploading(true)}>
-          Upload sound
+          Upload sounds
         </Button>
       </div>
       <SoundBrowser actions={(s) => <LibraryActions sound={s} />} />
