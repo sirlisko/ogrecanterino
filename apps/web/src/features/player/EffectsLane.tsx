@@ -1,7 +1,7 @@
 import type { Card, Scene } from '@ogre/shared'
 import { useRef } from 'react'
 import { useSoundStatus } from '../../api/sounds.ts'
-import { engine } from '../../audio/engine.ts'
+import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { flash } from '../../ui/flash.ts'
 import { EmptyLane, Lane } from './Lane.tsx'
@@ -21,6 +21,7 @@ export function EffectsLane({ scene, active }: { scene: Scene; active: boolean }
             card={card}
             hotkey={active ? EFFECT_KEYS[i] : undefined}
             active={active}
+            sceneVolume={scene.data.globalVolume}
           />
         ))}
       </div>
@@ -33,11 +34,13 @@ export function EffectPad({
   hotkey,
   active,
   large,
+  sceneVolume,
 }: {
   card: Card
   hotkey?: string
   active: boolean
   large?: boolean
+  sceneVolume?: number
 }) {
   const ref = useRef<HTMLButtonElement>(null)
   const status = useSoundStatus()(card.soundId)
@@ -49,7 +52,11 @@ export function EffectPad({
   const durationMs = card.soundId ? engine.lookup(card.soundId)?.durationMs : null
 
   const fire = () => {
-    if (!active) return card.soundId && engine.togglePreview(card.soundId)
+    if (!active)
+      return (
+        card.soundId &&
+        engine.togglePreview(card.soundId, previewLevel(card, 'effects', sceneVolume))
+      )
     void engine.triggerEffect(card)
     if (!stoppable) flash(ref.current)
   }

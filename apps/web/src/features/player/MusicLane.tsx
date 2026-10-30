@@ -1,6 +1,6 @@
 import type { Card, Scene, SceneSettings } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
-import { engine } from '../../audio/engine.ts'
+import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { formatTime } from '../../ui/format.ts'
@@ -23,7 +23,11 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
   const cards = scene.data.music
 
   const play = (card: Card) => {
-    if (!active) return card.soundId && engine.togglePreview(card.soundId)
+    if (!active)
+      return (
+        card.soundId &&
+        engine.togglePreview(card.soundId, previewLevel(card, 'music', scene.data.globalVolume))
+      )
     if (music.cardId === card.id) engine.music?.toggle()
     else engine.music?.playCard(card.id)
   }

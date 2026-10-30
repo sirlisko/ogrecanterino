@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Card, SceneSection } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
-import { engine } from '../../audio/engine.ts'
+import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { Icon } from '../../ui/Icon.tsx'
@@ -66,7 +66,9 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
         />
         <button
           type="button"
-          onClick={() => card.soundId && engine.togglePreview(card.soundId)}
+          onClick={() =>
+            card.soundId && engine.togglePreview(card.soundId, previewLevel(card, section))
+          }
           disabled={status !== 'ready'}
           aria-label={previewing ? `Stop ${card.label}` : `Preview ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-xs text-ink-muted hover:bg-peat-700 hover:text-ink disabled:opacity-40"

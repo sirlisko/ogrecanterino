@@ -1,14 +1,33 @@
-import type { Card, Scene, Sound } from '@ogre/shared'
+import type { Card, Scene, SceneSection, Sound } from '@ogre/shared'
 import { BufferCache } from './buffers.ts'
 import { EffectBoard } from './effects.ts'
 import { Mixer, type BusName } from './mixer.ts'
 import { ScenePlayback } from './scenePlayback.ts'
+import { createVoice } from './sources.ts'
 import { saveVolumes, usePlayer } from './store.ts'
 import type { Voice } from './voice.ts'
 
 const FADE_ALL_SECONDS = 1.5
 /** Effects at least this long stop when triggered again instead of layering. */
 export const LONG_EFFECT_MS = 8000
+const LIBRARY_PREVIEW_VOLUME = 80
+
+/** Where a preview would play in a scene, so auditioning matches playback loudness. */
+export interface PreviewLevel {
+  bus: BusName
+  volume: number
+}
+
+const SECTION_BUS: Record<SceneSection, BusName> = {
+  music: 'music',
+  ambiences: 'ambience',
+  effects: 'effect',
+}
+
+export function previewLevel(card: Card, section: SceneSection, sceneVolume = 100): PreviewLevel {
+  // Gains are squared, so multiplying the 0–100 volumes multiplies the gains too.
+  return { bus: SECTION_BUS[section], volume: (card.volume * sceneVolume) / 100 }
+}
 
 /** Single entry point the UI talks to; owns the audio graph and the active scene. */
 class Engine {
@@ -17,7 +36,6 @@ class Engine {
   private sounds = new Map<string, Sound>()
   private playback: ScenePlayback | null = null
   private pads: EffectBoard | null = null
-  private previews: EffectBoard | null = null
   private previewVoice: Voice | null = null
   private effectVoices = new Map<string, { voices: Set<Voice>; startedAt: number }>()
 
@@ -33,7 +51,6 @@ class Engine {
       this.mixer = new Mixer()
       this.buffers = new BufferCache(this.mixer.ctx)
       this.pads = new EffectBoard(this.factory(), this.mixer.buses.effect)
-      this.previews = new EffectBoard(this.factory(), this.mixer.preview)
       const { volumes, monitor } = usePlayer.getState()
       this.mixer.setMasterVolume(volumes.master, 0)
       for (const bus of ['music', 'ambience', 'effect'] as const)
@@ -154,13 +171,15 @@ class Engine {
   }
 
   /** Plays one sound at a time on this device only; resolves when it finishes or is replaced. */
-  async preview(soundId: string): Promise<void> {
-    await this.unlock()
+  async preview(soundId: string, level?: PreviewLevel): Promise<void> {
+    const mixer = await this.unlock()
     await this.previewVoice?.stop(0.15)
     const sound = this.lookup(soundId)
-    if (!sound || !this.previews) return
+    if (!sound) return
     usePlayer.setState({ previewId: soundId })
-    const voice = await this.previews.fire(sound, 80)
+    const output = level ? mixer.previewBuses[level.bus] : mixer.preview
+    const volume = level?.volume ?? LIBRARY_PREVIEW_VOLUME
+    const voice = await createVoice(this.factory(), sound, output, { volume })
     this.previewVoice = voice
     await new Promise<void>((resolve) => voice.onEnded(resolve))
     if (this.previewVoice === voice) {
@@ -169,9 +188,9 @@ class Engine {
     }
   }
 
-  togglePreview(soundId: string) {
+  togglePreview(soundId: string, level?: PreviewLevel) {
     if (usePlayer.getState().previewId === soundId) this.stopPreview()
-    else void this.preview(soundId)
+    else void this.preview(soundId, level)
   }
 
   stopPreview() {

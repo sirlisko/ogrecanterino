@@ -8,7 +8,8 @@ const DUCK_GAIN = 0.3
 /**
  * Global audio graph: buses → master → (monitor → speakers) and → a MediaStream that
  * the Discord bridge records, so remote players hear exactly the local mix.
- * Previews skip master so auditioning never reaches the table or Discord.
+ * Previews mirror the master and bus volumes on a parallel path that skips the stream,
+ * so auditioning sounds as loud as playback but never reaches Discord.
  */
 export class Mixer {
   readonly ctx = new AudioContext({ latencyHint: 'playback' })
@@ -17,6 +18,7 @@ export class Mixer {
   readonly stream = this.ctx.createMediaStreamDestination()
   readonly preview = this.ctx.createGain()
   readonly buses: Record<BusName, GainNode>
+  readonly previewBuses: Record<BusName, GainNode>
   /** Sits after the music bus so narration can pull music down without touching its volume. */
   private readonly duck = this.ctx.createGain()
 
@@ -29,6 +31,11 @@ export class Mixer {
       music: this.bus(this.duck),
       ambience: this.bus(),
       effect: this.bus(),
+    }
+    this.previewBuses = {
+      music: this.bus(this.preview),
+      ambience: this.bus(this.preview),
+      effect: this.bus(this.preview),
     }
   }
 
@@ -44,10 +51,12 @@ export class Mixer {
 
   setBusVolume(bus: BusName, volume: number) {
     rampTo(this.buses[bus].gain, toGain(volume), 0.05, this.ctx)
+    rampTo(this.previewBuses[bus].gain, toGain(volume), 0.05, this.ctx)
   }
 
   setMasterVolume(volume: number, seconds = 0.05) {
     rampTo(this.master.gain, toGain(volume), seconds, this.ctx)
+    rampTo(this.preview.gain, toGain(volume), seconds, this.ctx)
   }
 
   setMonitor(on: boolean) {
