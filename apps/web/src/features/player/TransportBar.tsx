@@ -7,7 +7,8 @@ import { formatTime } from '../../ui/format.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
-import { PadsPopover } from '../pads/PadsPopover.tsx'
+import { PadsStrip } from '../pads/PadsStrip.tsx'
+import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
 import { MixerPopover } from './MixerPopover.tsx'
 
 export function TransportBar() {
@@ -22,9 +23,11 @@ export function TransportBar() {
   const sounding = (scene?.data.ambiences ?? []).filter((c) => ambience[c.id]?.sounding)
   const setlist = useSetlist()
   const goTo = useGoToScene()
+  const padsVisible = usePadsVisible((s) => s.visible)
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
+      {padsVisible && <PadsStrip />}
       <div
         className="h-0.5 bg-brass transition-[width] duration-500"
         style={{ width: `${progress}%` }}
@@ -120,7 +123,15 @@ export function TransportBar() {
             Fade out
           </button>
           <DiscordControl />
-          <PadsPopover />
+          <button
+            type="button"
+            aria-pressed={padsVisible}
+            onClick={togglePads}
+            title={padsVisible ? 'Hide quick pads' : 'Show quick pads'}
+            className={`rounded-lg px-3 py-2 ring-1 ring-peat-600 hover:text-ink ${padsVisible ? 'bg-peat-700 text-ink' : 'text-ink-muted'}`}
+          >
+            Pads
+          </button>
           <MixerPopover />
           <button
             type="button"
