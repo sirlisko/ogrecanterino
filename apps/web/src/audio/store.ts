@@ -1,3 +1,4 @@
+import type { Scene } from '@ogre/shared'
 import { create } from 'zustand'
 import type { AmbienceCardState } from './ambience.ts'
 import type { BusName } from './mixer.ts'
@@ -8,6 +9,8 @@ export type Volumes = Record<BusName | 'master', number>
 export interface PlayerState {
   unlocked: boolean
   sceneId: string | null
+  /** Live copy of the playing scene, including unsaved tweaks. */
+  scene: Scene | null
   combat: boolean
   music: MusicState
   ambience: Record<string, AmbienceCardState>
@@ -38,6 +41,7 @@ export function saveVolumes(v: Volumes) {
 export const usePlayer = create<PlayerState>(() => ({
   unlocked: false,
   sceneId: null,
+  scene: null,
   combat: false,
   music: { playing: false, cardId: null, current: 0, duration: 0 },
   ambience: {},

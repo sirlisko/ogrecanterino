@@ -98,13 +98,6 @@ export class MusicDeck {
     this.voice?.seek(seconds)
   }
 
-  setCardVolume(cardId: string, volume: number) {
-    const card = this.cards.find((c) => c.id === cardId)
-    if (!card) return
-    card.volume = volume
-    if (this.cards[this.index] === card) this.voice?.setVolume(volume)
-  }
-
   async stop(fadeSeconds = 0) {
     this.stopTicker()
     const voice = this.voice

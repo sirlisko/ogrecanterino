@@ -11,10 +11,11 @@ export class EffectBoard {
     private output: AudioNode,
   ) {}
 
-  async fire(sound: Sound, volume: number) {
+  async fire(sound: Sound, volume: number): Promise<Voice> {
     const voice = await createVoice(this.factory, sound, this.output, { volume })
     this.voices.add(voice)
     voice.onEnded(() => this.voices.delete(voice))
+    return voice
   }
 
   stopAll(fadeSeconds = 0.3) {
