@@ -5,6 +5,7 @@ import { useMe } from '../../api/me.ts'
 import { useSaveScene, useScenes } from '../../api/scenes.ts'
 import { Button } from '../../ui/Button.tsx'
 import { Chip } from '../../ui/Chip.tsx'
+import { UNTITLED } from '../editor/useDiscardIfBlank.ts'
 import { ImportScenesButton } from './ImportScenesButton.tsx'
 import { SceneCard } from './SceneCard.tsx'
 import { topTags } from './topTags.ts'
@@ -40,14 +41,14 @@ export function ScenesPage() {
   const create = async () => {
     const scene = await save.mutateAsync({
       input: {
-        name: 'Untitled scene',
+        name: UNTITLED,
         tags: [],
         visibility: 'private',
         combatSceneId: null,
         data: emptySceneData(),
       },
     })
-    navigate(`/scenes/${scene.id}/edit`)
+    navigate(`/scenes/${scene.id}/edit`, { state: { fresh: true } })
   }
 
   return (

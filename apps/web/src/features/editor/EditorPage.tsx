@@ -1,13 +1,14 @@
 import { DndContext } from '@dnd-kit/core'
 import { emptySceneData, type SceneData, sceneSections } from '@ogre/shared'
 import { useEffect } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useLocation, useParams } from 'react-router'
 import { useLiveScene } from '../player/useLiveScene.ts'
 import { cardForSound, insertCard, removeCard, updateCard } from './cards.ts'
 import { LibraryPanel } from './LibraryPanel.tsx'
 import { SaveIndicator } from './SaveIndicator.tsx'
 import { SceneDetailsForm } from './SceneDetailsForm.tsx'
 import { SectionEditor } from './SectionEditor.tsx'
+import { useDiscardIfBlank } from './useDiscardIfBlank.ts'
 import { useSceneDnd } from './useSceneDnd.ts'
 
 export function EditorPage() {
@@ -16,6 +17,7 @@ export function EditorPage() {
   const draft = live.scene
   const dnd = useSceneDnd(draft?.data ?? emptySceneData(), (data) => live.updateData(() => data))
   const { flush } = live
+  useDiscardIfBlank(draft, useLocation().state?.fresh === true)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
