@@ -1,8 +1,10 @@
 import type { Sound } from '@ogre/shared'
+import { useState } from 'react'
 import { fetchSoundUsage, useDeleteSound } from '../../api/sounds.ts'
 import { useFavourites, useMe, useToggleFavourite } from '../../api/me.ts'
 import { PAD_SLOTS, usePadSlots } from '../pads/usePadSlots.ts'
 import { deleteSoundMessage } from './deleteMessage.ts'
+import { EditSoundDialog } from './EditSoundDialog.tsx'
 
 export function LibraryActions({ sound }: { sound: Sound }) {
   const me = useMe().data
@@ -10,6 +12,7 @@ export function LibraryActions({ sound }: { sound: Sound }) {
   const { pads, assign } = usePadSlots()
   const toggleFav = useToggleFavourite()
   const remove = useDeleteSound()
+  const [editing, setEditing] = useState(false)
   const fav = favourites.includes(sound.id)
   const canDelete =
     !!me && (me.role === 'admin' || (sound.uploadedBy !== null && sound.uploadedBy === me.id))
@@ -45,6 +48,16 @@ export function LibraryActions({ sound }: { sound: Sound }) {
           )
         })}
       </select>
+      {canDelete && (
+        <button
+          type="button"
+          onClick={() => setEditing(true)}
+          className="rounded-md px-2 py-1 text-sm text-ink-muted hover:bg-peat-700 hover:text-ink"
+        >
+          Edit
+        </button>
+      )}
+      {editing && <EditSoundDialog sound={sound} onClose={() => setEditing(false)} />}
       {canDelete && (
         <button
           type="button"
