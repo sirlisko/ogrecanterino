@@ -4,6 +4,7 @@ import { EffectBoard } from './effects.ts'
 import { Mixer, type BusName } from './mixer.ts'
 import { ScenePlayback } from './scenePlayback.ts'
 import { saveVolumes, usePlayer } from './store.ts'
+import type { Voice } from './voice.ts'
 
 const FADE_ALL_SECONDS = 1.5
 
@@ -14,6 +15,7 @@ class Engine {
   private sounds = new Map<string, Sound>()
   private playback: ScenePlayback | null = null
   private pads: EffectBoard | null = null
+  private previewVoice: Voice | null = null
 
   readonly lookup = (id: string) => this.sounds.get(id)
 
@@ -52,18 +54,22 @@ class Engine {
     if (this.playback?.sceneId === scene.id) return
     const fade = usePlayer.getState().crossfadeSeconds
     const previous = this.playback
-    const playback = new ScenePlayback(scene, mixer, this.factory(), this.lookup, {
+    // Declared first because the playback emits state while it's still being constructed.
+    let playback: ScenePlayback | undefined
+    playback = new ScenePlayback(scene, mixer, this.factory(), this.lookup, {
       music: (music) => this.playback === playback && usePlayer.setState({ music }),
       ambience: (ambience) => this.playback === playback && usePlayer.setState({ ambience }),
     })
     this.playback = playback
-    usePlayer.setState({ sceneId: scene.id, combat: false, ambience: {} })
+    usePlayer.setState({ sceneId: scene.id, scene, combat: false, ambience: {} })
     playback.start(previous ? fade : 1)
     await previous?.stop(fade)
   }
 
   updateScene(scene: Scene) {
-    if (this.playback?.sceneId === scene.id) this.playback.update(scene)
+    if (this.playback?.sceneId !== scene.id) return
+    this.playback.update(scene)
+    usePlayer.setState({ scene })
   }
 
   async stopScene(fadeSeconds = FADE_ALL_SECONDS) {
@@ -71,6 +77,7 @@ class Engine {
     this.playback = null
     usePlayer.setState({
       sceneId: null,
+      scene: null,
       combat: false,
       ambience: {},
       music: { playing: false, cardId: null, current: 0, duration: 0 },
@@ -97,15 +104,20 @@ class Engine {
     if (sound) void this.pads?.fire(sound, 100)
   }
 
-  async preview(soundId: string) {
+  /** Plays one sound at a time for auditioning; resolves when it finishes or is replaced. */
+  async preview(soundId: string): Promise<void> {
     await this.unlock()
-    this.pads?.stopAll(0.2)
+    await this.previewVoice?.stop(0.15)
     const sound = this.lookup(soundId)
-    if (sound) void this.pads?.fire(sound, 80)
+    if (!sound || !this.pads) return
+    const voice = await this.pads.fire(sound, 80)
+    this.previewVoice = voice
+    await new Promise<void>((resolve) => voice.onEnded(resolve))
   }
 
   stopPreview() {
-    this.pads?.stopAll(0.2)
+    void this.previewVoice?.stop(0.15)
+    this.previewVoice = null
   }
 
   toggleCombat(combat: Scene | null) {
