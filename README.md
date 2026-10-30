@@ -95,6 +95,41 @@ consistent copy of the database:
 0 4 * * * sqlite3 ~/ogrecanterino/data/app.db ".backup '/backups/ogre-$(date +\%a).db'"
 ```
 
+## Deploying with Coolify
+
+Coolify's own proxy handles HTTPS, so skip `compose.yaml` and its Caddy service and build the Dockerfile directly:
+
+1. **New Resource → Private Repository**, branch `main`.
+2. **Build Pack** `Dockerfile`, location `/docker/Dockerfile`, base directory `/`. **Ports Exposes** `3000`.
+3. **Domains**: `https://<your-domain>`.
+4. **Environment Variables**: everything in `.env.example` except `DOMAIN` and `DEV_LOGIN`. Untick "Build Variable"
+   on the secrets.
+5. **Persistent Storage**: a directory (bind) mount from `/srv/ogrecanterino/data` to `/data`, not a named volume,
+   so the library can be rsynced in and the database backed up from the host.
+6. Deploy, then check the mount from the container terminal with `grep ' /data ' /proc/self/mountinfo`.
+
+Upload the library into the mounted folder. rsync won't create missing parent directories, and Docker creates
+the mount as root:
+
+```sh
+ssh server 'sudo mkdir -p /srv/ogrecanterino/data/import && sudo chown -R $USER: /srv/ogrecanterino/data/import'
+rsync -av --include='*/' --include='*.mp3' --include='*.ogg' --include='*.wav' --include='scenes.json' \
+  --exclude='*' ~/Documents/rpg/tools/soundk/ server:/srv/ogrecanterino/data/import/soundk/
+rsync -av ~/Documents/rpg/tools/bardic_tools_sounds.csv server:/srv/ogrecanterino/data/import/
+```
+
+Then in Coolify's container **Terminal**:
+
+```sh
+cd /app/apps/server
+node_modules/.bin/tsx scripts/import-library.ts /data/import/bardic_tools_sounds.csv /data/import/soundk
+node_modules/.bin/tsx scripts/import-scenes.ts /data/import/soundk/scenes.json
+rm -rf /data/import
+```
+
+The import only needs to run once: redeploys keep `/data`. Turn on **Auto Deploy** to redeploy on every push to
+`main`. For backups, use the cron above with `/srv/ogrecanterino/data/app.db`.
+
 ## Credits and licensing
 
 The bundled sounds come from many artists, and many are under Creative Commons licences that require attribution.
