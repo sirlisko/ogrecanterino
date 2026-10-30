@@ -8,7 +8,12 @@ export interface SceneImportReport {
   missing: { scene: string; files: string[] }[]
 }
 
-export function importBardicScenes(db: Db, rows: unknown[], ownerId: string): SceneImportReport {
+export function importBardicScenes(
+  db: Db,
+  rows: unknown[],
+  ownerId: string,
+  visibility: 'private' | 'group' = 'group',
+): SceneImportReport {
   const library = db.select({ filename: sounds.filename, id: sounds.id }).from(sounds).all()
   const resolve = createResolver(library.map((s) => [s.filename, s.id]))
   const report: SceneImportReport = { imported: [], missing: [] }
@@ -20,7 +25,7 @@ export function importBardicScenes(db: Db, rows: unknown[], ownerId: string): Sc
         ownerId,
         name: scene.name,
         tags: scene.tags,
-        visibility: 'group' as const,
+        visibility,
         data: scene.data,
         updatedAt: new Date().toISOString(),
       }
