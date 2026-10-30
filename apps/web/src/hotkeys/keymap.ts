@@ -7,6 +7,7 @@ export type HotkeyAction =
   | { type: 'fadeOut' }
   | { type: 'toggleMonitor' }
   | { type: 'toggleCombat' }
+  | { type: 'duck' }
   | { type: 'nextScene' }
   | { type: 'previousScene' }
   | { type: 'focusSearch' }
@@ -55,6 +56,8 @@ export function actionFor(e: KeyLike): HotkeyAction | null {
       return { type: 'toggleMonitor' }
     case 'c':
       return { type: 'toggleCombat' }
+    case 'd':
+      return { type: 'duck' }
     case '/':
       return { type: 'focusSearch' }
     default:
@@ -78,6 +81,7 @@ export const HOTKEY_HELP: [keys: string, description: string][] = [
   ['C', 'Start or end combat music'],
   ['[ / ] or Page Up / Down', 'Previous or next scene in the collection'],
   ['Esc', 'Fade out everything'],
+  ['Hold D', 'Lower the music while you talk'],
   ['M', 'Mute or unmute this device'],
   ['/', 'Search'],
   ['?', 'Show these shortcuts'],

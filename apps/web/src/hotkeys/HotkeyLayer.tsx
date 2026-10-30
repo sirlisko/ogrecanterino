@@ -44,6 +44,8 @@ export function HotkeyLayer() {
           return engine.music?.previous()
         case 'fadeOut':
           return void engine.stopScene()
+        case 'duck':
+          return engine.setDucked(true)
         case 'toggleMonitor':
           return engine.setMonitor(!monitor)
         case 'toggleCombat':
@@ -79,8 +81,18 @@ export function HotkeyLayer() {
       e.preventDefault()
       run(action)
     }
+    // Ducking lasts while D is held; releasing anywhere (or leaving the tab) brings the music back.
+    const release = (e: Event) => {
+      if (!(e instanceof KeyboardEvent) || e.key.toLowerCase() === 'd') engine.setDucked(false)
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('keyup', release)
+    window.addEventListener('blur', release)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keyup', release)
+      window.removeEventListener('blur', release)
+    }
   }, [qc])
 
   return help ? <HotkeyHelp onClose={() => useHotkeyHelp.setState({ open: false })} /> : null

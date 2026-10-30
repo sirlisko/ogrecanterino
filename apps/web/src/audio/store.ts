@@ -16,6 +16,8 @@ export interface PlayerState {
   ambience: Record<string, AmbienceCardState>
   volumes: Volumes
   monitor: boolean
+  /** Music pulled down while the GM talks. */
+  ducked: boolean
   crossfadeSeconds: number
   /** Sound being auditioned on this device only. */
   previewId: string | null
@@ -53,6 +55,7 @@ export const usePlayer = create<PlayerState>(() => ({
   ambience: {},
   volumes: loadVolumes(),
   monitor: true,
+  ducked: false,
   crossfadeSeconds: 3,
   previewId: null,
   effects: {},

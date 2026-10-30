@@ -201,6 +201,12 @@ class Engine {
     this.mixer?.setMonitor(on)
   }
 
+  setDucked(on: boolean) {
+    if (usePlayer.getState().ducked === on) return
+    usePlayer.setState({ ducked: on })
+    this.mixer?.setDucked(on)
+  }
+
   setCrossfade(seconds: number) {
     usePlayer.setState({ crossfadeSeconds: seconds })
   }
