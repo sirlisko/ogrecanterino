@@ -11,8 +11,10 @@ export function TransportBar() {
   const music = usePlayer((s) => s.music)
   const combat = usePlayer((s) => s.combat)
   const monitor = usePlayer((s) => s.monitor)
+  const ambience = usePlayer((s) => s.ambience)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
   const progress = music.duration ? (music.current / music.duration) * 100 : 0
+  const sounding = (scene?.data.ambiences ?? []).filter((c) => ambience[c.id]?.sounding)
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
@@ -30,10 +32,21 @@ export function TransportBar() {
               >
                 {scene.name}
               </Link>
-              <p className="truncate text-sm text-ink-muted tabular">
-                {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
-                {music.duration > 0 &&
-                  ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
+              <p className="flex items-center gap-2 text-sm text-ink-muted tabular">
+                <span className="truncate">
+                  {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
+                  {music.duration > 0 &&
+                    ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
+                </span>
+                {sounding.length > 0 && (
+                  <span
+                    className="flex shrink-0 items-center gap-1 text-lichen"
+                    title={sounding.map((c) => c.label).join(', ')}
+                  >
+                    <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-lichen" />
+                    {sounding.length} ambience
+                  </span>
+                )}
               </p>
             </>
           ) : (
