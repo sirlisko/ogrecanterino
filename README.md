@@ -5,11 +5,17 @@ ambience layers (constant loops, or one-shots that fire at random intervals) and
 live at the table or stream them into a Discord voice channel.
 
 - Imports bardic.tools sound libraries (CSV) and scene exports (`scenes.json`)
-- Crossfades between tracks and between whole scenes; fade everything out with Esc
-- Keyboard-driven: `1`–`0` fire effects, `Shift+1`–`9` fire your quick pads, `Space` plays or pauses music (press `?` for the full list)
+- Crossfades between tracks and between whole scenes; fade everything out with Esc, then resume if you didn't mean it
+- Collections: ordered sets of scenes for a campaign or one-shot, stepped through with `[` and `]` like a setlist
+- Keyboard-driven: `1`–`0` fire effects, `Shift+1`–`9` fire your quick pads, `Space` plays or pauses music, hold `D` to lower the music while you talk (press `?` for the full list)
 - A combat button that swaps the music to a linked battle playlist and back
-- Shared library with uploads, per-GM scenes, favourites and recently played
+- Preview anything on your own device without interrupting the table
+- Table mode with big buttons for running a session from a tablet
+- Shared library with batch uploads, editable details, per-GM scenes, favourites and quick pads
 - Discord bot that plays the exact mix you hear, with no re-encoding on the server
+
+Design decisions and shared conventions live in [docs/decisions.md](docs/decisions.md) and
+[docs/conventions.md](docs/conventions.md).
 
 ## How it works
 
@@ -36,7 +42,7 @@ pnpm test
 
 Imports are idempotent, so you can re-run them after adding files. Imported scenes are shared with
 everyone as templates. GMs duplicate them to make their own versions. Scene cards whose audio file
-isn't in the library are kept and marked *missing*.
+isn't in the library are kept and marked _missing_.
 
 ## Discord setup
 
