@@ -74,6 +74,12 @@ export function PlayerPage() {
                 {combat ? 'End combat' : 'Combat'}
               </Button>
             )}
+            <Link
+              to="/table"
+              className="rounded-lg px-4 py-2 text-ink-muted ring-1 ring-peat-600 hover:text-ink"
+            >
+              Table mode
+            </Link>
             {canEdit && (
               <Link
                 to={`/scenes/${scene.id}/edit`}

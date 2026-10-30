@@ -6,6 +6,7 @@ import { LibraryPage } from '../features/library/LibraryPage.tsx'
 import { LoginPage } from '../features/login/LoginPage.tsx'
 import { PlayerPage } from '../features/player/PlayerPage.tsx'
 import { ScenesPage } from '../features/scenes/ScenesPage.tsx'
+import { TablePage } from '../features/table/TablePage.tsx'
 import { Layout } from './Layout.tsx'
 
 export function App() {
@@ -25,6 +26,7 @@ export function App() {
   }
   return (
     <Routes>
+      <Route path="table" element={<TablePage />} />
       <Route element={<Layout />}>
         <Route index element={<ScenesPage />} />
         <Route path="scenes/:id" element={<PlayerPage />} />

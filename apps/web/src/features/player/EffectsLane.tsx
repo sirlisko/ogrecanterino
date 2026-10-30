@@ -28,7 +28,17 @@ export function EffectsLane({ scene, active }: { scene: Scene; active: boolean }
   )
 }
 
-function EffectPad({ card, hotkey, active }: { card: Card; hotkey?: string; active: boolean }) {
+export function EffectPad({
+  card,
+  hotkey,
+  active,
+  large,
+}: {
+  card: Card
+  hotkey?: string
+  active: boolean
+  large?: boolean
+}) {
   const ref = useRef<HTMLButtonElement>(null)
   const status = useSoundStatus()(card.soundId)
   const missing = status === 'missing'
@@ -53,7 +63,7 @@ function EffectPad({ card, hotkey, active }: { card: Card; hotkey?: string; acti
       data-effect-id={card.id}
       aria-pressed={active ? stoppable : previewing}
       aria-label={stoppable ? `Stop ${card.label}` : undefined}
-      className={`relative flex min-h-20 flex-col justify-end rounded-xl p-3 text-left ring-1 transition-colors hover:bg-peat-700 hover:ring-arcane/60 active:scale-[0.98] disabled:opacity-40 overflow-hidden ${previewing || stoppable ? 'bg-arcane/15 ring-arcane' : 'bg-peat-800 ring-peat-700'}`}
+      className={`relative flex flex-col justify-end rounded-xl p-3 ${large ? 'min-h-28 text-xl' : 'min-h-20'} text-left ring-1 transition-colors hover:bg-peat-700 hover:ring-arcane/60 active:scale-[0.98] disabled:opacity-40 overflow-hidden ${previewing || stoppable ? 'bg-arcane/15 ring-arcane' : 'bg-peat-800 ring-peat-700'}`}
     >
       {hotkey && (
         <kbd className="absolute top-2 right-2 grid h-6 min-w-6 place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs text-ink tabular">
