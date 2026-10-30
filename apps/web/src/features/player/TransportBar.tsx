@@ -48,7 +48,7 @@ export function TransportBar() {
                 {ducked && <span className="shrink-0 text-brass">Music lowered</span>}
                 {sounding.length > 0 && (
                   <span
-                    className="flex shrink-0 items-center gap-1 text-lichen"
+                    className="hidden shrink-0 items-center gap-1 text-lichen sm:flex"
                     title={sounding.map((c) => c.label).join(', ')}
                   >
                     <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-lichen" />
