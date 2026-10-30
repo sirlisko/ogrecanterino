@@ -20,14 +20,18 @@ interface Props {
   actions?: (sound: Sound) => ReactNode
   wrapRow?: (sound: Sound, row: ReactNode) => ReactNode
   compact?: boolean
+  initialCategory?: SoundCategory
 }
 
-export function SoundBrowser({ actions, wrapRow, compact }: Props) {
+export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Props) {
   const sounds = useSounds()
   const favourites = new Set(useFavourites().data ?? [])
   const recent = useRecent().data ?? []
   const preview = usePreview()
-  const [filter, setFilter] = useState<SoundFilter>(emptyFilter)
+  const [filter, setFilter] = useState<SoundFilter>({
+    ...emptyFilter,
+    category: initialCategory ?? null,
+  })
   const [view, setView] = useState<View>('all')
   const [limit, setLimit] = useState(PAGE)
 

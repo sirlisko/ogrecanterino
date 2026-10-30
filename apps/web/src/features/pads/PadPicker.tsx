@@ -16,6 +16,7 @@ export function PadPicker({
       <div className="max-h-[60dvh] overflow-y-auto">
         <SoundBrowser
           compact
+          initialCategory="effect"
           actions={(sound) => (
             <Button
               className="px-3 py-1 text-sm"
