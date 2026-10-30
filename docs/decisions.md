@@ -65,6 +65,10 @@ Holding D lowers music to about −10 dB through a gain node after the music bus
 the music volume setting. It releases on key-up or when the window loses focus. Table mode has a
 "Hold to talk" button that does the same.
 
+Effect cards can opt in to the same duck ("Lower the music while it plays") for narration and big
+monster roars. It's off by default so existing scenes sound the same. The duck stays on while the
+key is held or any such effect is sounding.
+
 ### Quick pads live in the transport bar
 
 Pads moved from the bottom of the player page into a **Pads** tray, so they're reachable on every

@@ -88,6 +88,17 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           <Icon name="close" />
         </button>
       </div>
+      {section === 'effects' && (
+        <label className="mt-2 flex items-center gap-2 pl-8 text-sm text-ink-muted">
+          <input
+            type="checkbox"
+            checked={!!card.duckMusic}
+            onChange={(e) => onChange({ duckMusic: e.target.checked })}
+            style={{ accentColor: color }}
+          />
+          Lower the music while it plays
+        </label>
+      )}
       {section === 'ambiences' && (
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 pl-8 text-sm text-ink-muted">
           <select

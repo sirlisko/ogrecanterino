@@ -16,7 +16,7 @@ export function TransportBar() {
   const music = usePlayer((s) => s.music)
   const combat = usePlayer((s) => s.combat)
   const monitor = usePlayer((s) => s.monitor)
-  const ducked = usePlayer((s) => s.ducked)
+  const ducked = usePlayer((s) => s.ducked || s.effectDucking)
   const ambience = usePlayer((s) => s.ambience)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
   const progress = music.duration ? (music.current / music.duration) * 100 : 0

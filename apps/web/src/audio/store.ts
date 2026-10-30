@@ -18,6 +18,8 @@ export interface PlayerState {
   monitor: boolean
   /** Music pulled down while the GM talks. */
   ducked: boolean
+  /** Music pulled down by an effect card that asks for it. */
+  effectDucking: boolean
   crossfadeSeconds: number
   /** Sound being auditioned on this device only. */
   previewId: string | null
@@ -56,6 +58,7 @@ export const usePlayer = create<PlayerState>(() => ({
   volumes: loadVolumes(),
   monitor: true,
   ducked: false,
+  effectDucking: false,
   crossfadeSeconds: 3,
   previewId: null,
   effects: {},

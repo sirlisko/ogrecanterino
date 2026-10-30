@@ -15,6 +15,8 @@ export const card = z.object({
   mode: cardMode,
   intervalMs: range.optional(),
   times: range.optional(),
+  /** Effects only: lower the music while this one plays. */
+  duckMusic: z.boolean().optional(),
 })
 export type Card = z.infer<typeof card>
 

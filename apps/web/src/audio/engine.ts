@@ -38,6 +38,7 @@ class Engine {
   private pads: EffectBoard | null = null
   private previewVoice: Voice | null = null
   private effectVoices = new Map<string, { voices: Set<Voice>; startedAt: number }>()
+  private duckingVoices = new Set<Voice>()
 
   readonly lookup = (id: string) => this.sounds.get(id)
 
@@ -150,7 +151,12 @@ class Engine {
     entry.startedAt = Date.now()
     this.effectVoices.set(card.id, entry)
     this.publishEffects()
+    if (card.duckMusic) {
+      this.duckingVoices.add(voice)
+      this.applyDuck()
+    }
     voice.onEnded(() => {
+      if (this.duckingVoices.delete(voice)) this.applyDuck()
       entry.voices.delete(voice)
       if (!entry.voices.size && this.effectVoices.get(card.id) === entry)
         this.effectVoices.delete(card.id)
@@ -228,7 +234,13 @@ class Engine {
   setDucked(on: boolean) {
     if (usePlayer.getState().ducked === on) return
     usePlayer.setState({ ducked: on })
-    this.mixer?.setDucked(on)
+    this.applyDuck()
+  }
+
+  private applyDuck() {
+    const effectDucking = this.duckingVoices.size > 0
+    usePlayer.setState({ effectDucking })
+    this.mixer?.setDucked(usePlayer.getState().ducked || effectDucking)
   }
 
   setCrossfade(seconds: number) {
