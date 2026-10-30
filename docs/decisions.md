@@ -88,11 +88,22 @@ Controls use a small inline SVG set (`ui/Icon.tsx`). Unicode media glyphs render
 platform, and some turned into emoji on Apple devices. Add an icon to `PATHS` rather than pulling in
 a library.
 
+### Guard a playing session
+
+While a scene plays, closing or reloading the tab asks for confirmation, and the app holds a screen
+wake lock so a tablet doesn't lock and suspend the audio. The lock is taken again whenever the tab
+becomes visible, because browsers drop it on hide. If the lock is denied (battery saver), the app
+does nothing more.
+
 ### Considered and not done
 
 - **An "Add to…" dropdown in the editor library:** it would be clipped inside the scrolling sidebar,
   so the rows have labelled buttons instead.
-- **Arrow-key navigation in menus** and **removing a scene banner:** not done yet.
+- **Hardware media keys (Media Session API):** short tracks play from decoded buffers, not media
+  elements, so the keys would only sometimes work. An unreliable control is worse than none.
+- **Playlist resilience:** when a track fails to load (server gone, flaky network) the music deck
+  skips straight to the next track, so an outage races through the whole playlist. Worth a retry or
+  stop-after-N-failures rule if it bites at the table.
 
 ## 2026-10-30: Initial build
 
