@@ -1,6 +1,7 @@
 import type { Sound } from '@ogre/shared'
 import type { ReactNode } from 'react'
 import { formatTime } from '../../ui/format.ts'
+import { STRUCTURAL_TAGS } from './filters.ts'
 
 const CATEGORY_COLOR = {
   music: 'var(--color-brass)',
@@ -22,6 +23,7 @@ export function SoundRow({
   dragHandle?: ReactNode
 }) {
   const color = CATEGORY_COLOR[sound.category]
+  const tags = sound.tags.filter((t) => !STRUCTURAL_TAGS.has(t))
   return (
     <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-peat-800">
       {dragHandle}
@@ -42,14 +44,7 @@ export function SoundRow({
         <p className="truncate">{sound.title}</p>
         <p className="truncate text-sm text-ink-muted">
           {sound.artist || 'Unknown artist'}
-          {sound.tags.length > 0 && (
-            <span className="text-peat-400">
-              ,{' '}
-              {sound.tags
-                .filter((t) => !['Music', 'Sound Effect', 'Ambience'].includes(t))
-                .join(', ')}
-            </span>
-          )}
+          {tags.length > 0 && <span className="text-peat-400">, {tags.join(', ')}</span>}
         </p>
       </div>
       <span className="hidden text-sm text-ink-muted tabular sm:block">
