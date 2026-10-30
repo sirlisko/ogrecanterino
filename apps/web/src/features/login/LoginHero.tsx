@@ -1,7 +1,7 @@
 const KINDS = [
-  { label: 'Music', color: 'text-arcane' },
+  { label: 'Music', color: 'text-brass' },
   { label: 'Ambience', color: 'text-lichen' },
-  { label: 'Effects', color: 'text-brass' },
+  { label: 'Effects', color: 'text-arcane' },
 ]
 
 export function LoginHero() {
