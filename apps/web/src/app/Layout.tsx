@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
+import { ResumeToast } from '../features/player/ResumeToast.tsx'
 import { TransportBar } from '../features/player/TransportBar.tsx'
 import { HotkeyLayer } from '../hotkeys/HotkeyLayer.tsx'
 import { UserMenu } from './UserMenu.tsx'
@@ -44,6 +45,7 @@ export function Layout() {
         <Outlet />
       </main>
       <TransportBar />
+      <ResumeToast />
       <HotkeyLayer />
     </div>
   )

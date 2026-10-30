@@ -55,6 +55,7 @@ class Engine {
     const mixer = await this.unlock()
     if (this.playback?.sceneId === scene.id) return
     this.stopPreview()
+    usePlayer.setState({ faded: null })
     const fade = usePlayer.getState().crossfadeSeconds
     const previous = this.playback
     // Declared first because the playback emits state while it's still being constructed.
@@ -69,6 +70,17 @@ class Engine {
     await previous?.stop(fade)
   }
 
+  async resumeFaded() {
+    const faded = usePlayer.getState().faded
+    if (!faded) return
+    await this.playScene(faded.scene)
+    if (faded.cardId) this.music?.playCard(faded.cardId, 1)
+  }
+
+  dismissFaded() {
+    usePlayer.setState({ faded: null })
+  }
+
   updateScene(scene: Scene) {
     if (this.playback?.sceneId !== scene.id) return
     this.playback.update(scene)
@@ -78,7 +90,9 @@ class Engine {
   async stopScene(fadeSeconds = FADE_ALL_SECONDS) {
     const playback = this.playback
     this.playback = null
+    const { scene, music, combat } = usePlayer.getState()
     usePlayer.setState({
+      faded: scene ? { scene, cardId: combat ? null : music.cardId } : null,
       sceneId: null,
       scene: null,
       combat: false,

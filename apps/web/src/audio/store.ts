@@ -19,6 +19,8 @@ export interface PlayerState {
   crossfadeSeconds: number
   /** Sound being auditioned on this device only. */
   previewId: string | null
+  /** What the last fade-out stopped, so it can be resumed. */
+  faded: { scene: Scene; cardId: string | null } | null
 }
 
 const VOLUME_KEY = 'ogre.volumes'
@@ -51,4 +53,5 @@ export const usePlayer = create<PlayerState>(() => ({
   monitor: true,
   crossfadeSeconds: 3,
   previewId: null,
+  faded: null,
 }))
