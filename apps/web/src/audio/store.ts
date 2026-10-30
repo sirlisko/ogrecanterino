@@ -16,7 +16,17 @@ export interface PlayerState {
   ambience: Record<string, AmbienceCardState>
   volumes: Volumes
   monitor: boolean
+  /** Music pulled down while the GM talks. */
+  ducked: boolean
+  /** Music pulled down by an effect card that asks for it. */
+  effectDucking: boolean
   crossfadeSeconds: number
+  /** Sound being auditioned on this device only. */
+  previewId: string | null
+  /** Effect card id → when its latest voice started, for cards still sounding. */
+  effects: Record<string, number>
+  /** What the last fade-out stopped, so it can be resumed. */
+  faded: { scene: Scene; cardId: string | null } | null
 }
 
 const VOLUME_KEY = 'ogre.volumes'
@@ -47,5 +57,10 @@ export const usePlayer = create<PlayerState>(() => ({
   ambience: {},
   volumes: loadVolumes(),
   monitor: true,
+  ducked: false,
+  effectDucking: false,
   crossfadeSeconds: 3,
+  previewId: null,
+  effects: {},
+  faded: null,
 }))

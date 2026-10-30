@@ -4,7 +4,8 @@ import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
-import { PadsStrip } from '../pads/PadsStrip.tsx'
+import { combatSceneIdFor } from '../collections/setlist.ts'
+import { useActiveCollectionData } from '../collections/useSetlist.ts'
 import { sceneGradient } from '../scenes/sceneArt.ts'
 import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
@@ -16,7 +17,8 @@ export function PlayerPage() {
   const { scene, canEdit, isPending, error, updateData, updateCard } = useLiveScene(id)
   const active = usePlayer((s) => s.sceneId === id)
   const combat = usePlayer((s) => s.combat)
-  const combatScene = useScene(scene?.combatSceneId ?? undefined).data
+  const collection = useActiveCollectionData()
+  const combatScene = useScene((scene && combatSceneIdFor(scene, collection)) ?? undefined).data
 
   if (isPending) return <p className="text-ink-muted">Loading scene…</p>
   if (error || !scene) {
@@ -72,6 +74,12 @@ export function PlayerPage() {
                 {combat ? 'End combat' : 'Combat'}
               </Button>
             )}
+            <Link
+              to="/table"
+              className="rounded-lg px-4 py-2 text-ink-muted ring-1 ring-peat-600 hover:text-ink"
+            >
+              Table mode
+            </Link>
             {canEdit && (
               <Link
                 to={`/scenes/${scene.id}/edit`}
@@ -84,6 +92,12 @@ export function PlayerPage() {
         </div>
       </header>
 
+      {!active && (
+        <p className="mb-4 rounded-lg bg-peat-800 px-3 py-2 text-ink-muted ring-1 ring-peat-700">
+          Not playing. Tracks and effects you click play on this device only, so you can prepare
+          without interrupting the table.
+        </p>
+      )}
       {!canEdit && (
         <p className="mb-4 text-sm text-peat-400">
           Tweaks to a shared scene aren't saved. Duplicate it to keep your own version.
@@ -104,8 +118,6 @@ export function PlayerPage() {
         />
         <EffectsLane scene={scene} active={active} />
       </div>
-
-      <PadsStrip />
     </>
   )
 }

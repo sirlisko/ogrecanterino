@@ -20,14 +20,18 @@ interface Props {
   actions?: (sound: Sound) => ReactNode
   wrapRow?: (sound: Sound, row: ReactNode) => ReactNode
   compact?: boolean
+  initialCategory?: SoundCategory
 }
 
-export function SoundBrowser({ actions, wrapRow, compact }: Props) {
+export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Props) {
   const sounds = useSounds()
   const favourites = new Set(useFavourites().data ?? [])
   const recent = useRecent().data ?? []
   const preview = usePreview()
-  const [filter, setFilter] = useState<SoundFilter>(emptyFilter)
+  const [filter, setFilter] = useState<SoundFilter>({
+    ...emptyFilter,
+    category: initialCategory ?? null,
+  })
   const [view, setView] = useState<View>('all')
   const [limit, setLimit] = useState(PAGE)
 
@@ -62,7 +66,7 @@ export function SoundBrowser({ actions, wrapRow, compact }: Props) {
         />
         {(['all', 'favourites', 'recent'] as const).map((v) => (
           <Chip key={v} active={view === v} onClick={() => setView(v)}>
-            {{ all: 'All', favourites: 'Favourites', recent: 'Recent' }[v]}
+            {{ all: 'All', favourites: 'Favourites', recent: 'Recently previewed' }[v]}
           </Chip>
         ))}
         <span className="mx-1 hidden h-5 w-px bg-peat-600 sm:block" />

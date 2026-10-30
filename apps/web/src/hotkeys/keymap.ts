@@ -7,6 +7,9 @@ export type HotkeyAction =
   | { type: 'fadeOut' }
   | { type: 'toggleMonitor' }
   | { type: 'toggleCombat' }
+  | { type: 'duck' }
+  | { type: 'nextScene' }
+  | { type: 'previousScene' }
   | { type: 'focusSearch' }
   | { type: 'help' }
 
@@ -37,6 +40,9 @@ export function actionFor(e: KeyLike): HotkeyAction | null {
       : { type: 'effect', index: digit }
   if (e.key === '?') return { type: 'help' }
   if (e.shiftKey) return null
+  // Physical bracket keys, so layouts that need AltGr for "[" still work; PageUp/Down suit clickers.
+  if (e.code === 'BracketRight' || e.key === 'PageDown') return { type: 'nextScene' }
+  if (e.code === 'BracketLeft' || e.key === 'PageUp') return { type: 'previousScene' }
   switch (e.key.toLowerCase()) {
     case ' ':
       return { type: 'toggleMusic' }
@@ -50,6 +56,8 @@ export function actionFor(e: KeyLike): HotkeyAction | null {
       return { type: 'toggleMonitor' }
     case 'c':
       return { type: 'toggleCombat' }
+    case 'd':
+      return { type: 'duck' }
     case '/':
       return { type: 'focusSearch' }
     default:
@@ -71,7 +79,9 @@ export const HOTKEY_HELP: [keys: string, description: string][] = [
   ['Space', 'Play or pause music'],
   ['N / P', 'Next or previous track'],
   ['C', 'Start or end combat music'],
+  ['[ / ] or Page Up / Down', 'Previous or next scene in the collection'],
   ['Esc', 'Fade out everything'],
+  ['Hold D', 'Lower the music while you talk'],
   ['M', 'Mute or unmute this device'],
   ['/', 'Search'],
   ['?', 'Show these shortcuts'],

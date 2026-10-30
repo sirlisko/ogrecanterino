@@ -3,15 +3,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, json } from './client.ts'
 import { keys } from './keys.ts'
 
-export const useScenes = () =>
-  useQuery({ queryKey: keys.scenes, queryFn: () => api<Scene[]>('/api/scenes') })
+export const scenesQuery = { queryKey: keys.scenes, queryFn: () => api<Scene[]>('/api/scenes') }
+
+export const useScenes = () => useQuery(scenesQuery)
+
+export const sceneQuery = (id: string) => ({
+  queryKey: keys.scene(id),
+  queryFn: () => api<Scene>(`/api/scenes/${id}`),
+})
 
 export const useScene = (id: string | undefined) =>
-  useQuery({
-    queryKey: keys.scene(id ?? ''),
-    queryFn: () => api<Scene>(`/api/scenes/${id}`),
-    enabled: !!id,
-  })
+  useQuery({ ...sceneQuery(id ?? ''), enabled: !!id })
 
 export function useSaveScene() {
   const qc = useQueryClient()
@@ -63,6 +65,17 @@ export function useUploadBanner() {
       form.append('file', file)
       return api<Scene>(`/api/scenes/${id}/banner`, { method: 'POST', body: form })
     },
+    onSuccess: (scene) => {
+      qc.setQueryData(keys.scene(scene.id), scene)
+      void qc.invalidateQueries({ queryKey: keys.scenes, exact: true })
+    },
+  })
+}
+
+export function useRemoveBanner() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api<Scene>(`/api/scenes/${id}/banner`, { method: 'DELETE' }),
     onSuccess: (scene) => {
       qc.setQueryData(keys.scene(scene.id), scene)
       void qc.invalidateQueries({ queryKey: keys.scenes, exact: true })

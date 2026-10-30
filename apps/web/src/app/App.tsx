@@ -6,11 +6,19 @@ import { LibraryPage } from '../features/library/LibraryPage.tsx'
 import { LoginPage } from '../features/login/LoginPage.tsx'
 import { PlayerPage } from '../features/player/PlayerPage.tsx'
 import { ScenesPage } from '../features/scenes/ScenesPage.tsx'
+import { TablePage } from '../features/table/TablePage.tsx'
 import { Layout } from './Layout.tsx'
+import { usePlayingGuards } from './usePlayingGuards.ts'
 
 export function App() {
   const me = useMe()
-  if (me.isPending) return null
+  usePlayingGuards()
+  if (me.isPending)
+    return (
+      <div className="grid min-h-dvh place-items-center">
+        <img src="/logo.png" alt="Loading" className="h-16 w-16 animate-breathe" />
+      </div>
+    )
   if (!me.data) {
     return (
       <Routes>
@@ -20,6 +28,7 @@ export function App() {
   }
   return (
     <Routes>
+      <Route path="table" element={<TablePage />} />
       <Route element={<Layout />}>
         <Route index element={<ScenesPage />} />
         <Route path="scenes/:id" element={<PlayerPage />} />

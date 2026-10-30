@@ -1,9 +1,10 @@
 import type { Card, Scene, SceneSettings } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
-import { engine } from '../../audio/engine.ts'
+import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { formatTime } from '../../ui/format.ts'
+import { Icon } from '../../ui/Icon.tsx'
 import { EmptyLane, IconButton, Lane } from './Lane.tsx'
 
 interface Props {
@@ -15,13 +16,18 @@ interface Props {
 
 export function MusicLane({ scene, active, onCard, onSettings }: Props) {
   const music = usePlayer((s) => s.music)
+  const previewId = usePlayer((s) => s.previewId)
   const combat = usePlayer((s) => s.combat)
   const soundStatus = useSoundStatus()
   const { settings } = scene.data
   const cards = scene.data.music
 
   const play = (card: Card) => {
-    if (!active) return void engine.playScene(scene).then(() => engine.music?.playCard(card.id, 1))
+    if (!active)
+      return (
+        card.soundId &&
+        engine.togglePreview(card.soundId, previewLevel(card, 'music', scene.data.globalVolume))
+      )
     if (music.cardId === card.id) engine.music?.toggle()
     else engine.music?.playCard(card.id)
   }
@@ -37,7 +43,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
             active={settings.shuffle}
             onClick={() => onSettings({ shuffle: !settings.shuffle })}
           >
-            ⤮
+            <Icon name="shuffle" />
           </IconButton>
           <IconButton
             label={
@@ -48,7 +54,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
             active={!settings.musicIsPlaylist}
             onClick={() => onSettings({ musicIsPlaylist: !settings.musicIsPlaylist })}
           >
-            ↻
+            <Icon name="repeat" />
           </IconButton>
         </>
       }
@@ -62,6 +68,8 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
       <ol className="flex flex-col gap-1">
         {cards.map((card) => {
           const current = active && !combat && music.cardId === card.id
+          const previewing = !active && !!card.soundId && previewId === card.soundId
+          const sounding = (current && music.playing) || previewing
           const status = soundStatus(card.soundId)
           const missing = status === 'missing'
           return (
@@ -75,15 +83,20 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                   disabled={status !== 'ready' || !card.enabled}
                   onClick={() => play(card)}
                   aria-label={
-                    current && music.playing ? `Pause ${card.label}` : `Play ${card.label}`
+                    sounding
+                      ? `${previewing ? 'Stop' : 'Pause'} ${card.label}`
+                      : `${active ? 'Play' : 'Preview'} ${card.label}`
                   }
                   className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm disabled:opacity-40 ${
-                    current
+                    current || previewing
                       ? 'bg-brass text-peat-950'
                       : 'bg-peat-700 hover:bg-brass hover:text-peat-950'
                   }`}
                 >
-                  {current && music.playing ? '❚❚' : '▶'}
+                  <Icon
+                    name={previewing ? 'stop' : sounding ? 'pause' : 'play'}
+                    className="h-3.5 w-3.5"
+                  />
                 </button>
                 <span
                   className={`min-w-0 flex-1 truncate ${card.enabled ? '' : 'text-peat-400 line-through'}`}
@@ -96,7 +109,14 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                   label={`${card.label} volume`}
                   color="var(--color-brass)"
                   className="max-w-20"
-                  onChange={(volume) => onCard(card.id, { volume })}
+                  onChange={(volume) => {
+                    onCard(card.id, { volume })
+                    if (card.soundId)
+                      engine.setPreviewVolume(
+                        card.soundId,
+                        previewLevel({ ...card, volume }, 'music', scene.data.globalVolume),
+                      )
+                  }}
                 />
               </div>
               {current && music.duration > 0 && (

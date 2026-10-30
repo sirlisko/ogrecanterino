@@ -8,6 +8,7 @@ import type { Db } from '../db/client.ts'
 import { sounds } from '../db/schema.ts'
 import { authed, canEdit, httpError } from '../http/auth.ts'
 import { parseBody } from '../http/body.ts'
+import { measureGainDb } from '../library/media.ts'
 import { toSound } from './repo.ts'
 import { storeAudioUpload } from './upload.ts'
 import { soundUsage } from './usage.ts'
@@ -51,7 +52,7 @@ export async function soundRoutes(
         .filter(Boolean),
       category: fieldValue(file.fields.category),
     })
-    const stored = await storeAudioUpload(file, audioDir)
+    const stored = await storeAudioUpload(file, audioDir, meta.category)
     const row = db
       .insert(sounds)
       .values({ ...meta, ...stored, uploadedBy: user.id })
@@ -66,7 +67,19 @@ export async function soundRoutes(
     if (!existing) throw httpError(404, 'Sound not found')
     if (!canEdit(user, existing.uploadedBy)) throw httpError(403, 'Not your sound')
     const patch = parseBody(soundPatch, req.body)
-    return toSound(db.update(sounds).set(patch).where(eq(sounds.id, existing.id)).returning().get())
+    // Each category levels to its own target, so a recategorised sound needs a new trim.
+    const gainDb =
+      patch.category && patch.category !== existing.category
+        ? await measureGainDb(join(audioDir, existing.filename), patch.category)
+        : existing.gainDb
+    return toSound(
+      db
+        .update(sounds)
+        .set({ ...patch, gainDb })
+        .where(eq(sounds.id, existing.id))
+        .returning()
+        .get(),
+    )
   })
 
   app.get<{ Params: { id: string } }>('/api/sounds/:id/usage', async (req) =>

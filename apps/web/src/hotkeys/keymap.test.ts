@@ -23,6 +23,13 @@ describe('actionFor', () => {
     expect(actionFor(key(' ', 'Space'))).toEqual({ type: 'toggleMusic' })
     expect(actionFor(key('Escape', 'Escape'))).toEqual({ type: 'fadeOut' })
     expect(actionFor(key('N', 'KeyN'))).toEqual({ type: 'nextTrack' })
+    expect(actionFor(key('d', 'KeyD'))).toEqual({ type: 'duck' })
+  })
+
+  it('steps through the collection by physical bracket keys or page keys', () => {
+    expect(actionFor(key('+', 'BracketRight'))).toEqual({ type: 'nextScene' })
+    expect(actionFor(key('è', 'BracketLeft'))).toEqual({ type: 'previousScene' })
+    expect(actionFor(key('PageDown', 'PageDown'))).toEqual({ type: 'nextScene' })
   })
 
   it('ignores browser shortcuts', () => {

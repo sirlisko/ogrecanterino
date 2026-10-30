@@ -2,10 +2,21 @@ import type { Scene } from '@ogre/shared'
 import { Link, useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
-import { SceneMenu } from './SceneMenu.tsx'
+import { Icon } from '../../ui/Icon.tsx'
 import { sceneGradient } from './sceneArt.ts'
+import { SceneMenu } from './SceneMenu.tsx'
 
-export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }) {
+export function SceneCard({
+  scene,
+  canEdit,
+  mine,
+  position,
+}: {
+  scene: Scene
+  canEdit: boolean
+  mine: boolean
+  position?: number
+}) {
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const { music, ambiences, effects } = scene.data
@@ -31,6 +42,11 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
           className="block font-display text-xl leading-tight font-bold outline-none"
         >
           <span className="absolute inset-0" aria-hidden />
+          {position !== undefined && (
+            <span className="mr-2 font-sans text-base font-normal text-ink-muted tabular">
+              {position}
+            </span>
+          )}
           {scene.name}
         </Link>
         <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-ink-muted">
@@ -42,7 +58,11 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
           <p className="mt-2 truncate text-sm text-ink-muted">{scene.tags.join(', ')}</p>
         )}
         <p className="mt-1 text-sm text-peat-400">
-          {scene.visibility === 'group' ? `Shared by ${scene.ownerName}` : 'Only you'}
+          {scene.visibility === 'private'
+            ? 'Only you'
+            : mine
+              ? 'Shared with the group'
+              : `Shared by ${scene.ownerName}`}
         </p>
       </div>
       <button
@@ -56,9 +76,9 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
         }`}
       >
         {playing ? (
-          <span className="animate-breathe text-lg">♪</span>
+          <Icon name="note" className="h-5 w-5 animate-breathe" />
         ) : (
-          <span className="ml-0.5">▶</span>
+          <Icon name="play" className="ml-0.5 h-4 w-4" />
         )}
       </button>
       <div className="absolute top-3 right-3 z-10">

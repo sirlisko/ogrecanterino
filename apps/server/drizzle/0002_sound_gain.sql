@@ -1,0 +1,1 @@
+ALTER TABLE `sounds` ADD `gain_db` real;

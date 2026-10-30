@@ -1,7 +1,7 @@
-import type { Sound, SoundUsage } from '@ogre/shared'
+import type { Sound, SoundUpload, SoundUsage } from '@ogre/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo } from 'react'
-import { api } from './client.ts'
+import { api, json } from './client.ts'
 import { keys } from './keys.ts'
 
 export const useSounds = () =>
@@ -28,6 +28,15 @@ export function useUploadSound() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (form: FormData) => api<Sound>('/api/sounds', { method: 'POST', body: form }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.sounds }),
+  })
+}
+
+export function useUpdateSound() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: Partial<SoundUpload> }) =>
+      api<Sound>(`/api/sounds/${id}`, json('PATCH', patch)),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.sounds }),
   })
 }

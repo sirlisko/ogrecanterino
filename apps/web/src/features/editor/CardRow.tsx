@@ -2,8 +2,10 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Card, SceneSection } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
-import { engine } from '../../audio/engine.ts'
+import { engine, previewLevel } from '../../audio/engine.ts'
+import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
+import { Icon } from '../../ui/Icon.tsx'
 
 const SECONDS = (ms: number) => Math.round(ms / 1000)
 
@@ -20,6 +22,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
     id: card.id,
   })
   const status = useSoundStatus()(card.soundId)
+  const previewing = usePlayer((s) => !!card.soundId && s.previewId === card.soundId)
   const missing = status === 'missing'
   const interval = card.intervalMs ?? [30_000, 90_000]
   const times = card.times ?? [1, 1]
@@ -38,7 +41,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           aria-label={`Reorder ${card.label}`}
           className="cursor-grab touch-none px-1 text-peat-400 hover:text-ink"
         >
-          ⠿
+          <Icon name="grip" />
         </button>
         <input
           type="checkbox"
@@ -59,16 +62,22 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           label={`${card.label} volume`}
           color={color}
           className="max-w-24"
-          onChange={(volume) => onChange({ volume })}
+          onChange={(volume) => {
+            onChange({ volume })
+            if (card.soundId)
+              engine.setPreviewVolume(card.soundId, previewLevel({ ...card, volume }, section))
+          }}
         />
         <button
           type="button"
-          onClick={() => card.soundId && void engine.preview(card.soundId)}
+          onClick={() =>
+            card.soundId && engine.togglePreview(card.soundId, previewLevel(card, section))
+          }
           disabled={status !== 'ready'}
-          aria-label={`Preview ${card.label}`}
+          aria-label={previewing ? `Stop ${card.label}` : `Preview ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-xs text-ink-muted hover:bg-peat-700 hover:text-ink disabled:opacity-40"
         >
-          ▶
+          <Icon name={previewing ? 'stop' : 'play'} className="h-3 w-3" />
         </button>
         <button
           type="button"
@@ -76,9 +85,20 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           aria-label={`Remove ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
         >
-          ✕
+          <Icon name="close" />
         </button>
       </div>
+      {section === 'effects' && (
+        <label className="mt-2 flex items-center gap-2 pl-8 text-sm text-ink-muted">
+          <input
+            type="checkbox"
+            checked={!!card.duckMusic}
+            onChange={(e) => onChange({ duckMusic: e.target.checked })}
+            style={{ accentColor: color }}
+          />
+          Lower the music while it plays
+        </label>
+      )}
       {section === 'ambiences' && (
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 pl-8 text-sm text-ink-muted">
           <select

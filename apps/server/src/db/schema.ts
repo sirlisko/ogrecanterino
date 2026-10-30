@@ -1,5 +1,5 @@
 import type { SceneData } from '@ogre/shared'
-import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 const id = () =>
   text('id')
@@ -41,6 +41,8 @@ export const sounds = sqliteTable(
     mime: text('mime').notNull(),
     size: integer('size').notNull(),
     durationMs: integer('duration_ms'),
+    /** Trim that brings the file to a common loudness; null until measured. */
+    gainDb: real('gain_db'),
     category: text('category', { enum: ['music', 'ambience', 'effect'] }).notNull(),
     uploadedBy: text('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),
@@ -110,4 +112,35 @@ export const plays = sqliteTable(
     playedAt: integer('played_at').notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.soundId] })],
+)
+
+export const collections = sqliteTable(
+  'collections',
+  {
+    id: id(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    visibility: text('visibility', { enum: ['private', 'group'] })
+      .notNull()
+      .default('private'),
+    combatSceneId: text('combat_scene_id'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('collections_owner_idx').on(t.ownerId)],
+)
+
+export const collectionScenes = sqliteTable(
+  'collection_scenes',
+  {
+    collectionId: text('collection_id')
+      .notNull()
+      .references(() => collections.id, { onDelete: 'cascade' }),
+    sceneId: text('scene_id')
+      .notNull()
+      .references(() => scenes.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.collectionId, t.sceneId] })],
 )

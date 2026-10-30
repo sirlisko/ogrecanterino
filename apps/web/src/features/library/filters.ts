@@ -31,7 +31,7 @@ export function filterSounds(
   })
 }
 
-const STRUCTURAL_TAGS = new Set(['Music', 'Sound Effect', 'Ambience'])
+export const STRUCTURAL_TAGS = new Set(['Music', 'Sound Effect', 'Ambience'])
 
 export function tagCounts(sounds: Sound[]): [string, number][] {
   const counts = new Map<string, number>()

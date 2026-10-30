@@ -12,6 +12,7 @@ const sound = (category: Sound['category']): Sound => ({
   mime: 'audio/ogg',
   size: 1,
   durationMs: 2000,
+  gainDb: null,
   uploadedBy: null,
 })
 

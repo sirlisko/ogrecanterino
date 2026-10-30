@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
+import { ResumeToast } from '../features/player/ResumeToast.tsx'
 import { TransportBar } from '../features/player/TransportBar.tsx'
 import { HotkeyLayer } from '../hotkeys/HotkeyLayer.tsx'
 import { UserMenu } from './UserMenu.tsx'
@@ -9,12 +10,16 @@ import { UserMenu } from './UserMenu.tsx'
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-md px-3 py-1.5 transition-colors ${isActive ? 'bg-peat-700 text-ink' : 'text-ink-muted hover:text-ink'}`
 
-export function Layout() {
+/** Keeps the audio engine's sound lookup in step with the library. */
+export function useLibrarySync() {
   const sounds = useSounds()
-
   useEffect(() => {
     if (sounds.data) engine.setSounds(sounds.data)
   }, [sounds.data])
+}
+
+export function Layout() {
+  useLibrarySync()
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -44,6 +49,7 @@ export function Layout() {
         <Outlet />
       </main>
       <TransportBar />
+      <ResumeToast />
       <HotkeyLayer />
     </div>
   )

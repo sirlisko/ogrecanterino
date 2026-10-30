@@ -61,12 +61,63 @@ export function splitOpusPacket(packet: Buffer): Buffer[] {
   })
 }
 
-export function createOpusSplitter() {
+const FRAME_SAMPLES = 960
+
+/** Samples per frame at 48 kHz, from the TOC's config number (RFC 6716 §3.1). */
+export function frameSamples(toc: number): number {
+  const config = toc >> 3
+  if (config < 12) return [480, 960, 1920, 2880][config % 4] as number
+  if (config < 16) return [480, 960][config % 2] as number
+  return [120, 240, 480, 960][config % 4] as number
+}
+
+function frameLength(length: number): number[] {
+  if (length < 252) return [length]
+  const first = 252 + (length & 3)
+  return [first, (length - first) >> 2]
+}
+
+/** Joins single-frame packets sharing one TOC into a variable-bitrate code 3 packet (RFC 6716 §3.2.5). */
+export function joinOpusFrames(frames: Buffer[]): Buffer {
+  if (frames.length === 1) return frames[0] as Buffer
+  const data = frames.map((f) => f.subarray(1))
+  const lengths = data.slice(0, -1).flatMap((d) => frameLength(d.length))
+  const toc = ((frames[0] as Buffer)[0] as number) | 3
+  return Buffer.concat([Buffer.from([toc, 0x80 | frames.length, ...lengths]), ...data])
+}
+
+/**
+ * Re-packs browser Opus into the 20 ms packets Discord's player sends one per tick. Chromium
+ * emits 60 ms packets that get split; WebKit (Safari, every iOS browser) emits 2.5 ms frames
+ * that get joined eight at a time. Without the join, Discord heard 2.5 ms out of every 20.
+ */
+export function createOpusRepacketizer() {
+  let group: Buffer[] = []
+  let samples = 0
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,
     transform(packet: Buffer, _enc, done) {
-      for (const p of splitOpusPacket(packet)) this.push(p)
+      for (const frame of splitOpusPacket(packet)) {
+        const toc = frame[0] as number
+        // A frame that can't extend the current group (new config, or it would overrun 20 ms)
+        // flushes it early: a short packet beats dropping audio.
+        if (
+          group.length &&
+          (toc !== group[0]?.[0] || samples + frameSamples(toc) > FRAME_SAMPLES)
+        ) {
+          this.push(joinOpusFrames(group))
+          group = []
+          samples = 0
+        }
+        group.push(frame)
+        samples += frameSamples(toc)
+        if (samples >= FRAME_SAMPLES) {
+          this.push(joinOpusFrames(group))
+          group = []
+          samples = 0
+        }
+      }
       done()
     },
   })

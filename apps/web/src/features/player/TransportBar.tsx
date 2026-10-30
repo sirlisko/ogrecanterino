@@ -1,19 +1,33 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { toggleHotkeyHelp } from '../../hotkeys/helpStore.ts'
 import { formatTime } from '../../ui/format.ts'
+import { Icon } from '../../ui/Icon.tsx'
+import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
+import { PadsStrip } from '../pads/PadsStrip.tsx'
+import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
 import { MixerPopover } from './MixerPopover.tsx'
 
 export function TransportBar() {
   const scene = usePlayer((s) => s.scene)
   const music = usePlayer((s) => s.music)
   const combat = usePlayer((s) => s.combat)
+  const monitor = usePlayer((s) => s.monitor)
+  const ducked = usePlayer((s) => s.ducked || s.effectDucking)
+  const ambience = usePlayer((s) => s.ambience)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
   const progress = music.duration ? (music.current / music.duration) * 100 : 0
+  const sounding = (scene?.data.ambiences ?? []).filter((c) => ambience[c.id]?.sounding)
+  const setlist = useSetlist()
+  const goTo = useGoToScene()
+  const padsVisible = usePadsVisible((s) => s.visible)
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
+      {padsVisible && <PadsStrip />}
       <div
         className="h-0.5 bg-brass transition-[width] duration-500"
         style={{ width: `${progress}%` }}
@@ -28,10 +42,22 @@ export function TransportBar() {
               >
                 {scene.name}
               </Link>
-              <p className="truncate text-sm text-ink-muted tabular">
-                {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
-                {music.duration > 0 &&
-                  ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
+              <p className="flex items-center gap-2 text-sm text-ink-muted tabular">
+                <span className="truncate">
+                  {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
+                  {music.duration > 0 &&
+                    ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
+                </span>
+                {ducked && <span className="shrink-0 text-brass">Music lowered</span>}
+                {sounding.length > 0 && (
+                  <span
+                    className="hidden shrink-0 items-center gap-1 text-lichen sm:flex"
+                    title={sounding.map((c) => c.label).join(', ')}
+                  >
+                    <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-lichen" />
+                    {sounding.length} ambience
+                  </span>
+                )}
               </p>
             </>
           ) : (
@@ -45,7 +71,7 @@ export function TransportBar() {
             onClick={() => engine.music?.previous()}
             disabled={!scene}
           >
-            ⏮
+            <Icon name="previous" />
           </TransportButton>
           <button
             type="button"
@@ -55,18 +81,38 @@ export function TransportBar() {
             onClick={() => engine.music?.toggle()}
             className="grid h-11 w-11 place-items-center rounded-full bg-brass text-peat-950 disabled:opacity-40"
           >
-            {music.playing ? '❚❚' : '▶'}
+            <Icon name={music.playing ? 'pause' : 'play'} className="h-5 w-5" />
           </button>
           <TransportButton
             label="Next track (N)"
             onClick={() => engine.music?.next()}
             disabled={!scene}
           >
-            ⏭
+            <Icon name="next" />
           </TransportButton>
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+          {setlist.next && (
+            <button
+              type="button"
+              onClick={() => setlist.next && goTo(setlist.next)}
+              title={`${scene ? 'Next scene' : 'Start'} in ${setlist.collection?.name} (])`}
+              className="hidden max-w-56 truncate rounded-lg px-3 py-2 text-left text-ink-muted ring-1 ring-peat-600 hover:text-ink lg:block"
+            >
+              {scene ? 'Next' : 'Start'}: {setlist.next.name}
+            </button>
+          )}
+          {!monitor && (
+            <button
+              type="button"
+              onClick={() => engine.setMonitor(true)}
+              title="Unmute this device (M)"
+              className="rounded-lg bg-danger/15 px-3 py-2 font-medium text-danger hover:bg-danger/25"
+            >
+              Muted here
+            </button>
+          )}
           <button
             type="button"
             disabled={!scene}
@@ -77,7 +123,25 @@ export function TransportBar() {
             Fade out
           </button>
           <DiscordControl />
+          <button
+            type="button"
+            aria-pressed={padsVisible}
+            onClick={togglePads}
+            title={padsVisible ? 'Hide quick pads' : 'Show quick pads'}
+            className={`rounded-lg px-3 py-2 ring-1 ring-peat-600 hover:text-ink ${padsVisible ? 'bg-peat-700 text-ink' : 'text-ink-muted'}`}
+          >
+            Pads
+          </button>
           <MixerPopover />
+          <button
+            type="button"
+            onClick={toggleHotkeyHelp}
+            aria-label="Keyboard shortcuts (?)"
+            title="Keyboard shortcuts (?)"
+            className="hidden h-9 w-9 place-items-center rounded-full text-ink-muted ring-1 ring-peat-600 hover:text-ink md:grid"
+          >
+            ?
+          </button>
         </div>
       </div>
     </div>
@@ -93,7 +157,7 @@ function TransportButton({
   label: string
   onClick: () => void
   disabled?: boolean
-  children: string
+  children: ReactNode
 }) {
   return (
     <button

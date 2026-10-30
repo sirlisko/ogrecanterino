@@ -141,4 +141,16 @@ export async function sceneRoutes(
       .get()
     return toScene(updated, ownerName(db, updated.ownerId))
   })
+
+  app.delete<Params>('/api/scenes/:id/banner', async (req) => {
+    const row = editable(req, req.params.id)
+    if (row.bannerPath) await rm(join(bannerDir, row.bannerPath), { force: true })
+    const updated = db
+      .update(scenes)
+      .set({ bannerPath: null })
+      .where(eq(scenes.id, row.id))
+      .returning()
+      .get()
+    return toScene(updated, ownerName(db, updated.ownerId))
+  })
 }

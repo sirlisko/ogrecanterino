@@ -4,8 +4,9 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { App } from './app/App.tsx'
 import './styles.css'
+// Loaded up front so scenes started before visiting the scenes page are still recorded.
+import './features/scenes/recentScenes.ts'
 
-// A data router is required for useBlocker (unsaved-changes guard in the editor).
 const router = createBrowserRouter([{ path: '*', element: <App /> }])
 
 const queryClient = new QueryClient({

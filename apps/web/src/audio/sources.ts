@@ -1,6 +1,6 @@
 import type { Sound } from '@ogre/shared'
 import type { BufferCache } from './buffers.ts'
-import { BufferVoice, ElementVoice, type Voice } from './voice.ts'
+import { BufferVoice, ElementVoice, type Voice, type VoiceOptions } from './voice.ts'
 
 /** Below this length a sound is decoded up front: gapless loops and instant effects. */
 const BUFFER_MAX_MS = 90_000
@@ -24,11 +24,12 @@ export async function createVoice(
   { ctx, buffers }: VoiceFactory,
   sound: Sound,
   output: AudioNode,
-  opts: { volume: number; loop?: boolean; fadeIn?: number },
+  opts: Omit<VoiceOptions, 'trimDb'>,
 ): Promise<Voice> {
+  const withTrim = { ...opts, trimDb: sound.gainDb ?? 0 }
   if (shouldBuffer(sound))
-    return new BufferVoice(ctx, output, await buffers.get(soundUrl(sound)), opts)
-  return new ElementVoice(ctx, output, soundUrl(sound), opts)
+    return new BufferVoice(ctx, output, await buffers.get(soundUrl(sound)), withTrim)
+  return new ElementVoice(ctx, output, soundUrl(sound), withTrim)
 }
 
 export function preload({ buffers }: VoiceFactory, sound: Sound) {
