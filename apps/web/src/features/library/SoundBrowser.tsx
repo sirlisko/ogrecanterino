@@ -62,7 +62,7 @@ export function SoundBrowser({ actions, wrapRow, compact }: Props) {
         />
         {(['all', 'favourites', 'recent'] as const).map((v) => (
           <Chip key={v} active={view === v} onClick={() => setView(v)}>
-            {{ all: 'All', favourites: 'Favourites', recent: 'Recent' }[v]}
+            {{ all: 'All', favourites: 'Favourites', recent: 'Recently previewed' }[v]}
           </Chip>
         ))}
         <span className="mx-1 hidden h-5 w-px bg-peat-600 sm:block" />
