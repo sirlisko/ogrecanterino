@@ -193,6 +193,11 @@ class Engine {
     else void this.preview(soundId, level)
   }
 
+  /** Follows a card's fader while it previews; ignored if another sound took over. */
+  setPreviewVolume(soundId: string, level: PreviewLevel) {
+    if (usePlayer.getState().previewId === soundId) this.previewVoice?.setVolume(level.volume)
+  }
+
   stopPreview() {
     void this.previewVoice?.stop(0.15)
     this.previewVoice = null

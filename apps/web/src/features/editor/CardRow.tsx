@@ -62,7 +62,11 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           label={`${card.label} volume`}
           color={color}
           className="max-w-24"
-          onChange={(volume) => onChange({ volume })}
+          onChange={(volume) => {
+            onChange({ volume })
+            if (card.soundId)
+              engine.setPreviewVolume(card.soundId, previewLevel({ ...card, volume }, section))
+          }}
         />
         <button
           type="button"

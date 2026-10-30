@@ -109,7 +109,14 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                   label={`${card.label} volume`}
                   color="var(--color-brass)"
                   className="max-w-20"
-                  onChange={(volume) => onCard(card.id, { volume })}
+                  onChange={(volume) => {
+                    onCard(card.id, { volume })
+                    if (card.soundId)
+                      engine.setPreviewVolume(
+                        card.soundId,
+                        previewLevel({ ...card, volume }, 'music', scene.data.globalVolume),
+                      )
+                  }}
                 />
               </div>
               {current && music.duration > 0 && (
