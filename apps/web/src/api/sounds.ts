@@ -24,6 +24,12 @@ export function useDeleteSound() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api<void>(`/api/sounds/${id}`, { method: 'DELETE' }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.sounds }),
+    // The server cascades the delete to pads, favourites and recent plays.
+    onSuccess: () =>
+      Promise.all(
+        [keys.sounds, keys.pads, keys.favourites, keys.recent].map((queryKey) =>
+          qc.invalidateQueries({ queryKey }),
+        ),
+      ),
   })
 }
