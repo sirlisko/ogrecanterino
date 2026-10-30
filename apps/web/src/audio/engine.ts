@@ -15,6 +15,7 @@ class Engine {
   private sounds = new Map<string, Sound>()
   private playback: ScenePlayback | null = null
   private pads: EffectBoard | null = null
+  private previews: EffectBoard | null = null
   private previewVoice: Voice | null = null
 
   readonly lookup = (id: string) => this.sounds.get(id)
@@ -29,6 +30,7 @@ class Engine {
       this.mixer = new Mixer()
       this.buffers = new BufferCache(this.mixer.ctx)
       this.pads = new EffectBoard(this.factory(), this.mixer.buses.effect)
+      this.previews = new EffectBoard(this.factory(), this.mixer.preview)
       const { volumes, monitor } = usePlayer.getState()
       this.mixer.setMasterVolume(volumes.master, 0)
       for (const bus of ['music', 'ambience', 'effect'] as const)
@@ -104,13 +106,13 @@ class Engine {
     if (sound) void this.pads?.fire(sound, 100)
   }
 
-  /** Plays one sound at a time for auditioning; resolves when it finishes or is replaced. */
+  /** Plays one sound at a time on this device only; resolves when it finishes or is replaced. */
   async preview(soundId: string): Promise<void> {
     await this.unlock()
     await this.previewVoice?.stop(0.15)
     const sound = this.lookup(soundId)
-    if (!sound || !this.pads) return
-    const voice = await this.pads.fire(sound, 80)
+    if (!sound || !this.previews) return
+    const voice = await this.previews.fire(sound, 80)
     this.previewVoice = voice
     await new Promise<void>((resolve) => voice.onEnded(resolve))
   }
