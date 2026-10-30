@@ -111,3 +111,34 @@ export const plays = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.userId, t.soundId] })],
 )
+
+export const collections = sqliteTable(
+  'collections',
+  {
+    id: id(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    visibility: text('visibility', { enum: ['private', 'group'] })
+      .notNull()
+      .default('private'),
+    combatSceneId: text('combat_scene_id'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('collections_owner_idx').on(t.ownerId)],
+)
+
+export const collectionScenes = sqliteTable(
+  'collection_scenes',
+  {
+    collectionId: text('collection_id')
+      .notNull()
+      .references(() => collections.id, { onDelete: 'cascade' }),
+    sceneId: text('scene_id')
+      .notNull()
+      .references(() => scenes.id, { onDelete: 'cascade' }),
+    position: integer('position').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.collectionId, t.sceneId] })],
+)

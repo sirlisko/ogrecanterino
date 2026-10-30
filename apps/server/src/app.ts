@@ -6,6 +6,7 @@ import fastifyStatic from '@fastify/static'
 import fastifyWebsocket from '@fastify/websocket'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { authRoutes } from './auth/routes.ts'
+import { collectionRoutes } from './collections/routes.ts'
 import type { Db } from './db/client.ts'
 import { registerUserResolver, requireUser } from './http/auth.ts'
 import { meRoutes } from './me/routes.ts'
@@ -38,6 +39,7 @@ export async function buildApp(opts: AppOptions) {
     await scope.register(meRoutes, { db: opts.db })
     await scope.register(soundRoutes, { db: opts.db, audioDir: opts.audioDir })
     await scope.register(sceneRoutes, { db: opts.db, bannerDir: opts.bannerDir })
+    await scope.register(collectionRoutes, { db: opts.db })
     if (opts.extraRoutes) await opts.extraRoutes(scope)
   })
 

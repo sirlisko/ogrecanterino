@@ -2,10 +2,11 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { emptySceneData } from '@ogre/shared'
+import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from './app.ts'
 import { openDb } from './db/client.ts'
-import { sounds } from './db/schema.ts'
+import { collections, sounds, users } from './db/schema.ts'
 
 const dir = mkdtempSync(join(tmpdir(), 'ogre-'))
 const audioDir = join(dir, 'audio')
@@ -134,5 +135,68 @@ describe('me', () => {
 
     await app.inject({ method: 'POST', url: `/api/me/recent/${rain.id}`, headers: { cookie } })
     expect((await get('/api/me/recent')).json()).toEqual([rain.id])
+  })
+})
+
+describe('collections', () => {
+  const send = (method: 'POST' | 'PUT' | 'DELETE', url: string, payload?: unknown) =>
+    app.inject({ method, url, headers: { cookie }, payload: payload as object })
+  const newScene = async (name: string) =>
+    (await send('POST', '/api/scenes', { name, data: emptySceneData() })).json().id as string
+
+  it('keeps scenes in order, skipping duplicates and unknown ids', async () => {
+    const [a, b] = [await newScene('Road'), await newScene('Camp')]
+    const created = await send('POST', '/api/collections', {
+      name: 'Strahd',
+      sceneIds: [b, a, 'nope', b],
+    })
+    expect(created.statusCode).toBe(201)
+    const { id, sceneIds } = created.json()
+    expect(sceneIds).toEqual([b, a])
+
+    const updated = await send('PUT', `/api/collections/${id}`, {
+      name: 'Strahd, act 1',
+      visibility: 'group',
+      sceneIds: [a, b],
+    })
+    expect(updated.json()).toMatchObject({ name: 'Strahd, act 1', sceneIds: [a, b] })
+
+    await send('DELETE', `/api/scenes/${a}`)
+    expect((await get(`/api/collections/${id}`)).json().sceneIds).toEqual([b])
+
+    expect((await send('DELETE', `/api/collections/${id}`)).statusCode).toBe(204)
+    expect((await get(`/api/collections/${id}`)).statusCode).toBe(404)
+  })
+
+  it("hides other GMs' private collections", async () => {
+    const other = db
+      .insert(users)
+      .values({ discordId: 'other', name: 'Other GM' })
+      .returning()
+      .get()
+    const hidden = db
+      .insert(collections)
+      .values({ ownerId: other.id, name: 'Secret' })
+      .returning()
+      .get()
+    expect((await get(`/api/collections/${hidden.id}`)).statusCode).toBe(404)
+    expect((await get('/api/collections')).json()).not.toContainEqual(
+      expect.objectContaining({ id: hidden.id }),
+    )
+  })
+
+  it("refuses edits to another GM's shared collection", async () => {
+    const other = db.select().from(users).where(eq(users.discordId, 'other')).get()
+    const shared = db
+      .insert(collections)
+      .values({ ownerId: other!.id, name: 'Shared', visibility: 'group' })
+      .returning()
+      .get()
+    const res = await send('PUT', `/api/collections/${shared.id}`, { name: 'Mine now' })
+    expect(res.statusCode).toBe(403)
+  })
+
+  it('validates collection bodies', async () => {
+    expect((await send('POST', '/api/collections', { name: ' ' })).statusCode).toBe(400)
   })
 })
