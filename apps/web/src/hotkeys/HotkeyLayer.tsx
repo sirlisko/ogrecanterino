@@ -1,10 +1,13 @@
 import type { Pad } from '@ogre/shared'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { keys } from '../api/keys.ts'
 import { sceneQuery } from '../api/scenes.ts'
 import { engine } from '../audio/engine.ts'
 import { usePlayer } from '../audio/store.ts'
+import { useActiveCollection } from '../features/collections/activeCollection.ts'
+import { adjacentScene, combatSceneIdFor } from '../features/collections/setlist.ts'
+import { loadSetlist, useGoToScene } from '../features/collections/useSetlist.ts'
 import { flash } from '../ui/flash.ts'
 import { actionFor, isTypingTarget, type HotkeyAction } from './keymap.ts'
 import { HotkeyHelp } from './HotkeyHelp.tsx'
@@ -13,6 +16,7 @@ import { toggleHotkeyHelp, useHotkeyHelp } from './helpStore.ts'
 export function HotkeyLayer() {
   const qc = useQueryClient()
   const help = useHotkeyHelp((s) => s.open)
+  const goTo = useRef(useGoToScene())
 
   useEffect(() => {
     const run = (action: HotkeyAction) => {
@@ -42,13 +46,19 @@ export function HotkeyLayer() {
           return void engine.stopScene()
         case 'toggleMonitor':
           return engine.setMonitor(!monitor)
-        case 'toggleCombat': {
-          const combatId = scene?.combatSceneId
-          if (!combatId) return engine.toggleCombat(null)
-          return void qc
-            .ensureQueryData(sceneQuery(combatId))
-            .then((combat) => engine.toggleCombat(combat))
-        }
+        case 'toggleCombat':
+          if (!scene) return
+          return void loadSetlist(qc).then(async ({ collection }) => {
+            const combatId = combatSceneIdFor(scene, collection)
+            engine.toggleCombat(combatId ? await qc.ensureQueryData(sceneQuery(combatId)) : null)
+          })
+        case 'nextScene':
+        case 'previousScene':
+          return void loadSetlist(qc).then(({ collection, scenes }) => {
+            const offset = action.type === 'nextScene' ? 1 : -1
+            const target = adjacentScene(collection, scenes, scene?.id ?? null, offset)
+            if (target) goTo.current(target)
+          })
         case 'focusSearch':
           return document.querySelector<HTMLInputElement>('[data-hotkey-search]')?.focus()
         case 'help':
@@ -63,6 +73,9 @@ export function HotkeyLayer() {
       if (!action) return
       // Let Space/Enter keep activating a focused button.
       if (action.type === 'toggleMusic' && e.target instanceof HTMLButtonElement) return
+      // Without a collection to step through, Page Up/Down keep scrolling the page.
+      const step = action.type === 'nextScene' || action.type === 'previousScene'
+      if (step && !useActiveCollection.getState().id) return
       e.preventDefault()
       run(action)
     }

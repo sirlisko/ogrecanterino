@@ -25,6 +25,12 @@ describe('actionFor', () => {
     expect(actionFor(key('N', 'KeyN'))).toEqual({ type: 'nextTrack' })
   })
 
+  it('steps through the collection by physical bracket keys or page keys', () => {
+    expect(actionFor(key('+', 'BracketRight'))).toEqual({ type: 'nextScene' })
+    expect(actionFor(key('è', 'BracketLeft'))).toEqual({ type: 'previousScene' })
+    expect(actionFor(key('PageDown', 'PageDown'))).toEqual({ type: 'nextScene' })
+  })
+
   it('ignores browser shortcuts', () => {
     expect(actionFor(key('n', 'KeyN', { metaKey: true }))).toBeNull()
     expect(actionFor(key('1', 'Digit1', { ctrlKey: true }))).toBeNull()

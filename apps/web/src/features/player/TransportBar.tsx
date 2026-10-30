@@ -3,6 +3,7 @@ import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { formatTime } from '../../ui/format.ts'
 import { toggleHotkeyHelp } from '../../hotkeys/helpStore.ts'
+import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
 import { PadsPopover } from '../pads/PadsPopover.tsx'
 import { MixerPopover } from './MixerPopover.tsx'
@@ -16,6 +17,8 @@ export function TransportBar() {
   const track = scene?.data.music.find((c) => c.id === music.cardId)
   const progress = music.duration ? (music.current / music.duration) * 100 : 0
   const sounding = (scene?.data.ambiences ?? []).filter((c) => ambience[c.id]?.sounding)
+  const setlist = useSetlist()
+  const goTo = useGoToScene()
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
@@ -83,6 +86,16 @@ export function TransportBar() {
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+          {setlist.next && (
+            <button
+              type="button"
+              onClick={() => setlist.next && goTo(setlist.next)}
+              title={`${scene ? 'Next scene' : 'Start'} in ${setlist.collection?.name} (])`}
+              className="hidden max-w-56 truncate rounded-lg px-3 py-2 text-left text-ink-muted ring-1 ring-peat-600 hover:text-ink lg:block"
+            >
+              {scene ? 'Next' : 'Start'}: {setlist.next.name}
+            </button>
+          )}
           {!monitor && (
             <button
               type="button"

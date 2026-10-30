@@ -4,6 +4,8 @@ import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
+import { combatSceneIdFor } from '../collections/setlist.ts'
+import { useActiveCollectionData } from '../collections/useSetlist.ts'
 import { sceneGradient } from '../scenes/sceneArt.ts'
 import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
@@ -15,7 +17,8 @@ export function PlayerPage() {
   const { scene, canEdit, isPending, error, updateData, updateCard } = useLiveScene(id)
   const active = usePlayer((s) => s.sceneId === id)
   const combat = usePlayer((s) => s.combat)
-  const combatScene = useScene(scene?.combatSceneId ?? undefined).data
+  const collection = useActiveCollectionData()
+  const combatScene = useScene((scene && combatSceneIdFor(scene, collection)) ?? undefined).data
 
   if (isPending) return <p className="text-ink-muted">Loading scene…</p>
   if (error || !scene) {
