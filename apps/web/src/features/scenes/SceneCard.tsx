@@ -5,7 +5,15 @@ import { usePlayer } from '../../audio/store.ts'
 import { SceneMenu } from './SceneMenu.tsx'
 import { sceneGradient } from './sceneArt.ts'
 
-export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }) {
+export function SceneCard({
+  scene,
+  canEdit,
+  mine,
+}: {
+  scene: Scene
+  canEdit: boolean
+  mine: boolean
+}) {
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const { music, ambiences, effects } = scene.data
@@ -42,7 +50,11 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
           <p className="mt-2 truncate text-sm text-ink-muted">{scene.tags.join(', ')}</p>
         )}
         <p className="mt-1 text-sm text-peat-400">
-          {scene.visibility === 'group' ? `Shared by ${scene.ownerName}` : 'Only you'}
+          {scene.visibility === 'private'
+            ? 'Only you'
+            : mine
+              ? 'Shared with the group'
+              : `Shared by ${scene.ownerName}`}
         </p>
       </div>
       <button

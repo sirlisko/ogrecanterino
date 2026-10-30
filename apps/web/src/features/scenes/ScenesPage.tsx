@@ -101,6 +101,7 @@ export function ScenesPage() {
               key={s.id}
               scene={s}
               canEdit={me?.role === 'admin' || s.ownerId === me?.id}
+              mine={s.ownerId === me?.id}
             />
           ))}
         </div>
