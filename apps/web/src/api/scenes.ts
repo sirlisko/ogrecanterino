@@ -71,3 +71,14 @@ export function useUploadBanner() {
     },
   })
 }
+
+export function useRemoveBanner() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api<Scene>(`/api/scenes/${id}/banner`, { method: 'DELETE' }),
+    onSuccess: (scene) => {
+      qc.setQueryData(keys.scene(scene.id), scene)
+      void qc.invalidateQueries({ queryKey: keys.scenes, exact: true })
+    },
+  })
+}

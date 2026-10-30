@@ -1,8 +1,9 @@
 import type { Scene, SceneSettings } from '@ogre/shared'
 import { useState } from 'react'
-import { useScenes, useUploadBanner } from '../../api/scenes.ts'
+import { useScenes } from '../../api/scenes.ts'
 import { fieldClass } from '../../ui/Dialog.tsx'
 import { Fader } from '../../ui/Fader.tsx'
+import { BannerField } from './BannerField.tsx'
 
 const SETTINGS: { key: keyof SceneSettings; label: string }[] = [
   { key: 'autoStartMusic', label: 'Start music when the scene starts' },
@@ -28,7 +29,6 @@ export function SceneDetailsForm({
   onChange: (patch: Partial<Scene>) => void
 }) {
   const scenes = useScenes().data ?? []
-  const banner = useUploadBanner()
   const [tagText, setTagText] = useState(scene.tags.join(', '))
   const setSetting = (key: keyof SceneSettings, value: boolean) =>
     onChange({ data: { ...scene.data, settings: { ...scene.data.settings, [key]: value } } })
@@ -86,20 +86,7 @@ export function SceneDetailsForm({
           The Combat button swaps to this scene's music and back.
         </span>
       </label>
-      <label className="flex flex-col gap-1">
-        Banner image
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/avif"
-          disabled={banner.isPending}
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) banner.mutate({ id: scene.id, file })
-          }}
-          className="text-ink-muted"
-        />
-        {banner.error && <span className="text-sm text-danger">{banner.error.message}</span>}
-      </label>
+      <BannerField scene={scene} />
       <fieldset className="flex flex-col gap-1.5 md:col-span-2">
         <legend className="mb-1">Playback</legend>
         <div className="flex flex-wrap gap-x-6 gap-y-1.5">
