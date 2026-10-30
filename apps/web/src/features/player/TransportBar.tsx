@@ -9,6 +9,7 @@ export function TransportBar() {
   const scene = usePlayer((s) => s.scene)
   const music = usePlayer((s) => s.music)
   const combat = usePlayer((s) => s.combat)
+  const monitor = usePlayer((s) => s.monitor)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
   const progress = music.duration ? (music.current / music.duration) * 100 : 0
 
@@ -67,6 +68,16 @@ export function TransportBar() {
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+          {!monitor && (
+            <button
+              type="button"
+              onClick={() => engine.setMonitor(true)}
+              title="Unmute this device (M)"
+              className="rounded-lg bg-danger/15 px-3 py-2 font-medium text-danger hover:bg-danger/25"
+            >
+              Muted here
+            </button>
+          )}
           <button
             type="button"
             disabled={!scene}

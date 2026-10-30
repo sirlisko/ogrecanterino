@@ -38,11 +38,11 @@ export function MixerPopover() {
         <label className="mt-1 flex items-center gap-2 text-sm">
           <input
             type="checkbox"
-            checked={monitor}
-            onChange={(e) => engine.setMonitor(e.target.checked)}
+            checked={!monitor}
+            onChange={(e) => engine.setMonitor(!e.target.checked)}
             className="accent-brass"
           />
-          Play through this device (M)
+          Mute this device (M)
         </label>
         <label className="flex items-center gap-2 text-sm">
           Scene crossfade
