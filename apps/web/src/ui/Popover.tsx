@@ -5,10 +5,12 @@ export function Popover({
   trigger,
   label,
   children,
+  wide,
 }: {
   trigger: ReactNode
   label: string
   children: ReactNode
+  wide?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -48,7 +50,7 @@ export function Popover({
           id={id}
           role="dialog"
           aria-label={label}
-          className="absolute right-0 bottom-full mb-3 w-[min(20rem,calc(100vw-2rem))] rounded-xl bg-peat-800 p-4 shadow-2xl ring-1 ring-peat-600"
+          className={`absolute right-0 bottom-full mb-3 ${wide ? 'w-[min(26rem,calc(100vw-2rem))]' : 'w-[min(20rem,calc(100vw-2rem))]'} rounded-xl bg-peat-800 p-4 shadow-2xl ring-1 ring-peat-600`}
         >
           {children}
         </div>

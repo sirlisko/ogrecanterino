@@ -4,10 +4,12 @@ export function Dialog({
   title,
   onClose,
   children,
+  wide,
 }: {
   title: string
   onClose: () => void
   children: ReactNode
+  wide?: boolean
 }) {
   const ref = useRef<HTMLDialogElement>(null)
 
@@ -20,7 +22,7 @@ export function Dialog({
       ref={ref}
       onClose={onClose}
       aria-label={title}
-      className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-xl bg-peat-800 p-6 text-ink ring-1 ring-peat-600 backdrop:bg-peat-950/70"
+      className={`m-auto ${wide ? 'w-[min(44rem,calc(100vw-2rem))]' : 'w-[min(32rem,calc(100vw-2rem))]'} rounded-xl bg-peat-800 p-6 text-ink ring-1 ring-peat-600 backdrop:bg-peat-950/70`}
     >
       <h2 className="font-display text-2xl font-bold">{title}</h2>
       <div className="mt-4">{children}</div>

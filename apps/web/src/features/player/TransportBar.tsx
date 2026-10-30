@@ -3,6 +3,7 @@ import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { formatTime } from '../../ui/format.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
+import { PadsPopover } from '../pads/PadsPopover.tsx'
 import { MixerPopover } from './MixerPopover.tsx'
 
 export function TransportBar() {
@@ -88,6 +89,7 @@ export function TransportBar() {
             Fade out
           </button>
           <DiscordControl />
+          <PadsPopover />
           <MixerPopover />
         </div>
       </div>

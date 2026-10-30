@@ -4,7 +4,6 @@ import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
-import { PadsStrip } from '../pads/PadsStrip.tsx'
 import { sceneGradient } from '../scenes/sceneArt.ts'
 import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
@@ -110,8 +109,6 @@ export function PlayerPage() {
         />
         <EffectsLane scene={scene} active={active} />
       </div>
-
-      <PadsStrip />
     </>
   )
 }

@@ -1,26 +1,18 @@
 import type { Sound } from '@ogre/shared'
 import { fetchSoundUsage, useDeleteSound } from '../../api/sounds.ts'
-import { useFavourites, useMe, usePads, useSavePads, useToggleFavourite } from '../../api/me.ts'
-import { PAD_SLOTS } from '../pads/PadsStrip.tsx'
+import { useFavourites, useMe, useToggleFavourite } from '../../api/me.ts'
+import { PAD_SLOTS, usePadSlots } from '../pads/usePadSlots.ts'
 import { deleteSoundMessage } from './deleteMessage.ts'
 
 export function LibraryActions({ sound }: { sound: Sound }) {
   const me = useMe().data
   const favourites = useFavourites().data ?? []
-  const pads = usePads().data ?? []
+  const { pads, assign } = usePadSlots()
   const toggleFav = useToggleFavourite()
-  const savePads = useSavePads()
   const remove = useDeleteSound()
   const fav = favourites.includes(sound.id)
   const canDelete =
     !!me && (me.role === 'admin' || (sound.uploadedBy !== null && sound.uploadedBy === me.id))
-
-  const pin = (slot: number) => {
-    const others = pads.filter((p) => p.slot !== slot)
-    savePads.mutate(
-      [...others, { slot, soundId: sound.id, label: sound.title }].sort((a, b) => a.slot - b.slot),
-    )
-  }
 
   return (
     <div className="flex items-center gap-1">
@@ -38,8 +30,8 @@ export function LibraryActions({ sound }: { sound: Sound }) {
       <select
         aria-label={`Pin ${sound.title} to a quick pad`}
         value=""
-        onChange={(e) => pin(Number(e.target.value))}
-        className="hidden w-24 rounded-md bg-peat-800 px-1.5 py-1 text-sm text-ink-muted ring-1 ring-peat-700 md:block"
+        onChange={(e) => assign(Number(e.target.value), sound.id, sound.title)}
+        className="w-24 rounded-md bg-peat-800 px-1.5 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
       >
         <option value="" disabled>
           Pin to pad
