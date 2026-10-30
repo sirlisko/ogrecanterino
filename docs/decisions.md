@@ -69,6 +69,15 @@ Effect cards can opt in to the same duck ("Lower the music while it plays") for 
 monster roars. It's off by default so existing scenes sound the same. The duck stays on while the
 key is held or any such effect is sounding.
 
+### Loudness is levelled per category
+
+Every sound is measured once with ffmpeg's EBU R128 filter (on upload, import, or
+`measure:loudness`) and stores a trim in dB that each voice applies before its volume. Each category
+has its own target (music −14, ambience −25, effects −20 LUFS): the library's averages when this
+was added, so files are evened out within a category without shifting the balance between music
+and ambience that scenes were mixed with. Boosts stop 1 dB under the file's peak and at +12 dB.
+Sounds too short or quiet to measure play unchanged.
+
 ### Quick pads live in the transport bar
 
 Pads moved from the bottom of the player page into a **Pads** tray, so they're reachable on every

@@ -1,5 +1,5 @@
 import type { SceneData } from '@ogre/shared'
-import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 const id = () =>
   text('id')
@@ -41,6 +41,8 @@ export const sounds = sqliteTable(
     mime: text('mime').notNull(),
     size: integer('size').notNull(),
     durationMs: integer('duration_ms'),
+    /** Trim that brings the file to a common loudness; null until measured. */
+    gainDb: real('gain_db'),
     category: text('category', { enum: ['music', 'ambience', 'effect'] }).notNull(),
     uploadedBy: text('uploaded_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: createdAt(),

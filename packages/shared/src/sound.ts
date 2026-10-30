@@ -12,6 +12,7 @@ export const sound = z.object({
   mime: z.string(),
   size: z.number().int(),
   durationMs: z.number().int().nullable(),
+  gainDb: z.number().nullable(),
   category: soundCategory,
   uploadedBy: z.string().nullable(),
 })

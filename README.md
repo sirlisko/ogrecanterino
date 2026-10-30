@@ -40,6 +40,10 @@ pnpm dev                      # API on :3000, app on http://localhost:5173
 pnpm test
 ```
 
+Imports and uploads measure each sound's loudness so the app can even them out. For a library imported
+before that existed, run `pnpm --filter @ogre/server measure:loudness` once (add `--all` to
+re-measure everything after changing the targets in `library/media.ts`).
+
 Imports are idempotent, so you can re-run them after adding files. Imported scenes are shared with
 everyone as templates. GMs duplicate them to make their own versions. Scene cards whose audio file
 isn't in the library are kept and marked _missing_.
@@ -131,6 +135,12 @@ cd /app/apps/server
 node_modules/.bin/tsx scripts/import-library.ts /data/import/bardic_tools_sounds.csv /data/import/soundk
 node_modules/.bin/tsx scripts/import-scenes.ts /data/import/soundk/scenes.json
 rm -rf /data/import
+```
+
+For a library imported before loudness levelling, run this once in the same terminal:
+
+```sh
+cd /app/apps/server && node_modules/.bin/tsx scripts/measure-loudness.ts
 ```
 
 The import only needs to run once: redeploys keep `/data`. Turn on **Auto Deploy** to redeploy on every push to

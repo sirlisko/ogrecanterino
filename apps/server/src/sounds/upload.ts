@@ -4,7 +4,8 @@ import { mkdir, rm, stat } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import type { MultipartFile } from '@fastify/multipart'
-import { audioMime, probeDurationMs } from '../library/media.ts'
+import type { SoundCategory } from '@ogre/shared'
+import { audioMime, measureGainDb, probeDurationMs } from '../library/media.ts'
 import { httpError } from '../http/auth.ts'
 
 function slugify(name: string) {
@@ -20,7 +21,11 @@ function slugify(name: string) {
 }
 
 /** Stores an uploaded audio file under a unique name and verifies ffprobe can read it. */
-export async function storeAudioUpload(file: MultipartFile, audioDir: string) {
+export async function storeAudioUpload(
+  file: MultipartFile,
+  audioDir: string,
+  category: SoundCategory,
+) {
   const ext = extname(file.filename).toLowerCase()
   const mime = audioMime(file.filename)
   if (!mime) throw httpError(415, `Unsupported file type ${ext || '(none)'}`)
@@ -37,5 +42,11 @@ export async function storeAudioUpload(file: MultipartFile, audioDir: string) {
     await rm(path)
     throw httpError(422, 'Could not read audio from the file')
   }
-  return { filename, mime, size: (await stat(path)).size, durationMs }
+  return {
+    filename,
+    mime,
+    size: (await stat(path)).size,
+    durationMs,
+    gainDb: await measureGainDb(path, category),
+  }
 }

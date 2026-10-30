@@ -118,6 +118,7 @@ export class MusicDeck {
     const voice = new ElementVoice(this.factory.ctx, this.output, soundUrl(sound), {
       volume: card.volume,
       fadeIn: fade,
+      trimDb: sound.gainDb ?? 0,
       loop: !this.opts.autoAdvance || this.opts.mode === 'repeat-one',
     })
     voice.onEnded(() => {

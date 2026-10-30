@@ -18,6 +18,7 @@ const sound = (
   mime: 'audio/mpeg',
   size: 1,
   durationMs: 1000,
+  gainDb: null,
   uploadedBy: null,
 })
 

@@ -10,20 +10,32 @@ export interface Voice {
   position(): { current: number; duration: number } | null
 }
 
+export interface VoiceOptions {
+  volume: number
+  loop?: boolean
+  fadeIn?: number
+  /** Fixed loudness correction for the file, applied before the volume. */
+  trimDb?: number
+}
+
 abstract class BaseVoice implements Voice {
   readonly gain: GainNode
+  /** Where the source connects; carries the trim so `setVolume` never has to account for it. */
+  protected readonly input: GainNode
   protected endedCbs: (() => void)[] = []
   protected stopped = false
 
   constructor(
     protected ctx: AudioContext,
     output: AudioNode,
-    volume: number,
-    fadeIn: number,
+    { volume, fadeIn = 0, trimDb = 0 }: VoiceOptions,
   ) {
     this.gain = ctx.createGain()
     this.gain.gain.value = 0
     this.gain.connect(output)
+    this.input = ctx.createGain()
+    this.input.gain.value = 10 ** (trimDb / 20)
+    this.input.connect(this.gain)
     rampTo(this.gain.gain, toGain(volume), fadeIn, ctx)
   }
 
@@ -56,17 +68,12 @@ abstract class BaseVoice implements Voice {
 export class BufferVoice extends BaseVoice {
   private source: AudioBufferSourceNode
 
-  constructor(
-    ctx: AudioContext,
-    output: AudioNode,
-    buffer: AudioBuffer,
-    opts: { volume: number; loop?: boolean; fadeIn?: number },
-  ) {
-    super(ctx, output, opts.volume, opts.fadeIn ?? 0)
+  constructor(ctx: AudioContext, output: AudioNode, buffer: AudioBuffer, opts: VoiceOptions) {
+    super(ctx, output, opts)
     this.source = ctx.createBufferSource()
     this.source.buffer = buffer
     this.source.loop = opts.loop ?? false
-    this.source.connect(this.gain)
+    this.source.connect(this.input)
     this.source.onended = () => this.ended()
     this.source.start()
   }
@@ -83,6 +90,7 @@ export class BufferVoice extends BaseVoice {
       // already stopped
     }
     this.source.disconnect()
+    this.input.disconnect()
     this.gain.disconnect()
   }
 }
@@ -92,19 +100,14 @@ export class ElementVoice extends BaseVoice {
   private el: HTMLAudioElement
   private node: MediaElementAudioSourceNode
 
-  constructor(
-    ctx: AudioContext,
-    output: AudioNode,
-    url: string,
-    opts: { volume: number; loop?: boolean; fadeIn?: number },
-  ) {
-    super(ctx, output, opts.volume, opts.fadeIn ?? 0)
+  constructor(ctx: AudioContext, output: AudioNode, url: string, opts: VoiceOptions) {
+    super(ctx, output, opts)
     this.el = new Audio()
     this.el.preload = 'auto'
     this.el.loop = opts.loop ?? false
     this.el.src = url
     this.node = ctx.createMediaElementSource(this.el)
-    this.node.connect(this.gain)
+    this.node.connect(this.input)
     this.el.onended = () => this.ended()
     this.el.onerror = () => this.ended()
     void this.el.play().catch(() => this.ended())
@@ -142,6 +145,7 @@ export class ElementVoice extends BaseVoice {
     this.el.removeAttribute('src')
     this.el.load()
     this.node.disconnect()
+    this.input.disconnect()
     this.gain.disconnect()
   }
 }

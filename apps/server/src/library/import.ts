@@ -5,7 +5,7 @@ import { sql } from 'drizzle-orm'
 import type { Db } from '../db/client.ts'
 import { sounds } from '../db/schema.ts'
 import type { LibraryEntry } from './csv.ts'
-import { audioMime, mapLimit, probeDurationMs } from './media.ts'
+import { audioMime, mapLimit, measureGainDb, probeDurationMs } from './media.ts'
 
 export interface ImportReport {
   imported: number
@@ -30,7 +30,13 @@ export async function importLibrary(
     // FICLONE makes this a free copy-on-write clone on APFS/btrfs; elsewhere it's a normal copy.
     if (!(await stat(target).catch(() => null)))
       await copyFile(source, target, constants.COPYFILE_FICLONE)
-    return { ...entry, mime, size: info.size, durationMs: await probeDurationMs(target) }
+    return {
+      ...entry,
+      mime,
+      size: info.size,
+      durationMs: await probeDurationMs(target),
+      gainDb: await measureGainDb(target, entry.category),
+    }
   })
 
   const valid = rows.filter((r) => r !== undefined)
@@ -47,6 +53,7 @@ export async function importLibrary(
             category: sql`excluded.category`,
             size: sql`excluded.size`,
             durationMs: sql`excluded.duration_ms`,
+            gainDb: sql`excluded.gain_db`,
           },
         })
         .run()
