@@ -88,7 +88,7 @@ export class ScenePlayback {
 
   fireEffect(card: Card) {
     const sound = card.soundId ? this.lookup(card.soundId) : undefined
-    if (sound && card.enabled) void this.effects.fire(sound, card.volume)
+    return sound && card.enabled ? this.effects.fire(sound, card.volume) : undefined
   }
 
   /** Crossfades the music to another scene's playlist; call again with null to return. */

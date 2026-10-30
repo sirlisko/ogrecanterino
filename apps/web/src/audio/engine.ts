@@ -7,6 +7,8 @@ import { saveVolumes, usePlayer } from './store.ts'
 import type { Voice } from './voice.ts'
 
 const FADE_ALL_SECONDS = 1.5
+/** Effects at least this long stop when triggered again instead of layering. */
+export const LONG_EFFECT_MS = 8000
 
 /** Single entry point the UI talks to; owns the audio graph and the active scene. */
 class Engine {
@@ -17,6 +19,7 @@ class Engine {
   private pads: EffectBoard | null = null
   private previews: EffectBoard | null = null
   private previewVoice: Voice | null = null
+  private effectVoices = new Map<string, { voices: Set<Voice>; startedAt: number }>()
 
   readonly lookup = (id: string) => this.sounds.get(id)
 
@@ -111,8 +114,37 @@ class Engine {
     this.playback?.ambience.trigger(cardId)
   }
 
-  fireEffect(card: Card) {
-    this.playback?.fireEffect(card)
+  isLongEffect(card: Card) {
+    const ms = card.soundId ? this.lookup(card.soundId)?.durationMs : null
+    return !!ms && ms >= LONG_EFFECT_MS
+  }
+
+  /** Fires an effect, or stops it if it's a long one that's still playing. */
+  async triggerEffect(card: Card) {
+    const playing = this.effectVoices.get(card.id)
+    if (playing && this.isLongEffect(card)) {
+      for (const v of playing.voices) void v.stop(0.3)
+      return
+    }
+    const voice = await this.playback?.fireEffect(card)
+    if (!voice) return
+    const entry = this.effectVoices.get(card.id) ?? { voices: new Set<Voice>(), startedAt: 0 }
+    entry.voices.add(voice)
+    entry.startedAt = Date.now()
+    this.effectVoices.set(card.id, entry)
+    this.publishEffects()
+    voice.onEnded(() => {
+      entry.voices.delete(voice)
+      if (!entry.voices.size && this.effectVoices.get(card.id) === entry)
+        this.effectVoices.delete(card.id)
+      this.publishEffects()
+    })
+  }
+
+  private publishEffects() {
+    usePlayer.setState({
+      effects: Object.fromEntries([...this.effectVoices].map(([id, e]) => [id, e.startedAt])),
+    })
   }
 
   async firePad(soundId: string) {

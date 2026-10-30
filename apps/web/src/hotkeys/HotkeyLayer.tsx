@@ -20,7 +20,7 @@ export function HotkeyLayer() {
         case 'effect': {
           const card = scene?.data.effects[action.index]
           if (!card) return
-          engine.fireEffect(card)
+          void engine.triggerEffect(card)
           flash(document.querySelector(`[data-effect-id="${card.id}"]`))
           return
         }

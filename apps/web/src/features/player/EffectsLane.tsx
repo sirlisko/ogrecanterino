@@ -33,11 +33,15 @@ function EffectPad({ card, hotkey, active }: { card: Card; hotkey?: string; acti
   const status = useSoundStatus()(card.soundId)
   const missing = status === 'missing'
   const previewing = usePlayer((s) => !active && !!card.soundId && s.previewId === card.soundId)
+  const startedAt = usePlayer((s) => (active ? s.effects[card.id] : undefined))
+  const long = engine.isLongEffect(card)
+  const stoppable = long && startedAt !== undefined
+  const durationMs = card.soundId ? engine.lookup(card.soundId)?.durationMs : null
 
   const fire = () => {
     if (!active) return card.soundId && engine.togglePreview(card.soundId)
-    engine.fireEffect(card)
-    flash(ref.current)
+    void engine.triggerEffect(card)
+    if (!stoppable) flash(ref.current)
   }
 
   return (
@@ -47,8 +51,9 @@ function EffectPad({ card, hotkey, active }: { card: Card; hotkey?: string; acti
       disabled={status !== 'ready' || !card.enabled}
       onClick={fire}
       data-effect-id={card.id}
-      aria-pressed={active ? undefined : previewing}
-      className={`relative flex min-h-20 flex-col justify-end rounded-xl p-3 text-left ring-1 transition-colors hover:bg-peat-700 hover:ring-arcane/60 active:scale-[0.98] disabled:opacity-40 ${previewing ? 'bg-arcane/15 ring-arcane' : 'bg-peat-800 ring-peat-700'}`}
+      aria-pressed={active ? stoppable : previewing}
+      aria-label={stoppable ? `Stop ${card.label}` : undefined}
+      className={`relative flex min-h-20 flex-col justify-end rounded-xl p-3 text-left ring-1 transition-colors hover:bg-peat-700 hover:ring-arcane/60 active:scale-[0.98] disabled:opacity-40 overflow-hidden ${previewing || stoppable ? 'bg-arcane/15 ring-arcane' : 'bg-peat-800 ring-peat-700'}`}
     >
       {hotkey && (
         <kbd className="absolute top-2 right-2 grid h-6 min-w-6 place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs text-ink tabular">
@@ -57,6 +62,15 @@ function EffectPad({ card, hotkey, active }: { card: Card; hotkey?: string; acti
       )}
       <span className="pr-6 leading-tight">{card.label}</span>
       {missing && <span className="text-sm text-danger">missing</span>}
+      {stoppable && <span className="text-sm text-arcane">Playing, press to stop</span>}
+      {long && startedAt !== undefined && durationMs && (
+        <span
+          key={startedAt}
+          aria-hidden
+          className="animate-progress absolute inset-x-0 bottom-0 h-1 origin-left bg-arcane"
+          style={{ animationDuration: `${durationMs}ms` }}
+        />
+      )}
     </button>
   )
 }

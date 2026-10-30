@@ -19,6 +19,8 @@ export interface PlayerState {
   crossfadeSeconds: number
   /** Sound being auditioned on this device only. */
   previewId: string | null
+  /** Effect card id → when its latest voice started, for cards still sounding. */
+  effects: Record<string, number>
   /** What the last fade-out stopped, so it can be resumed. */
   faded: { scene: Scene; cardId: string | null } | null
 }
@@ -53,5 +55,6 @@ export const usePlayer = create<PlayerState>(() => ({
   monitor: true,
   crossfadeSeconds: 3,
   previewId: null,
+  effects: {},
   faded: null,
 }))

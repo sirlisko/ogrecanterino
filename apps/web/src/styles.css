@@ -53,6 +53,16 @@
   animation: breathe 2.4s ease-in-out infinite;
 }
 
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.animate-progress {
+  animation: progress linear forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-breathe {
     animation: none;
