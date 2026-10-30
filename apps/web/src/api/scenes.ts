@@ -6,12 +6,13 @@ import { keys } from './keys.ts'
 export const useScenes = () =>
   useQuery({ queryKey: keys.scenes, queryFn: () => api<Scene[]>('/api/scenes') })
 
+export const sceneQuery = (id: string) => ({
+  queryKey: keys.scene(id),
+  queryFn: () => api<Scene>(`/api/scenes/${id}`),
+})
+
 export const useScene = (id: string | undefined) =>
-  useQuery({
-    queryKey: keys.scene(id ?? ''),
-    queryFn: () => api<Scene>(`/api/scenes/${id}`),
-    enabled: !!id,
-  })
+  useQuery({ ...sceneQuery(id ?? ''), enabled: !!id })
 
 export function useSaveScene() {
   const qc = useQueryClient()

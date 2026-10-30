@@ -1,7 +1,8 @@
-import type { Pad, Scene } from '@ogre/shared'
+import type { Pad } from '@ogre/shared'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { keys } from '../api/keys.ts'
+import { sceneQuery } from '../api/scenes.ts'
 import { engine } from '../audio/engine.ts'
 import { usePlayer } from '../audio/store.ts'
 import { flash } from '../ui/flash.ts'
@@ -42,8 +43,10 @@ export function HotkeyLayer() {
           return engine.setMonitor(!monitor)
         case 'toggleCombat': {
           const combatId = scene?.combatSceneId
-          const combat = combatId ? qc.getQueryData<Scene>(keys.scene(combatId)) : null
-          return engine.toggleCombat(combat ?? null)
+          if (!combatId) return engine.toggleCombat(null)
+          return void qc
+            .ensureQueryData(sceneQuery(combatId))
+            .then((combat) => engine.toggleCombat(combat))
         }
         case 'focusSearch':
           return document.querySelector<HTMLInputElement>('[data-hotkey-search]')?.focus()
