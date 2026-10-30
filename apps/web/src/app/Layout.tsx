@@ -21,7 +21,7 @@ export function Layout() {
       <header className="sticky top-0 z-30 border-b border-peat-700 bg-peat-900/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2.5">
           <NavLink to="/" className="mr-3 flex items-center gap-2 font-display text-xl font-bold">
-            <img src="/favicon.svg" alt="" className="h-7 w-7" />
+            <img src="/logo.png" alt="" className="h-7 w-7" />
             <span className="hidden sm:inline">Ogre Canterino</span>
           </NavLink>
           <nav className="flex gap-1 text-[15px]">
