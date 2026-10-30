@@ -25,6 +25,13 @@ export const soundUpload = z.object({
 })
 export type SoundUpload = z.infer<typeof soundUpload>
 
+export interface SoundUsage {
+  /** Names of scenes the caller can see that use the sound. */
+  scenes: string[]
+  /** Other GMs' private scenes that use it, counted but not named. */
+  privateCount: number
+}
+
 export function categoryFromTags(tags: readonly string[]): SoundCategory {
   if (tags.includes('Music')) return 'music'
   if (tags.includes('Ambience')) return 'ambience'

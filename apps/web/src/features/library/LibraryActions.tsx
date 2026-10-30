@@ -1,7 +1,8 @@
 import type { Sound } from '@ogre/shared'
-import { useDeleteSound } from '../../api/sounds.ts'
+import { fetchSoundUsage, useDeleteSound } from '../../api/sounds.ts'
 import { useFavourites, useMe, usePads, useSavePads, useToggleFavourite } from '../../api/me.ts'
 import { PAD_SLOTS } from '../pads/PadsStrip.tsx'
+import { deleteSoundMessage } from './deleteMessage.ts'
 
 export function LibraryActions({ sound }: { sound: Sound }) {
   const me = useMe().data
@@ -56,9 +57,10 @@ export function LibraryActions({ sound }: { sound: Sound }) {
         <button
           type="button"
           aria-label={`Delete ${sound.title}`}
-          onClick={() =>
-            confirm(`Delete "${sound.title}" from the library?`) && remove.mutate(sound.id)
-          }
+          onClick={async () => {
+            const usage = await fetchSoundUsage(sound.id)
+            if (confirm(deleteSoundMessage(sound.title, usage))) remove.mutate(sound.id)
+          }}
           className="grid h-8 w-8 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
         >
           ✕

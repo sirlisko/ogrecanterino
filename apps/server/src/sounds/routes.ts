@@ -10,6 +10,7 @@ import { authed, canEdit, httpError } from '../http/auth.ts'
 import { parseBody } from '../http/body.ts'
 import { toSound } from './repo.ts'
 import { storeAudioUpload } from './upload.ts'
+import { soundUsage } from './usage.ts'
 
 const soundPatch = soundUpload.partial()
 
@@ -67,6 +68,10 @@ export async function soundRoutes(
     const patch = parseBody(soundPatch, req.body)
     return toSound(db.update(sounds).set(patch).where(eq(sounds.id, existing.id)).returning().get())
   })
+
+  app.get<{ Params: { id: string } }>('/api/sounds/:id/usage', async (req) =>
+    soundUsage(db, authed(req), req.params.id),
+  )
 
   app.delete<{ Params: { id: string } }>('/api/sounds/:id', async (req, reply) => {
     const user = authed(req)

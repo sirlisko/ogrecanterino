@@ -1,4 +1,4 @@
-import type { Sound } from '@ogre/shared'
+import type { Sound, SoundUsage } from '@ogre/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './client.ts'
 import { keys } from './keys.ts'
@@ -17,6 +17,8 @@ export function useUploadSound() {
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.sounds }),
   })
 }
+
+export const fetchSoundUsage = (id: string) => api<SoundUsage>(`/api/sounds/${id}/usage`)
 
 export function useDeleteSound() {
   const qc = useQueryClient()
