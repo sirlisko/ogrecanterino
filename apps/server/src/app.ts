@@ -45,10 +45,12 @@ export async function buildApp(opts: AppOptions) {
     const root = resolve(opts.webDist)
     await app.register(fastifyStatic, { root, wildcard: false })
     app.setNotFoundHandler((req, reply) => {
-      const isApi = /^\/(api|audio|banners|auth)\//.test(req.url)
-      return isApi
-        ? reply.code(404).send({ error: 'Not found' })
-        : reply.sendFile('index.html', root)
+      // Only extensionless page routes fall back to the SPA; missing files and API paths are real 404s.
+      const path = req.url.split('?')[0] ?? ''
+      const isPage = !/^\/(api|audio|banners|auth)\//.test(path) && !/\.[a-z0-9]+$/i.test(path)
+      return isPage
+        ? reply.sendFile('index.html', root)
+        : reply.code(404).send({ error: 'Not found' })
     })
   }
   return app
