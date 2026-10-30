@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 import { api } from '../../api/client.ts'
 import { keys } from '../../api/keys.ts'
+import { LoginHero } from './LoginHero.tsx'
 
 const ERRORS: Record<string, string> = {
   guild:
@@ -24,15 +25,11 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-dvh place-items-center px-4">
-      <div className="w-full max-w-sm">
-        <img src="/favicon.svg" alt="" className="mb-6 h-14 w-14" />
-        <h1 className="font-display text-5xl leading-none font-bold">Ogre Canterino</h1>
-        <p className="mt-3 text-ink-muted">
-          Music, ambience and effects for your table, live or over Discord.
-        </p>
-        {error && <p className="mt-6 rounded-md bg-danger/15 px-3 py-2 text-danger">{error}</p>}
-        <div className="mt-8 flex flex-col gap-3">
+    <main className="grid min-h-dvh place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_top,var(--color-peat-700),var(--color-peat-950)_70%)] px-4 py-12">
+      <div className="w-full max-w-md">
+        <LoginHero />
+        {error && <p className="mt-8 rounded-md bg-danger/15 px-3 py-2 text-danger">{error}</p>}
+        <div className="mx-auto mt-10 flex max-w-sm flex-col gap-3">
           {providers.data?.discord && (
             <a
               href="/auth/login"
