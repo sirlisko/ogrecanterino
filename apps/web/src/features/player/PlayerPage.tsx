@@ -84,6 +84,12 @@ export function PlayerPage() {
         </div>
       </header>
 
+      {!active && (
+        <p className="mb-4 rounded-lg bg-peat-800 px-3 py-2 text-ink-muted ring-1 ring-peat-700">
+          Not playing. Tracks and effects you click play on this device only, so you can prepare
+          without interrupting the table.
+        </p>
+      )}
       {!canEdit && (
         <p className="mb-4 text-sm text-peat-400">
           Tweaks to a shared scene aren't saved. Duplicate it to keep your own version.

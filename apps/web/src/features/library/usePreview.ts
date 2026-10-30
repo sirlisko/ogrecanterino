@@ -1,22 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRecordPlay } from '../../api/me.ts'
 import { engine } from '../../audio/engine.ts'
+import { usePlayer } from '../../audio/store.ts'
 
 export function usePreview() {
-  const [playing, setPlaying] = useState<string | null>(null)
+  const playing = usePlayer((s) => s.previewId)
   const record = useRecordPlay()
 
   useEffect(() => () => engine.stopPreview(), [])
 
   const toggle = (soundId: string) => {
-    if (playing === soundId) {
-      engine.stopPreview()
-      setPlaying(null)
-      return
-    }
-    setPlaying(soundId)
-    record.mutate(soundId)
-    void engine.preview(soundId).then(() => setPlaying((p) => (p === soundId ? null : p)))
+    if (playing !== soundId) record.mutate(soundId)
+    engine.togglePreview(soundId)
   }
 
   return { playing, toggle }

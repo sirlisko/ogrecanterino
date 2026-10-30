@@ -17,6 +17,8 @@ export interface PlayerState {
   volumes: Volumes
   monitor: boolean
   crossfadeSeconds: number
+  /** Sound being auditioned on this device only. */
+  previewId: string | null
 }
 
 const VOLUME_KEY = 'ogre.volumes'
@@ -48,4 +50,5 @@ export const usePlayer = create<PlayerState>(() => ({
   volumes: loadVolumes(),
   monitor: true,
   crossfadeSeconds: 3,
+  previewId: null,
 }))

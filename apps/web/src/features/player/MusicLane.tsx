@@ -15,13 +15,14 @@ interface Props {
 
 export function MusicLane({ scene, active, onCard, onSettings }: Props) {
   const music = usePlayer((s) => s.music)
+  const previewId = usePlayer((s) => s.previewId)
   const combat = usePlayer((s) => s.combat)
   const soundStatus = useSoundStatus()
   const { settings } = scene.data
   const cards = scene.data.music
 
   const play = (card: Card) => {
-    if (!active) return void engine.playScene(scene).then(() => engine.music?.playCard(card.id, 1))
+    if (!active) return card.soundId && engine.togglePreview(card.soundId)
     if (music.cardId === card.id) engine.music?.toggle()
     else engine.music?.playCard(card.id)
   }
@@ -62,6 +63,8 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
       <ol className="flex flex-col gap-1">
         {cards.map((card) => {
           const current = active && !combat && music.cardId === card.id
+          const previewing = !active && !!card.soundId && previewId === card.soundId
+          const sounding = (current && music.playing) || previewing
           const status = soundStatus(card.soundId)
           const missing = status === 'missing'
           return (
@@ -75,15 +78,17 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                   disabled={status !== 'ready' || !card.enabled}
                   onClick={() => play(card)}
                   aria-label={
-                    current && music.playing ? `Pause ${card.label}` : `Play ${card.label}`
+                    sounding
+                      ? `${previewing ? 'Stop' : 'Pause'} ${card.label}`
+                      : `${active ? 'Play' : 'Preview'} ${card.label}`
                   }
                   className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm disabled:opacity-40 ${
-                    current
+                    current || previewing
                       ? 'bg-brass text-peat-950'
                       : 'bg-peat-700 hover:bg-brass hover:text-peat-950'
                   }`}
                 >
-                  {current && music.playing ? '❚❚' : '▶'}
+                  {previewing ? '■' : sounding ? '❚❚' : '▶'}
                 </button>
                 <span
                   className={`min-w-0 flex-1 truncate ${card.enabled ? '' : 'text-peat-400 line-through'}`}

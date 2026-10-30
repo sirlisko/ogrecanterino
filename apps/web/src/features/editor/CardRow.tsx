@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type { Card, SceneSection } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
+import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 
 const SECONDS = (ms: number) => Math.round(ms / 1000)
@@ -20,6 +21,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
     id: card.id,
   })
   const status = useSoundStatus()(card.soundId)
+  const previewing = usePlayer((s) => !!card.soundId && s.previewId === card.soundId)
   const missing = status === 'missing'
   const interval = card.intervalMs ?? [30_000, 90_000]
   const times = card.times ?? [1, 1]
@@ -63,12 +65,12 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
         />
         <button
           type="button"
-          onClick={() => card.soundId && void engine.preview(card.soundId)}
+          onClick={() => card.soundId && engine.togglePreview(card.soundId)}
           disabled={status !== 'ready'}
-          aria-label={`Preview ${card.label}`}
+          aria-label={previewing ? `Stop ${card.label}` : `Preview ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-xs text-ink-muted hover:bg-peat-700 hover:text-ink disabled:opacity-40"
         >
-          ▶
+          {previewing ? '■' : '▶'}
         </button>
         <button
           type="button"

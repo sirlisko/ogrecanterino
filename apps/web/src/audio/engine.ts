@@ -54,6 +54,7 @@ class Engine {
   async playScene(scene: Scene) {
     const mixer = await this.unlock()
     if (this.playback?.sceneId === scene.id) return
+    this.stopPreview()
     const fade = usePlayer.getState().crossfadeSeconds
     const previous = this.playback
     // Declared first because the playback emits state while it's still being constructed.
@@ -112,14 +113,25 @@ class Engine {
     await this.previewVoice?.stop(0.15)
     const sound = this.lookup(soundId)
     if (!sound || !this.previews) return
+    usePlayer.setState({ previewId: soundId })
     const voice = await this.previews.fire(sound, 80)
     this.previewVoice = voice
     await new Promise<void>((resolve) => voice.onEnded(resolve))
+    if (this.previewVoice === voice) {
+      this.previewVoice = null
+      usePlayer.setState({ previewId: null })
+    }
+  }
+
+  togglePreview(soundId: string) {
+    if (usePlayer.getState().previewId === soundId) this.stopPreview()
+    else void this.preview(soundId)
   }
 
   stopPreview() {
     void this.previewVoice?.stop(0.15)
     this.previewVoice = null
+    usePlayer.setState({ previewId: null })
   }
 
   toggleCombat(combat: Scene | null) {
