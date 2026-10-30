@@ -54,7 +54,7 @@ export function ScenesPage() {
     <>
       <div className="flex flex-wrap items-end gap-4">
         <h1 className="font-display text-4xl font-bold">Scenes</h1>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap justify-end gap-2">
           <ImportScenesButton />
           <Button variant="primary" onClick={create} disabled={save.isPending}>
             New scene
