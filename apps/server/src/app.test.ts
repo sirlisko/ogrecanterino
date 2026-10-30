@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { emptySceneData } from '@ogre/shared'
@@ -110,6 +110,41 @@ describe('scenes', () => {
       headers: { cookie },
     })
     expect(del.statusCode).toBe(204)
+  })
+
+  it('uploads and removes a banner', async () => {
+    const created = await app.inject({
+      method: 'POST',
+      url: '/api/scenes',
+      headers: { cookie },
+      payload: { name: 'Bannered', data: emptySceneData() },
+    })
+    const { id } = created.json()
+    const boundary = 'ogre-boundary'
+    const upload = await app.inject({
+      method: 'POST',
+      url: `/api/scenes/${id}/banner`,
+      headers: { cookie, 'content-type': `multipart/form-data; boundary=${boundary}` },
+      payload: [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="file"; filename="banner.png"',
+        'Content-Type: image/png',
+        '',
+        'not really a png',
+        `--${boundary}--`,
+        '',
+      ].join('\r\n'),
+    })
+    const { bannerPath } = upload.json()
+    expect(existsSync(join(dir, 'banners', bannerPath))).toBe(true)
+
+    const removed = await app.inject({
+      method: 'DELETE',
+      url: `/api/scenes/${id}/banner`,
+      headers: { cookie },
+    })
+    expect(removed.json().bannerPath).toBeNull()
+    expect(existsSync(join(dir, 'banners', bannerPath))).toBe(false)
   })
 
   it('validates scene bodies', async () => {
