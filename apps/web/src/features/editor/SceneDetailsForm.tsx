@@ -1,4 +1,5 @@
 import type { Scene, SceneSettings } from '@ogre/shared'
+import { useState } from 'react'
 import { useScenes, useUploadBanner } from '../../api/scenes.ts'
 import { fieldClass } from '../../ui/Dialog.tsx'
 import { Fader } from '../../ui/Fader.tsx'
@@ -10,6 +11,15 @@ const SETTINGS: { key: keyof SceneSettings; label: string }[] = [
   { key: 'shuffle', label: 'Shuffle' },
 ]
 
+const parseTags = (text: string) => [
+  ...new Set(
+    text
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean),
+  ),
+]
+
 export function SceneDetailsForm({
   scene,
   onChange,
@@ -19,6 +29,7 @@ export function SceneDetailsForm({
 }) {
   const scenes = useScenes().data ?? []
   const banner = useUploadBanner()
+  const [tagText, setTagText] = useState(scene.tags.join(', '))
   const setSetting = (key: keyof SceneSettings, value: boolean) =>
     onChange({ data: { ...scene.data, settings: { ...scene.data.settings, [key]: value } } })
 
@@ -35,19 +46,11 @@ export function SceneDetailsForm({
       <label className="flex flex-col gap-1">
         Tags
         <input
-          defaultValue={scene.tags.join(', ')}
-          onBlur={(e) =>
-            onChange({
-              tags: [
-                ...new Set(
-                  e.target.value
-                    .split(',')
-                    .map((t) => t.trim())
-                    .filter(Boolean),
-                ),
-              ],
-            })
-          }
+          value={tagText}
+          onChange={(e) => {
+            setTagText(e.target.value)
+            onChange({ tags: parseTags(e.target.value) })
+          }}
           placeholder="Forest, Night, Tense"
           className={fieldClass}
         />

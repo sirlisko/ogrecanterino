@@ -79,6 +79,7 @@ export function EditorPage() {
       </div>
 
       <SceneDetailsForm
+        key={draft.id}
         scene={draft}
         onChange={(patch) => {
           setDraft((d) => (d ? { ...d, ...patch } : d))
