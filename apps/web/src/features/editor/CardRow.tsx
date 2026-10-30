@@ -1,6 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Card, SceneSection } from '@ogre/shared'
+import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { Fader } from '../../ui/Fader.tsx'
 
@@ -18,7 +19,8 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
   })
-  const missing = !card.soundId || !engine.lookup(card.soundId)
+  const status = useSoundStatus()(card.soundId)
+  const missing = status === 'missing'
   const interval = card.intervalMs ?? [30_000, 90_000]
   const times = card.times ?? [1, 1]
 
@@ -62,7 +64,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
         <button
           type="button"
           onClick={() => card.soundId && void engine.preview(card.soundId)}
-          disabled={missing}
+          disabled={status !== 'ready'}
           aria-label={`Preview ${card.label}`}
           className="grid h-7 w-7 place-items-center rounded-full text-xs text-ink-muted hover:bg-peat-700 hover:text-ink disabled:opacity-40"
         >

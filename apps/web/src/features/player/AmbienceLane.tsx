@@ -1,5 +1,6 @@
 import type { Card, Scene } from '@ogre/shared'
 import { useEffect, useState } from 'react'
+import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
@@ -27,6 +28,7 @@ export function AmbienceLane({
 }) {
   const state = usePlayer((s) => s.ambience)
   const cards = scene.data.ambiences
+  const soundStatus = useSoundStatus()
   const now = useNow(active && cards.some((c) => c.mode === 'interval'))
 
   return (
@@ -35,7 +37,8 @@ export function AmbienceLane({
       <ul className="flex flex-col gap-1">
         {cards.map((card) => {
           const s = active ? state[card.id] : undefined
-          const missing = !card.soundId || !engine.lookup(card.soundId)
+          const status = soundStatus(card.soundId)
+          const missing = status === 'missing'
           const interval = card.mode === 'interval' && card.intervalMs
           const nextIn = s?.nextAt ? Math.max(0, Math.ceil((s.nextAt - now) / 1000)) : null
           return (
@@ -48,7 +51,7 @@ export function AmbienceLane({
                   type="checkbox"
                   className="peer sr-only"
                   checked={card.enabled}
-                  disabled={missing}
+                  disabled={status !== 'ready'}
                   onChange={(e) => onCard(card.id, { enabled: e.target.checked })}
                 />
                 <span className="h-5 w-9 rounded-full bg-peat-600 transition-colors peer-checked:bg-lichen peer-focus-visible:outline-2 peer-focus-visible:outline-brass peer-disabled:opacity-40" />

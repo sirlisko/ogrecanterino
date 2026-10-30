@@ -1,5 +1,6 @@
 import type { Sound, SoundUsage } from '@ogre/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useMemo } from 'react'
 import { api } from './client.ts'
 import { keys } from './keys.ts'
 
@@ -9,6 +10,19 @@ export const useSounds = () =>
     queryFn: () => api<Sound[]>('/api/sounds'),
     staleTime: 5 * 60_000,
   })
+
+export type SoundStatus = 'loading' | 'missing' | 'ready'
+
+/** Reactive counterpart to `engine.lookup`, so cards re-render once the library loads or changes. */
+export function useSoundStatus() {
+  const { data } = useSounds()
+  const ids = useMemo(() => data && new Set(data.map((s) => s.id)), [data])
+  return useCallback(
+    (soundId: string | null): SoundStatus =>
+      !ids ? 'loading' : soundId && ids.has(soundId) ? 'ready' : 'missing',
+    [ids],
+  )
+}
 
 export function useUploadSound() {
   const qc = useQueryClient()

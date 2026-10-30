@@ -1,5 +1,6 @@
 import type { Card, Scene } from '@ogre/shared'
 import { useRef } from 'react'
+import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { flash } from '../../ui/flash.ts'
 import { EmptyLane, Lane } from './Lane.tsx'
@@ -39,7 +40,8 @@ function EffectPad({
   active: boolean
 }) {
   const ref = useRef<HTMLButtonElement>(null)
-  const missing = !card.soundId || !engine.lookup(card.soundId)
+  const status = useSoundStatus()(card.soundId)
+  const missing = status === 'missing'
 
   const fire = async () => {
     if (!active) await engine.playScene(scene)
@@ -51,7 +53,7 @@ function EffectPad({
     <button
       ref={ref}
       type="button"
-      disabled={missing || !card.enabled}
+      disabled={status !== 'ready' || !card.enabled}
       onClick={fire}
       data-effect-id={card.id}
       className={`relative flex min-h-20 flex-col justify-end rounded-xl bg-peat-800 p-3 text-left ring-1 ring-peat-700 transition-colors hover:bg-peat-700 hover:ring-arcane/60 active:scale-[0.98] disabled:opacity-40`}

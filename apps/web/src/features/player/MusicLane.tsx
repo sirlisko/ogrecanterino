@@ -1,4 +1,5 @@
 import type { Card, Scene, SceneSettings } from '@ogre/shared'
+import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
@@ -15,6 +16,7 @@ interface Props {
 export function MusicLane({ scene, active, onCard, onSettings }: Props) {
   const music = usePlayer((s) => s.music)
   const combat = usePlayer((s) => s.combat)
+  const soundStatus = useSoundStatus()
   const { settings } = scene.data
   const cards = scene.data.music
 
@@ -60,7 +62,8 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
       <ol className="flex flex-col gap-1">
         {cards.map((card) => {
           const current = active && !combat && music.cardId === card.id
-          const missing = !card.soundId || !engine.lookup(card.soundId)
+          const status = soundStatus(card.soundId)
+          const missing = status === 'missing'
           return (
             <li
               key={card.id}
@@ -69,7 +72,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
               <div className="flex items-center gap-2 px-2 py-1.5">
                 <button
                   type="button"
-                  disabled={missing || !card.enabled}
+                  disabled={status !== 'ready' || !card.enabled}
                   onClick={() => play(card)}
                   aria-label={
                     current && music.playing ? `Pause ${card.label}` : `Play ${card.label}`
