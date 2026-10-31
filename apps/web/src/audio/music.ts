@@ -10,6 +10,11 @@ export interface MusicState {
   duration: number
 }
 
+const TICK_MS = 500
+/** How long a playing track may sit still near its end before we stop waiting for `ended`. */
+const STALL_MS = 3000
+const STALL_NEAR_END_S = 15
+
 export interface MusicOptions {
   crossfadeSeconds: number
   mode: PlaylistMode
@@ -24,6 +29,8 @@ export class MusicDeck {
   private voice: ElementVoice | null = null
   private ticker: number | null = null
   private advancing = false
+  private lastCurrent = -1
+  private stalledTicks = 0
 
   constructor(
     private factory: VoiceFactory,
@@ -44,6 +51,10 @@ export class MusicDeck {
 
   setOptions(opts: Partial<MusicOptions>) {
     this.opts = { ...this.opts, ...opts }
+  }
+
+  private get loops() {
+    return !this.opts.autoAdvance || this.opts.mode === 'repeat-one'
   }
 
   get state(): MusicState {
@@ -119,7 +130,7 @@ export class MusicDeck {
       volume: card.volume,
       fadeIn: fade,
       trimDb: sound.gainDb ?? 0,
-      loop: !this.opts.autoAdvance || this.opts.mode === 'repeat-one',
+      loop: this.loops,
     })
     voice.onEnded(() => {
       if (this.voice === voice) this.advance()
@@ -140,13 +151,23 @@ export class MusicDeck {
   private startTicker() {
     if (this.ticker !== null) return
     this.ticker = window.setInterval(() => {
-      const pos = this.voice?.position()
-      if (pos && this.opts.autoAdvance && this.opts.mode !== 'repeat-one' && pos.duration > 0) {
-        const remaining = pos.duration - pos.current
-        if (remaining < this.opts.crossfadeSeconds && !this.voice?.paused) this.advance()
-      }
+      const voice = this.voice
+      const pos = voice?.position()
+      if (voice && pos && !voice.paused && pos.duration > 0) this.watch(voice, pos)
       this.emit()
-    }, 500)
+    }, TICK_MS)
+  }
+
+  private watch(voice: ElementVoice, { current, duration }: { current: number; duration: number }) {
+    const remaining = duration - current
+    if (!this.loops && remaining < this.opts.crossfadeSeconds) return this.advance()
+    this.stalledTicks = current === this.lastCurrent ? this.stalledTicks + 1 : 0
+    this.lastCurrent = current
+    if (this.stalledTicks * TICK_MS < STALL_MS || remaining > STALL_NEAR_END_S) return
+    // WebKit can freeze a stream just short of its end without ever firing `ended`.
+    this.stalledTicks = 0
+    if (this.loops) voice.seek(0)
+    else this.advance()
   }
 
   private stopTicker() {
