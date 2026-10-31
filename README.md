@@ -14,7 +14,8 @@ live at the table or stream them into a Discord voice channel.
 - Shared library with batch uploads, editable details, per-GM scenes, favourites and quick pads
 - Discord bot that plays the exact mix you hear, with no re-encoding on the server
 
-Design decisions and shared conventions live in [docs/decisions.md](docs/decisions.md) and
+How the app is put together is in [docs/architecture.md](docs/architecture.md). Design decisions and shared
+conventions live in [docs/decisions.md](docs/decisions.md) and
 [docs/conventions.md](docs/conventions.md).
 
 ## How it works
