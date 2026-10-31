@@ -6,6 +6,7 @@ import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { EFFECT_KEYS, EffectPad } from '../player/EffectsLane.tsx'
 import { ResumeToast } from '../player/ResumeToast.tsx'
 import { TableControls } from './TableControls.tsx'
+import { TableMusic } from './TableMusic.tsx'
 import { TablePads } from './TablePads.tsx'
 
 /** Big touch targets for running a session from a tablet: no navigation, no editing. */
@@ -24,7 +25,7 @@ export function TablePage() {
         >
           Exit table mode
         </Link>
-        <h1 className="min-w-0 flex-1 truncate font-display text-3xl font-bold">
+        <h1 className="order-first min-w-0 flex-1 basis-full truncate font-display text-3xl font-bold sm:order-none sm:basis-0">
           {scene?.name ?? 'Nothing playing'}
         </h1>
         {setlist.previous && (
@@ -61,6 +62,7 @@ export function TablePage() {
       {scene ? (
         <>
           <TableControls scene={scene} />
+          <TableMusic scene={scene} />
           <section aria-label="Effects">
             {scene.data.effects.length === 0 ? (
               <p className="text-ink-muted">No effects in this scene.</p>
