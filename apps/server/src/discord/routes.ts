@@ -46,7 +46,8 @@ export function discordRoutes(bot: DiscordBot | null, sessions: VoiceSessions | 
         if (isBinary)
           stream.write(Array.isArray(data) ? Buffer.concat(data) : Buffer.from(data as ArrayBuffer))
       })
-      socket.on('close', () => stream.close())
+      // The web app closes with 1000 only when the GM stops sending; a closed tab sends 1001.
+      socket.on('close', (code) => stream.close(code !== 1000))
     })
   }
 }

@@ -32,7 +32,7 @@ export function TransportBar() {
         className="h-0.5 bg-brass transition-[width] duration-500"
         style={{ width: `${progress}%` }}
       />
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
         <div className="min-w-0 flex-1">
           {scene ? (
             <>
@@ -92,7 +92,7 @@ export function TransportBar() {
           </TransportButton>
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-2">
+        <div className="flex w-full items-center justify-end gap-2 sm:w-auto sm:flex-1">
           {setlist.next && (
             <button
               type="button"

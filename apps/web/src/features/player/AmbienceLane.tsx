@@ -70,9 +70,10 @@ export function AmbienceLane({
                   <span className="text-sm text-danger">missing</span>
                 ) : (
                   interval && (
-                    <span className="block text-sm text-ink-muted tabular">
-                      Every {formatRange(interval)}
-                      {nextIn !== null && card.enabled && `, next in ${nextIn} s`}
+                    <span className="block truncate text-sm text-ink-muted tabular">
+                      {nextIn !== null && card.enabled
+                        ? `Next in ${nextIn} s, every ${formatRange(interval)}`
+                        : `Every ${formatRange(interval)}`}
                     </span>
                   )
                 )}
@@ -81,7 +82,7 @@ export function AmbienceLane({
                 <button
                   type="button"
                   onClick={() => engine.triggerAmbience(card.id)}
-                  className="rounded-md px-2 py-1 text-sm text-lichen hover:bg-peat-700"
+                  className="shrink-0 rounded-md px-2 py-1 text-sm text-lichen hover:bg-peat-700"
                   aria-label={`Play ${card.label} now`}
                 >
                   Now

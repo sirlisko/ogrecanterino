@@ -126,6 +126,10 @@ export class ElementVoice extends BaseVoice {
     this.el.currentTime = seconds
   }
 
+  setLoop(loop: boolean) {
+    this.el.loop = loop
+  }
+
   get paused() {
     return this.el.paused
   }
