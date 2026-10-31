@@ -51,6 +51,7 @@ export class MusicDeck {
 
   setOptions(opts: Partial<MusicOptions>) {
     this.opts = { ...this.opts, ...opts }
+    this.voice?.setLoop(this.loops)
   }
 
   private get loops() {

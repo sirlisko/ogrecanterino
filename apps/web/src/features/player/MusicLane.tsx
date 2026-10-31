@@ -46,15 +46,11 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
             <Icon name="shuffle" />
           </IconButton>
           <IconButton
-            label={
-              settings.musicIsPlaylist
-                ? 'Playing as playlist (click to loop one track)'
-                : 'Looping one track (click to play as playlist)'
-            }
+            label={settings.musicIsPlaylist ? 'Repeat this track' : 'Repeating this track'}
             active={!settings.musicIsPlaylist}
             onClick={() => onSettings({ musicIsPlaylist: !settings.musicIsPlaylist })}
           >
-            <Icon name="repeat" />
+            <Icon name="repeat-one" />
           </IconButton>
         </>
       }
