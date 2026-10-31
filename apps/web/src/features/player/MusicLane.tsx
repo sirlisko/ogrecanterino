@@ -3,8 +3,8 @@ import { useSoundStatus } from '../../api/sounds.ts'
 import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
-import { formatTime } from '../../ui/format.ts'
 import { Icon } from '../../ui/Icon.tsx'
+import { SeekBar } from '../../ui/SeekBar.tsx'
 import { EmptyLane, IconButton, Lane } from './Lane.tsx'
 
 interface Props {
@@ -116,21 +116,12 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                 />
               </div>
               {current && music.duration > 0 && (
-                <div className="flex items-center gap-2 px-3 pb-2 text-xs text-ink-muted tabular">
-                  <span>{formatTime(music.current)}</span>
-                  <input
-                    type="range"
-                    className="fader"
-                    min={0}
-                    max={music.duration}
-                    step={1}
-                    value={music.current}
-                    aria-label="Seek"
-                    style={{ ['--fader-color' as string]: 'var(--color-brass)' }}
-                    onChange={(e) => engine.music?.seek(Number(e.target.value))}
-                  />
-                  <span>{formatTime(music.duration)}</span>
-                </div>
+                <SeekBar
+                  current={music.current}
+                  duration={music.duration}
+                  onSeek={(seconds) => engine.music?.seek(seconds)}
+                  className="px-3 pb-2"
+                />
               )}
             </li>
           )

@@ -108,6 +108,7 @@ export class MusicDeck {
 
   seek(seconds: number) {
     this.voice?.seek(seconds)
+    this.emit()
   }
 
   async stop(fadeSeconds = 0) {
