@@ -19,6 +19,8 @@ import { createOpusRepacketizer } from './opusSplit.ts'
 
 // 300 ms: absorbs the browser's 100 ms chunk bursts plus network jitter.
 const MAX_BUFFERED_FRAMES = 15
+// Long enough to survive a page reload or a network blip, short enough that a closed tab frees the bot.
+const ABANDONED_LEAVE_MS = 30_000
 
 interface VoiceSession {
   guildId: string
@@ -28,6 +30,7 @@ interface VoiceSession {
   connection: VoiceConnection
   player: AudioPlayer
   input: PassThrough | null
+  leaveTimer: NodeJS.Timeout | null
 }
 
 export interface SessionInfo {
@@ -104,7 +107,9 @@ export class VoiceSessions {
       connection,
       player,
       input: existing?.input ?? null,
+      leaveTimer: null,
     })
+    if (existing?.leaveTimer) clearTimeout(existing.leaveTimer)
     return this.forUser(userId) as SessionInfo
   }
 
@@ -118,6 +123,8 @@ export class VoiceSessions {
     const session = [...this.sessions.values()].find((s) => s.ownerId === userId)
     if (!session) throw httpError(409, 'Connect to a voice channel first')
     session.input?.end()
+    if (session.leaveTimer) clearTimeout(session.leaveTimer)
+    session.leaveTimer = null
     const input = new PassThrough()
     session.input = input
     // The browser already sends Opus: demux the WebM and re-pack it into 20 ms packets, no re-encoding.
@@ -128,12 +135,17 @@ export class VoiceSessions {
     session.player.play(createAudioResource(packets, { inputType: StreamType.Opus }))
     return {
       write: (chunk: Buffer) => input.write(chunk),
-      close: () => {
+      /** `abandoned`: the browser went away without stopping, so leave the channel unless it returns. */
+      close: (abandoned: boolean) => {
         input.end()
-        if (session.input === input) {
-          session.input = null
-          if (session.player.state.status !== AudioPlayerStatus.Idle) session.player.stop()
-        }
+        if (session.input !== input) return
+        session.input = null
+        if (session.player.state.status !== AudioPlayerStatus.Idle) session.player.stop()
+        if (abandoned)
+          session.leaveTimer = setTimeout(
+            () => this.cleanup(session.guildId, session.connection),
+            ABANDONED_LEAVE_MS,
+          )
       },
     }
   }
@@ -145,6 +157,7 @@ export class VoiceSessions {
   private cleanup(guildId: string, connection: VoiceConnection) {
     const s = this.sessions.get(guildId)
     if (s?.connection !== connection) return
+    if (s.leaveTimer) clearTimeout(s.leaveTimer)
     s.input?.end()
     s.player.stop()
     if (connection.state.status !== VoiceConnectionStatus.Destroyed) connection.destroy()

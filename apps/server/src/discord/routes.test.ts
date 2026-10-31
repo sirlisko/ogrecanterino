@@ -11,10 +11,13 @@ import type { VoiceSessions } from './voiceSessions.ts'
 describe('discord stream route', () => {
   it('forwards binary chunks from the browser into the voice session', async () => {
     const received: Buffer[] = []
-    let closed = false
+    let closed: boolean | null = null
     const sessions = {
       forUser: () => null,
-      openStream: () => ({ write: (b: Buffer) => received.push(b), close: () => (closed = true) }),
+      openStream: () => ({
+        write: (b: Buffer) => received.push(b),
+        close: (abandoned: boolean) => (closed = abandoned),
+      }),
     } as unknown as VoiceSessions
     const bot = { isReady: true, inviteUrl: null } as unknown as DiscordBot
     const dir = mkdtempSync(join(tmpdir(), 'ogre-'))
@@ -44,7 +47,7 @@ describe('discord stream route', () => {
     await new Promise((r) => setTimeout(r, 50))
 
     expect(Buffer.concat(received)).toEqual(Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 1, 2, 3]))
-    expect(closed).toBe(true)
+    expect(closed).toBe(true) // terminated without a 1000 close
     await app.close()
   })
 })
