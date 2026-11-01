@@ -11,6 +11,7 @@ import {
   type AudioPlayer,
   type VoiceConnection,
 } from '@discordjs/voice'
+import { Events } from 'discord.js'
 import prism from 'prism-media'
 import { httpError } from '../http/auth.ts'
 import type { DiscordBot } from './bot.ts'
@@ -44,7 +45,14 @@ export interface SessionInfo {
 export class VoiceSessions {
   private sessions = new Map<string, VoiceSession>()
 
-  constructor(private bot: DiscordBot) {}
+  constructor(private bot: DiscordBot) {
+    // Discord's close code on a manual disconnect makes @discordjs/voice rejoin on its own; honour the kick instead.
+    bot.client.on(Events.VoiceStateUpdate, (_, state) => {
+      if (state.id !== bot.client.user?.id || state.channelId) return
+      const s = this.sessions.get(state.guild.id)
+      if (s) this.cleanup(s.guildId, s.connection)
+    })
+  }
 
   forUser(userId: string): SessionInfo | null {
     for (const s of this.sessions.values()) {
