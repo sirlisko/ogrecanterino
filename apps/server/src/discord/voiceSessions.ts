@@ -22,6 +22,8 @@ import { createOpusRepacketizer } from './opusSplit.ts'
 const MAX_BUFFERED_FRAMES = 15
 // Long enough to survive a page reload or a network blip, short enough that a closed tab frees the bot.
 const ABANDONED_LEAVE_MS = 30_000
+// Connected but silent this long (never started, or stopped and forgotten): free the bot for other GMs.
+const IDLE_LEAVE_MS = 60 * 60_000
 
 interface VoiceSession {
   guildId: string
@@ -107,7 +109,7 @@ export class VoiceSessions {
         entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
       ]).catch(() => this.cleanup(guildId, connection))
     })
-    this.sessions.set(guildId, {
+    const session: VoiceSession = {
       guildId,
       channelId,
       channelName: channel.name,
@@ -116,8 +118,10 @@ export class VoiceSessions {
       player,
       input: existing?.input ?? null,
       leaveTimer: null,
-    })
+    }
+    this.sessions.set(guildId, session)
     if (existing?.leaveTimer) clearTimeout(existing.leaveTimer)
+    if (!session.input) this.scheduleLeave(session, IDLE_LEAVE_MS)
     return this.forUser(userId) as SessionInfo
   }
 
@@ -149,17 +153,18 @@ export class VoiceSessions {
         if (session.input !== input) return
         session.input = null
         if (session.player.state.status !== AudioPlayerStatus.Idle) session.player.stop()
-        if (abandoned)
-          session.leaveTimer = setTimeout(
-            () => this.cleanup(session.guildId, session.connection),
-            ABANDONED_LEAVE_MS,
-          )
+        this.scheduleLeave(session, abandoned ? ABANDONED_LEAVE_MS : IDLE_LEAVE_MS)
       },
     }
   }
 
   destroyAll() {
     for (const s of this.sessions.values()) this.cleanup(s.guildId, s.connection)
+  }
+
+  private scheduleLeave(session: VoiceSession, ms: number) {
+    if (session.leaveTimer) clearTimeout(session.leaveTimer)
+    session.leaveTimer = setTimeout(() => this.cleanup(session.guildId, session.connection), ms)
   }
 
   private cleanup(guildId: string, connection: VoiceConnection) {
