@@ -78,8 +78,9 @@ The bot (`discord/bot.ts`) only joins channels and relays audio. `VoiceSessions`
 connection per Discord server, owned by the GM who connected. The browser's MediaRecorder stream
 arrives over a WebSocket, gets demuxed, repacketised into 20 ms Opus frames (`opusSplit.ts`) and fed
 through a bounded live buffer (`liveBuffer.ts`) that drops the oldest frames instead of building
-latency. A closed tab leaves the channel after 30 s; a deliberate stop closes with code 1000 and
-leaves straight away.
+latency. The server only sees the browser through that stream socket: a tab closed mid-stream
+leaves the channel after 30 s, while a deliberate stop (code 1000) or a connection that never
+streamed leaves after an hour of silence, even if the tab is closed in the meantime.
 
 ## Web
 
