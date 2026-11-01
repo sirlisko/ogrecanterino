@@ -51,7 +51,7 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
       {visible.length === 0 ? (
         <p className="mt-10 max-w-prose text-ink-muted">
           {scenes.length === 0
-            ? 'No scenes yet. Create one, or import a bardic.tools export.'
+            ? 'No scenes yet. Create one, or import a scene file.'
             : 'No scenes match. Clear the search or pick another tag.'}
         </p>
       ) : (
