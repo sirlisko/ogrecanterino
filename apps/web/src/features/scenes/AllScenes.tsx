@@ -14,6 +14,10 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
   const [query, setQuery] = useState('')
   const [owner, setOwner] = useState<Owner>('all')
   const [tag, setTag] = useState<string | null>(null)
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const activeFilters = (owner !== 'all' ? 1 : 0) + (tag ? 1 : 0)
+  // On phones the filters fold behind a button, so the first scenes show without scrolling.
+  const folded = filtersOpen ? '' : 'max-sm:hidden'
 
   const tags = useMemo(
     () =>
@@ -34,14 +38,26 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
     <>
       <RecentScenes scenes={scenes} />
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <SceneSearch value={query} onChange={setQuery} />
-        {(['all', 'mine', 'shared'] as const).map((o) => (
-          <Chip key={o} active={owner === o} onClick={() => setOwner(o)}>
-            {{ all: 'All', mine: 'Mine', shared: 'Shared with me' }[o]}
-          </Chip>
-        ))}
+        <div className="flex w-full items-center gap-2 sm:contents">
+          <SceneSearch value={query} onChange={setQuery} />
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((o) => !o)}
+            className={`shrink-0 rounded-lg px-3 py-2 ring-1 sm:hidden ${activeFilters ? 'text-ink ring-ink-muted' : 'text-ink-muted ring-peat-700'}`}
+          >
+            Filters{activeFilters > 0 && ` (${activeFilters})`}
+          </button>
+        </div>
+        <div className={`flex flex-wrap gap-2 ${folded}`}>
+          {(['all', 'mine', 'shared'] as const).map((o) => (
+            <Chip key={o} active={owner === o} onClick={() => setOwner(o)}>
+              {{ all: 'All', mine: 'Mine', shared: 'Shared with me' }[o]}
+            </Chip>
+          ))}
+        </div>
       </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
+      <div className={`mt-3 flex flex-wrap gap-1.5 ${folded}`}>
         {tags.map((t) => (
           <Chip key={t} active={tag === t} onClick={() => setTag(tag === t ? null : t)}>
             {t}
