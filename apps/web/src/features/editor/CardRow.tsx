@@ -7,6 +7,7 @@ import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { Icon } from '../../ui/Icon.tsx'
+import { PreviewSeek } from '../library/PreviewSeek.tsx'
 import { SoundPicker } from '../library/SoundPicker.tsx'
 import { relinkCard, SECTION_CATEGORY } from './cards.ts'
 
@@ -100,6 +101,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           <Icon name="close" />
         </button>
       </div>
+      {previewing && <PreviewSeek className="mt-1 pl-8" />}
       {replacing && (
         <SoundPicker
           title={`Replace the sound for ${card.label}`}
