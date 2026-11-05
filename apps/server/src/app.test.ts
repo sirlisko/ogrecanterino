@@ -39,6 +39,14 @@ beforeAll(async () => {
 const get = (url: string, headers: Record<string, string> = {}) =>
   app.inject({ method: 'GET', url, headers: { cookie, ...headers } })
 
+describe('health check', () => {
+  it('answers without a login and reports Discord as off when it is not configured', async () => {
+    const res = await app.inject({ url: '/healthz' })
+    expect(res.statusCode).toBe(200)
+    expect(res.json()).toEqual({ ok: true, discord: 'off' })
+  })
+})
+
 describe('auth', () => {
   it('rejects anonymous API and audio requests', async () => {
     expect((await app.inject({ url: '/api/sounds' })).statusCode).toBe(401)

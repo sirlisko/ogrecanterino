@@ -26,6 +26,7 @@ const app = await buildApp({
   sessionSecret,
   webDist: config.WEB_DIST,
   extraRoutes: discordRoutes(bot, sessions),
+  discordReady: bot ? () => bot.isReady : undefined,
   logger: true,
 })
 await app.listen({ port: config.PORT, host: config.HOST })
