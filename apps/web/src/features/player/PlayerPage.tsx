@@ -92,7 +92,13 @@ export function PlayerPage() {
         </div>
       </header>
 
-      {!active && (
+      {/* Both states keep the same slot, so starting the scene doesn't shift the lanes under the cursor. */}
+      {active ? (
+        <p className="mb-4 flex items-center gap-2 rounded-lg bg-brass/10 px-3 py-2 text-ink ring-1 ring-brass/40">
+          <span aria-hidden className="h-2 w-2 shrink-0 animate-breathe rounded-full bg-brass" />
+          Playing for the table. Tracks and effects you click here are heard by everyone.
+        </p>
+      ) : (
         <p className="mb-4 rounded-lg bg-peat-800 px-3 py-2 text-ink-muted ring-1 ring-peat-700">
           Not playing. Tracks and effects you click play on this device only, so you can prepare
           without interrupting the table.
