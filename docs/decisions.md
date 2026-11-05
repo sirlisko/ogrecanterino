@@ -20,6 +20,16 @@ its name, so renaming a scene keeps its picture and two forest scenes still look
 replace the blurred colour washes, which matched only capitalised tags and so ignored lower-case
 ones like the starter pack's.
 
+### A selected collection is a setlist
+
+With a collection selected, the scenes page shows its scenes as a numbered run instead of a grid:
+played, playing for the table, up next (with `]`), then the rest. "Played" means started in this
+browser tab (`sessionStorage`), so it describes tonight and survives a reload, but a new tab or a
+new evening starts clean. Starting a scene from the setlist stays on the setlist; the name opens
+the player. "Up next" starts without the second click, like `]`; the others ask first while
+something is live. Collections are tabs above the page rather than chips, since they choose what
+you're running rather than filtering what you see.
+
 ## 2026-11-05: Session safety
 
 ### The Discord stream reconnects by itself
