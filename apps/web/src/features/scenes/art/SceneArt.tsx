@@ -1,8 +1,9 @@
 import type { Scene, SceneArt as Art } from '@ogre/shared'
-import { type Ref, useMemo } from 'react'
+import { type Ref, useId, useMemo } from 'react'
 import { drawScene, PALETTES } from './compose.ts'
 import { artFor, artForTags } from './kinds.ts'
 import { hashText, seededRandom } from './random.ts'
+import { LIGHTS } from './useSceneGlow.ts'
 
 type ArtScene = Pick<Scene, 'id' | 'tags' | 'bannerPath' | 'data'>
 
@@ -16,6 +17,7 @@ export function SceneArt({
   wide,
   className = '',
   glowRef,
+  lit,
 }: {
   scene: ArtScene
   /** Draws this illustration whatever the scene uses ('auto': the one its tags pick), as in the picker. */
@@ -25,6 +27,8 @@ export function SceneArt({
   className?: string
   /** Gives `useSceneGlow` the element whose lights it drives. */
   glowRef?: Ref<HTMLDivElement>
+  /** Turns the drawing's lights up, for the scene playing for the table. */
+  lit?: boolean
 }) {
   if (!show && scene.bannerPath) {
     return (
@@ -37,7 +41,16 @@ export function SceneArt({
     )
   }
   const kind = show === 'auto' ? artForTags(scene.tags) : (show ?? artFor(scene))
-  return <Drawing kind={kind} seed={scene.id} wide={wide} className={className} glowRef={glowRef} />
+  return (
+    <Drawing
+      kind={kind}
+      seed={scene.id}
+      wide={wide}
+      className={className}
+      glowRef={glowRef}
+      lit={lit}
+    />
+  )
 }
 
 function Drawing({
@@ -46,12 +59,14 @@ function Drawing({
   wide,
   className,
   glowRef,
+  lit,
 }: {
   kind: Art
   seed: string
   wide?: boolean
   className: string
   glowRef?: Ref<HTMLDivElement>
+  lit?: boolean
 }) {
   const width = wide ? 720 : 320
   // Seeded by id, not name: renaming a scene keeps its picture.
@@ -60,6 +75,7 @@ function Drawing({
     [kind, seed, width],
   )
   const p = PALETTES[kind]
+  const washId = `wash-${useId().replace(/[^\w-]/g, '')}`
   return (
     // A one-cell grid stacks the drawing and the flash without positioning, so callers can
     // place the box however they like (absolute in a header, in flow in a card).
@@ -86,10 +102,26 @@ function Drawing({
         )}
         {d.far && <path d={d.far} fill={p.far} fillRule={d.farRule} />}
         {d.detail && <path d={d.detail} style={{ fill: d.detailFill }} opacity={0.85} />}
+        {/* Light behind the foreground, so a live scene looks lit rather than just labelled. */}
+        <radialGradient id={washId} cx="50%" cy="100%" r="70%">
+          <stop offset="0" style={{ stopColor: d.lightsFill }} stopOpacity={0.4} />
+          <stop offset="1" style={{ stopColor: d.lightsFill }} stopOpacity={0} />
+        </radialGradient>
+        <rect
+          width={width}
+          height={80}
+          fill={`url(#${washId})`}
+          opacity={lit ? 1 : 0}
+          className="transition-opacity duration-700"
+        />
         <path d={d.near} fill={p.near} fillRule={d.nearRule} />
         {d.lights && (
-          // Dim until the scene plays; `useSceneGlow` brings them up with the sound.
-          <path data-glow="lights" d={d.lights} style={{ fill: d.lightsFill }} opacity={0.5} />
+          <path
+            data-glow="lights"
+            d={d.lights}
+            style={{ fill: d.lightsFill }}
+            opacity={lit ? LIGHTS.lit : LIGHTS.dim}
+          />
         )}
       </svg>
       <div

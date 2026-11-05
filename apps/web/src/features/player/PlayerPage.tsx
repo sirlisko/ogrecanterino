@@ -45,7 +45,7 @@ export function PlayerPage() {
   return (
     <>
       <header className="relative -mt-6 mb-6 mx-[calc(50%-50vw)] pt-20 pb-5">
-        <SceneArt scene={scene} wide glowRef={glow} className="absolute inset-0" />
+        <SceneArt scene={scene} wide {...glow} className="absolute inset-0" />
         <div
           aria-hidden
           className="absolute inset-0 bg-linear-to-b from-transparent from-30% to-peat-900"

@@ -26,7 +26,7 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
       className={`relative overflow-hidden rounded-[10px] bg-peat-800 has-[:focus-visible]:ring-brass ${playing ? 'ring-2 ring-brass' : 'ring-1 ring-peat-700'}`}
     >
       <div className="relative h-[76px]">
-        <SceneArt scene={scene} glowRef={glow} className="h-full" />
+        <SceneArt scene={scene} {...glow} className="h-full" />
         {playing && (
           <span className="absolute top-[15px] left-[52px] flex items-center gap-1.5 rounded-full bg-peat-950/80 px-2.5 text-[13px] font-medium text-brass">
             <span aria-hidden className="h-[7px] w-[7px] animate-breathe rounded-full bg-brass" />

@@ -1,11 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { api } from '../api/client.ts'
 import { useMe } from '../api/me.ts'
 import { keys } from '../api/keys.ts'
+import { SettingsDialog } from '../features/settings/SettingsDialog.tsx'
 
 export function UserMenu() {
   const me = useMe().data
   const qc = useQueryClient()
+  const [settings, setSettings] = useState(false)
   if (!me) return null
 
   const logout = async () => {
@@ -23,9 +26,17 @@ export function UserMenu() {
         </span>
       )}
       <span className="hidden text-ink-muted md:inline">{me.name}</span>
+      <button
+        type="button"
+        onClick={() => setSettings(true)}
+        className="text-ink-muted hover:text-ink"
+      >
+        Settings
+      </button>
       <button type="button" onClick={logout} className="text-ink-muted hover:text-ink">
         Log out
       </button>
+      {settings && <SettingsDialog onClose={() => setSettings(false)} />}
     </div>
   )
 }

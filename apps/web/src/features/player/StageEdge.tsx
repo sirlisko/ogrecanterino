@@ -1,24 +1,25 @@
 import { useRef } from 'react'
 import { mixColor } from '../../audio/levels.ts'
 import { usePlayer } from '../../audio/store.ts'
-import { prefersReducedMotion } from '../../ui/motion.ts'
+import { useLightsFollowSound } from '../settings/settings.ts'
 import { useLiveLevels } from './useLiveLevels.ts'
 
-/** Brass and lichen, as a steady light when motion is reduced. */
+/** Brass and lichen, as a steady light unless the lights follow the sound. */
 const STEADY = '182, 177, 113'
 
 const glowFor = (rgb: string) =>
   `radial-gradient(ellipse 60% 100% at 50% 100%, rgba(${rgb}, 0.45), rgba(${rgb}, 0) 100%)`
 
 /**
- * The top edge of the transport bar lights up while a scene plays for the table: its colour mixes
- * the sections by loudness and it flares on effects. Drawn through refs, so it never re-renders.
+ * The top edge of the transport bar lights up while a scene plays for the table. With "Lights
+ * follow the sound" its colour mixes the sections by loudness and it flares on effects, drawn
+ * through refs so it never re-renders.
  */
 export function StageEdge() {
   const live = usePlayer((s) => s.sceneId !== null)
   const line = useRef<HTMLDivElement>(null)
   const glow = useRef<HTMLDivElement>(null)
-  const still = prefersReducedMotion()
+  const still = !useLightsFollowSound()
 
   useLiveLevels(live && !still, (levels) => {
     const peak = Math.max(levels.music, levels.ambience, levels.effect)

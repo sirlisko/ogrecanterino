@@ -14,7 +14,7 @@ export function TableHeader({ onPickScene }: { onPickScene: () => void }) {
 
   return (
     <header className="relative overflow-hidden bg-peat-950">
-      {scene && <SceneArt scene={scene} wide glowRef={glow} className="absolute inset-0" />}
+      {scene && <SceneArt scene={scene} wide {...glow} className="absolute inset-0" />}
       <div
         aria-hidden
         className="absolute inset-0 bg-linear-to-b from-peat-950/50 to-peat-900/95"
