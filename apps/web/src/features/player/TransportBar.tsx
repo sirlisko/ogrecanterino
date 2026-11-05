@@ -20,6 +20,7 @@ import { useSceneGlow } from '../scenes/art/useSceneGlow.ts'
 export function TransportBar() {
   const scene = usePlayer((s) => s.scene)
   const music = usePlayer((s) => s.music)
+  const noMusic = !scene?.data.music.length
   const combat = usePlayer((s) => s.combat)
   const monitor = usePlayer((s) => s.monitor)
   const ducked = usePlayer((s) => s.ducked || s.effectDucking)
@@ -81,7 +82,7 @@ export function TransportBar() {
           <TransportButton
             label="Previous track (P)"
             onClick={() => engine.music?.previous()}
-            disabled={!scene}
+            disabled={noMusic}
           >
             <Icon name="previous" />
           </TransportButton>
@@ -89,16 +90,16 @@ export function TransportBar() {
             type="button"
             aria-label={music.playing ? 'Pause music (Space)' : 'Play music (Space)'}
             title={music.playing ? 'Pause music (Space)' : 'Play music (Space)'}
-            disabled={!scene}
+            disabled={noMusic}
             onClick={() => engine.music?.toggle()}
-            className="grid h-11 w-11 place-items-center rounded-full bg-brass text-peat-950 disabled:opacity-40"
+            className="grid h-11 w-11 place-items-center rounded-full bg-brass text-peat-950 disabled:bg-peat-700 disabled:text-peat-400"
           >
             <Icon name={music.playing ? 'pause' : 'play'} className="h-5 w-5" />
           </button>
           <TransportButton
             label="Next track (N)"
             onClick={() => engine.music?.next()}
-            disabled={!scene}
+            disabled={noMusic}
           >
             <Icon name="next" />
           </TransportButton>
