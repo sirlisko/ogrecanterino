@@ -1,3 +1,4 @@
+import { useDiscordStatus } from '../../api/discord.ts'
 import { Button } from '../../ui/Button.tsx'
 import { Dialog } from '../../ui/Dialog.tsx'
 import { CheckRow, SelectRow, SettingsSection } from './SettingRows.tsx'
@@ -8,6 +9,7 @@ const seconds = (values: number[], zero?: string) =>
 
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const settings = useSettings()
+  const discord = useDiscordStatus().data?.configured
 
   return (
     <Dialog title="Settings" onClose={onClose}>
@@ -54,6 +56,16 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             onChange={(keyHints) => changeSettings({ keyHints })}
           />
         </SettingsSection>
+        {discord && (
+          <SettingsSection title="Discord">
+            <CheckRow
+              label="Mute this device while sending to Discord"
+              description="So you don't hear the scene twice when you listen in Discord. Your sound comes back when you stop sending."
+              checked={settings.muteWhileStreaming}
+              onChange={(muteWhileStreaming) => changeSettings({ muteWhileStreaming })}
+            />
+          </SettingsSection>
+        )}
         <SettingsSection title="Display">
           <CheckRow
             label="Lights follow the sound"

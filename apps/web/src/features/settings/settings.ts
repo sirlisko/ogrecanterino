@@ -13,6 +13,7 @@ export interface Settings {
   confirmStart: boolean
   /** Keys shown on effects, pads and the setlist. */
   keyHints: boolean
+  muteWhileStreaming: boolean
   lightsFollowSound: boolean
 }
 
@@ -23,6 +24,7 @@ const DEFAULTS: Settings = {
   confirmStart: true,
   // A touch screen usually has no keyboard to press them on.
   keyHints: !window.matchMedia('(pointer: coarse)').matches,
+  muteWhileStreaming: false,
   lightsFollowSound: false,
 }
 
