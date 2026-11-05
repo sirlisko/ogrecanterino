@@ -147,7 +147,7 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
               : 'No sounds match. Clear the search or remove a tag.'}
         </p>
       )}
-      <ul className="flex flex-col">
+      <ul className="flex flex-col border-t border-peat-700">
         {results.slice(0, limit).map((s) => {
           const row = (
             <SoundRow
@@ -157,7 +157,11 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
               actions={actions?.(s)}
             />
           )
-          return <li key={s.id}>{wrapRow ? wrapRow(s, row) : row}</li>
+          return (
+            <li key={s.id} className="border-b border-peat-700">
+              {wrapRow ? wrapRow(s, row) : row}
+            </li>
+          )
         })}
       </ul>
       {results.length > limit && (
