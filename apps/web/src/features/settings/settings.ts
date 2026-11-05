@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { prefersReducedMotion } from '../../ui/motion.ts'
+import { withChoice, withSaved } from './stored.ts'
 
 const KEY = 'ogre.settings'
 
@@ -7,22 +8,23 @@ export interface Settings {
   lightsFollowSound: boolean
 }
 
-function load(): Settings {
+const DEFAULTS: Settings = { lightsFollowSound: false }
+
+function saved() {
   try {
-    const saved = JSON.parse(localStorage.getItem(KEY) ?? '{}')
-    return { lightsFollowSound: saved?.lightsFollowSound === true }
+    return localStorage.getItem(KEY)
   } catch {
-    return { lightsFollowSound: false }
+    return null
   }
 }
 
 /** Preferences for this device. */
-export const useSettings = create<Settings>(() => load())
+export const useSettings = create<Settings>(() => withSaved(DEFAULTS, saved()))
 
 export function changeSettings(patch: Partial<Settings>) {
   useSettings.setState(patch)
   try {
-    localStorage.setItem(KEY, JSON.stringify(useSettings.getState()))
+    localStorage.setItem(KEY, withChoice(saved(), patch))
   } catch {
     // storage unavailable: the choice just won't survive a reload
   }
