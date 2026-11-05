@@ -1,21 +1,11 @@
 import type { Card, Scene } from '@ogre/shared'
-import { useEffect, useState } from 'react'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { formatRange } from '../../ui/format.ts'
+import { useNow } from '../../ui/useNow.ts'
 import { EmptyLane, Lane } from './Lane.tsx'
-
-function useNow(enabled: boolean) {
-  const [now, setNow] = useState(Date.now())
-  useEffect(() => {
-    if (!enabled) return
-    const t = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(t)
-  }, [enabled])
-  return now
-}
 
 export function AmbienceLane({
   scene,

@@ -7,6 +7,8 @@ import { PageCrash } from '../../app/CrashNotice.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { EFFECT_KEYS, EffectPad } from '../player/EffectsLane.tsx'
 import { ResumeToast } from '../player/ResumeToast.tsx'
+import { useLiveScene } from '../player/useLiveScene.ts'
+import { TableAmbience } from './TableAmbience.tsx'
 import { TableControls } from './TableControls.tsx'
 import { TableMixer } from './TableMixer.tsx'
 import { TableMusic } from './TableMusic.tsx'
@@ -16,6 +18,8 @@ import { TablePads } from './TablePads.tsx'
 export function TablePage() {
   useLibrarySync()
   const scene = usePlayer((s) => s.scene)
+  // Same working copy as the player page, so ambience switches save the same way.
+  const live = useLiveScene(scene?.id)
   const setlist = useSetlist()
   const goTo = useGoToScene()
 
@@ -69,6 +73,7 @@ export function TablePage() {
             <TableMixer />
             <TableMusic scene={scene} />
             <section aria-label="Effects">
+              <h2 className="mb-3 font-display text-2xl font-bold text-arcane">Effects</h2>
               {scene.data.effects.length === 0 ? (
                 <p className="text-ink-muted">No effects in this scene.</p>
               ) : (
@@ -79,6 +84,12 @@ export function TablePage() {
                 </div>
               )}
             </section>
+            {live.scene?.id === scene.id && (
+              <TableAmbience
+                scene={scene}
+                onCard={(id, patch) => live.updateCard('ambiences', id, patch)}
+              />
+            )}
           </>
         ) : (
           <p className="max-w-prose text-lg text-ink-muted">
