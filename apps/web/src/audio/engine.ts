@@ -86,7 +86,15 @@ class Engine {
       ambience: (ambience) => this.playback === playback && usePlayer.setState({ ambience }),
     })
     this.playback = playback
-    usePlayer.setState({ sceneId: scene.id, scene, combat: false, ambience: {} })
+    // The deck's first update came before `this.playback` pointed at it and was dropped; without
+    // this, a scene that doesn't start its music would show the previous scene's track.
+    usePlayer.setState({
+      sceneId: scene.id,
+      scene,
+      combat: false,
+      ambience: {},
+      music: playback.music.state,
+    })
     playback.start(previous ? fade : 1)
     await previous?.stop(fade)
   }
