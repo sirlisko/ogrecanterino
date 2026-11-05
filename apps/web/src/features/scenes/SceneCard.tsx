@@ -4,23 +4,21 @@ import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { SceneArt } from './art/SceneArt.tsx'
+import { SceneCounts } from './SceneCounts.tsx'
 import { SceneMenu } from './SceneMenu.tsx'
 import { useConfirmStart } from './useConfirmStart.ts'
 
 export function SceneCard({
   scene,
   canEdit,
-  mine,
   position,
 }: {
   scene: Scene
   canEdit: boolean
-  mine: boolean
   position?: number
 }) {
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
-  const { music, ambiences, effects } = scene.data
   const confirm = useConfirmStart(scene.id)
 
   const start = () =>
@@ -30,36 +28,35 @@ export function SceneCard({
     })
 
   return (
-    <article className="group relative overflow-hidden rounded-xl bg-peat-800 ring-1 ring-peat-700 has-[:focus-visible]:ring-brass">
-      <SceneArt scene={scene} className="aspect-[16/7]" />
-      <div className="p-4 pt-3">
-        <Link
-          to={`/scenes/${scene.id}`}
-          className="block font-display text-xl leading-tight font-bold outline-none"
-        >
-          <span className="absolute inset-0" aria-hidden />
-          {position !== undefined && (
-            <span className="mr-2 font-sans text-base font-normal text-ink-muted tabular">
-              {position}
-            </span>
-          )}
-          {scene.name}
-        </Link>
-        <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-ink-muted">
-          <span className="text-brass">{music.length} music</span>
-          <span className="text-lichen">{ambiences.length} ambience</span>
-          <span className="text-arcane">{effects.length} effects</span>
-        </p>
-        {scene.tags.length > 0 && (
-          <p className="mt-2 truncate text-sm text-ink-muted">{scene.tags.join(', ')}</p>
+    <article
+      className={`relative overflow-hidden rounded-[10px] bg-peat-800 has-[:focus-visible]:ring-brass ${playing ? 'ring-2 ring-brass' : 'ring-1 ring-peat-700'}`}
+    >
+      <div className="relative h-[76px]">
+        <SceneArt scene={scene} className="h-full" />
+        {playing && (
+          <span className="absolute top-[15px] left-[52px] flex items-center gap-1.5 rounded-full bg-peat-950/80 px-2.5 text-[13px] font-medium text-brass">
+            <span aria-hidden className="h-[7px] w-[7px] animate-breathe rounded-full bg-brass" />
+            Live
+          </span>
         )}
-        <p className="mt-1 text-sm text-peat-400">
-          {scene.visibility === 'private'
-            ? 'Only you'
-            : mine
-              ? 'Shared with the group'
-              : `Shared by ${scene.ownerName}`}
-        </p>
+      </div>
+      <div className="px-3.5 pt-2.5 pb-3">
+        <h2 className="font-display text-[19px] leading-tight font-bold">
+          <Link to={`/scenes/${scene.id}`} className="outline-none">
+            <span className="absolute inset-0" aria-hidden />
+            {position !== undefined && (
+              <span className="mr-2 font-sans text-base font-normal text-ink-muted tabular">
+                {position}
+              </span>
+            )}
+            {scene.name}
+          </Link>
+        </h2>
+        <SceneCounts scene={scene} className="mt-1" />
+        {scene.tags.length > 0 && (
+          <p className="mt-0.5 truncate text-sm text-ink-muted">{scene.tags.join(', ')}</p>
+        )}
+        {scene.visibility === 'private' && <p className="text-sm text-ink-muted">Only you</p>}
       </div>
       <button
         type="button"
@@ -71,20 +68,20 @@ export function SceneCard({
               ? `Click again to replace the playing scene with ${scene.name}`
               : `Start scene: ${scene.name}`
         }
-        className={`absolute top-3 left-3 z-10 flex h-11 min-w-11 items-center justify-center gap-2 rounded-full shadow-lg transition ${
+        className={`absolute top-2 left-2 z-10 flex h-9 min-w-9 items-center justify-center gap-2 rounded-full shadow-lg transition ${
           playing || confirm.armed
             ? 'bg-brass text-peat-950'
             : 'bg-peat-950/70 text-ink hover:bg-brass hover:text-peat-950'
-        } ${confirm.armed ? 'px-4 font-medium' : ''}`}
+        } ${confirm.armed ? 'px-3.5 font-medium' : ''}`}
       >
         {playing ? (
-          <Icon name="note" className="h-5 w-5 animate-breathe" />
+          <Icon name="note" className="h-4 w-4 animate-breathe" />
         ) : (
-          <Icon name="play" className="ml-0.5 h-4 w-4" />
+          <Icon name="play" className="ml-0.5 h-3.5 w-3.5" />
         )}
         {confirm.armed && 'Start scene?'}
       </button>
-      <div className="absolute top-3 right-3 z-10">
+      <div className="absolute top-2 right-2 z-10">
         <SceneMenu scene={scene} canEdit={canEdit} />
       </div>
     </article>

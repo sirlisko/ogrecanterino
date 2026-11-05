@@ -7,7 +7,7 @@ export function SceneGrid({ scenes, numbered }: { scenes: Scene[]; numbered?: bo
   const me = useMe().data
   const deleting = usePendingDelete((s) => s.pending?.scene.id)
   return (
-    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3.5">
       {scenes
         .filter((s) => s.id !== deleting)
         .map((s, i) => (
@@ -15,7 +15,6 @@ export function SceneGrid({ scenes, numbered }: { scenes: Scene[]; numbered?: bo
             key={s.id}
             scene={s}
             canEdit={me?.role === 'admin' || s.ownerId === me?.id}
-            mine={s.ownerId === me?.id}
             position={numbered ? i + 1 : undefined}
           />
         ))}
