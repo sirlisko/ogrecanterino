@@ -32,16 +32,21 @@ you're running rather than filtering what you see.
 
 ### The live indicator is a lit stage edge and a lit scene
 
-While a scene plays for the table, the top edge of the transport bar glows: its colour mixes the
-sections by loudness (effects weighted up so a hit tints it before it's gone) and its brightness
-follows the loudest one. A drawn scene picture also comes alive: windows, torches and fires follow
-the music and ambience, and an effect flashes the picture, in the player header, the transport bar
-thumbnail and the live scene's tile. At rest the lights are dim, so lit means live. Uploaded
-pictures have nothing to light and rely on the edge.
+While a scene plays for the table, the top edge of the transport bar lights up and so does the
+scene's drawn picture, in the player header, table mode, the transport bar thumbnail and the live
+scene's tile: its windows, torches and fires come up and a soft light rises behind the foreground.
+At rest the lights are dim, so lit means live. Uploaded pictures have nothing to light and rely on
+the edge.
+
+By default these lights are steady. Following the sound drew the eye away from the table, so it's a
+setting, "Lights follow the sound", off by default and kept per device. With it on, the edge's
+colour mixes the sections by loudness (effects weighted up so a hit tints it before it's gone) and
+its brightness follows the loudest one; the picture's lights follow the music and ambience, and an
+effect flashes it. Reduced motion keeps them steady whatever the setting.
 
 One animation loop (`audio/liveLevels.ts`) reads the meters for everything that follows the levels,
-and everything draws through refs, so nothing re-renders per frame. With reduced motion the edge is
-a steady light and pictures don't flicker.
+and everything draws through refs, so nothing re-renders per frame. The steady state is plain
+rendering and runs no loop.
 
 We tried and dropped a beam per section rising from the bar: effects are one-offs, so their beam
 was dark nearly all the time and the display looked lopsided. The thin music progress line on top
