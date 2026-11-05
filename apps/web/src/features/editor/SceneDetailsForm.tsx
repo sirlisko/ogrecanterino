@@ -1,25 +1,18 @@
 import type { Scene, SceneSettings } from '@ogre/shared'
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { useScenes } from '../../api/scenes.ts'
 import { fieldClass } from '../../ui/Dialog.tsx'
 import { Fader } from '../../ui/Fader.tsx'
 import { Segmented } from '../../ui/Segmented.tsx'
+import { topTags } from '../scenes/topTags.ts'
 import { BannerField } from './BannerField.tsx'
+import { TagInput } from './TagInput.tsx'
 
 const SETTINGS: { key: keyof SceneSettings; label: string }[] = [
   { key: 'autoStartMusic', label: 'Start music when the scene starts' },
   { key: 'musicIsPlaylist', label: 'Play music as a playlist' },
   { key: 'musicCrossfade', label: 'Crossfade between tracks' },
   { key: 'shuffle', label: 'Shuffle' },
-]
-
-const parseTags = (text: string) => [
-  ...new Set(
-    text
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean),
-  ),
 ]
 
 export function SceneDetailsForm({
@@ -30,7 +23,14 @@ export function SceneDetailsForm({
   onChange: (patch: Partial<Scene>) => void
 }) {
   const scenes = useScenes().data ?? []
-  const [tagText, setTagText] = useState(scene.tags.join(', '))
+  const suggestions = useMemo(
+    () =>
+      topTags(
+        scenes.map((s) => s.tags),
+        16,
+      ),
+    [scenes],
+  )
   const setSetting = (key: keyof SceneSettings, value: boolean) =>
     onChange({ data: { ...scene.data, settings: { ...scene.data.settings, [key]: value } } })
 
@@ -44,18 +44,16 @@ export function SceneDetailsForm({
           className={`${fieldClass} font-display text-2xl font-bold`}
         />
       </label>
-      <label className="flex flex-col gap-1">
-        Tags
-        <input
-          value={tagText}
-          onChange={(e) => {
-            setTagText(e.target.value)
-            onChange({ tags: parseTags(e.target.value) })
-          }}
-          placeholder="Forest, Night, Tense"
-          className={fieldClass}
-        />
-      </label>
+      <div className="flex flex-col gap-1">
+        <span id="scene-tags">Tags</span>
+        <div role="group" aria-labelledby="scene-tags">
+          <TagInput
+            tags={scene.tags}
+            suggestions={suggestions}
+            onChange={(tags) => onChange({ tags })}
+          />
+        </div>
+      </div>
       <div className="flex flex-col items-start gap-1">
         <span>Who can use it</span>
         <Segmented
