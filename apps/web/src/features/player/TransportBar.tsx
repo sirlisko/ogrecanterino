@@ -13,6 +13,9 @@ import { PadsStrip } from '../pads/PadsStrip.tsx'
 import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
 import { MixerPopover } from './MixerPopover.tsx'
 import { ResumeToast } from './ResumeToast.tsx'
+import { StageEdge } from './StageEdge.tsx'
+import { SceneArt } from '../scenes/art/SceneArt.tsx'
+import { useSceneGlow } from '../scenes/art/useSceneGlow.ts'
 
 export function TransportBar() {
   const scene = usePlayer((s) => s.scene)
@@ -22,11 +25,11 @@ export function TransportBar() {
   const ducked = usePlayer((s) => s.ducked || s.effectDucking)
   const ambience = usePlayer((s) => s.ambience)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
-  const progress = music.duration ? (music.current / music.duration) * 100 : 0
   const sounding = (scene?.data.ambiences ?? []).filter((c) => ambience[c.id]?.sounding)
   const setlist = useSetlist()
   const goTo = useGoToScene()
   const padsVisible = usePadsVisible((s) => s.visible)
+  const glow = useSceneGlow(!!scene)
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
@@ -34,38 +37,40 @@ export function TransportBar() {
         <ResumeToast />
         <DeleteToast />
       </ToastStack>
+      <StageEdge />
       {padsVisible && <PadsStrip />}
-      <div
-        className="h-0.5 bg-brass transition-[width] duration-500"
-        style={{ width: `${progress}%` }}
-      />
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
-        <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           {scene ? (
             <>
-              <Link
-                to={`/scenes/${scene.id}`}
-                className="block truncate font-display text-lg leading-tight font-bold hover:underline"
-              >
-                {scene.name}
-              </Link>
-              <p className="flex items-center gap-2 text-sm text-ink-muted tabular">
-                <span className="truncate">
-                  {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
-                  {music.duration > 0 &&
-                    ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
-                </span>
-                {ducked && <span className="shrink-0 text-brass">Music lowered</span>}
-                {sounding.length > 0 && (
-                  <span
-                    className="hidden shrink-0 items-center gap-1 text-lichen sm:flex"
-                    title={sounding.map((c) => c.label).join(', ')}
-                  >
-                    <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-lichen" />
-                    {sounding.length} ambience
+              <div className="hidden shrink-0 overflow-hidden rounded-md sm:block">
+                <SceneArt scene={scene} glowRef={glow} className="h-10 w-[72px]" />
+              </div>
+              <div className="min-w-0">
+                <Link
+                  to={`/scenes/${scene.id}`}
+                  className="block truncate font-display text-lg leading-tight font-bold hover:underline"
+                >
+                  {scene.name}
+                </Link>
+                <p className="flex items-center gap-2 text-sm text-ink-muted tabular">
+                  <span className="truncate">
+                    {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
+                    {music.duration > 0 &&
+                      ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
                   </span>
-                )}
-              </p>
+                  {ducked && <span className="shrink-0 text-brass">Music lowered</span>}
+                  {sounding.length > 0 && (
+                    <span
+                      className="hidden shrink-0 items-center gap-1 text-lichen sm:flex"
+                      title={sounding.map((c) => c.label).join(', ')}
+                    >
+                      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-lichen" />
+                      {sounding.length} ambience
+                    </span>
+                  )}
+                </p>
+              </div>
             </>
           ) : (
             <p className="text-ink-muted">Nothing playing. Start a scene.</p>

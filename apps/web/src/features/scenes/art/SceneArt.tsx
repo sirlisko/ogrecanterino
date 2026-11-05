@@ -88,7 +88,8 @@ function Drawing({
         {d.detail && <path d={d.detail} style={{ fill: d.detailFill }} opacity={0.85} />}
         <path d={d.near} fill={p.near} fillRule={d.nearRule} />
         {d.lights && (
-          <path data-glow="lights" d={d.lights} style={{ fill: d.lightsFill }} opacity={0.9} />
+          // Dim until the scene plays; `useSceneGlow` brings them up with the sound.
+          <path data-glow="lights" d={d.lights} style={{ fill: d.lightsFill }} opacity={0.5} />
         )}
       </svg>
       <div

@@ -30,6 +30,23 @@ the player. "Up next" starts without the second click, like `]`; the others ask 
 something is live. Collections are tabs above the page rather than chips, since they choose what
 you're running rather than filtering what you see.
 
+### The live indicator is a lit stage edge and a lit scene
+
+While a scene plays for the table, the top edge of the transport bar glows: its colour mixes the
+sections by loudness (effects weighted up so a hit tints it before it's gone) and its brightness
+follows the loudest one. A drawn scene picture also comes alive: windows, torches and fires follow
+the music and ambience, and an effect flashes the picture, in the player header, the transport bar
+thumbnail and the live scene's tile. At rest the lights are dim, so lit means live. Uploaded
+pictures have nothing to light and rely on the edge.
+
+One animation loop (`audio/liveLevels.ts`) reads the meters for everything that follows the levels,
+and everything draws through refs, so nothing re-renders per frame. With reduced motion the edge is
+a steady light and pictures don't flicker.
+
+We tried and dropped a beam per section rising from the bar: effects are one-offs, so their beam
+was dark nearly all the time and the display looked lopsided. The thin music progress line on top
+of the transport bar made way for the edge; the bar still shows the time.
+
 ## 2026-11-05: Session safety
 
 ### The Discord stream reconnects by itself

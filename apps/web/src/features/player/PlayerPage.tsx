@@ -8,6 +8,7 @@ import { Button } from '../../ui/Button.tsx'
 import { combatSceneIdFor } from '../collections/setlist.ts'
 import { useActiveCollectionData } from '../collections/useSetlist.ts'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
+import { useSceneGlow } from '../scenes/art/useSceneGlow.ts'
 import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
 import { LaneTabs } from './LaneTabs.tsx'
@@ -22,6 +23,7 @@ export function PlayerPage() {
   const collection = useActiveCollectionData()
   const combatScene = useScene((scene && combatSceneIdFor(scene, collection)) ?? undefined).data
   const [tab, setTab] = useState<SceneSection>('music')
+  const glow = useSceneGlow(active)
 
   if (isPending) return <p className="text-ink-muted">Loading scene…</p>
   if (error || !scene) {
@@ -43,7 +45,7 @@ export function PlayerPage() {
   return (
     <>
       <header className="relative -mt-6 mb-6 mx-[calc(50%-50vw)] pt-20 pb-5">
-        <SceneArt scene={scene} wide className="absolute inset-0" />
+        <SceneArt scene={scene} wide glowRef={glow} className="absolute inset-0" />
         <div
           aria-hidden
           className="absolute inset-0 bg-linear-to-b from-transparent from-30% to-peat-900"
