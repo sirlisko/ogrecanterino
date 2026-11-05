@@ -21,6 +21,13 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             options={seconds([0, 1, 3, 5, 8], 'Cut')}
             onChange={(crossfadeSeconds) => changeSettings({ crossfadeSeconds })}
           />
+          <SelectRow
+            label="Fade out"
+            description="How long Fade out (Esc) takes to bring everything to silence."
+            value={settings.fadeOutSeconds}
+            options={seconds([0.5, 1.5, 3, 5])}
+            onChange={(fadeOutSeconds) => changeSettings({ fadeOutSeconds })}
+          />
         </SettingsSection>
         <SettingsSection title="Display">
           <CheckRow

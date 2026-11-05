@@ -7,7 +7,6 @@ import { createVoice, preload } from './sources.ts'
 import { saveVolumes, usePlayer } from './store.ts'
 import { ElementVoice, type Voice } from './voice.ts'
 
-const FADE_ALL_SECONDS = 1.5
 /** Effects at least this long stop when triggered again instead of layering. */
 export const LONG_EFFECT_MS = 8000
 const LIBRARY_PREVIEW_VOLUME = 80
@@ -39,6 +38,7 @@ class Engine {
   private previewVoice: Voice | null = null
   private effectVoices = new Map<string, { voices: Set<Voice>; startedAt: number }>()
   private duckingVoices = new Set<Voice>()
+  private fadeOutSeconds = 1.5
 
   readonly lookup = (id: string) => this.sounds.get(id)
 
@@ -129,7 +129,7 @@ class Engine {
     usePlayer.setState({ scene })
   }
 
-  async stopScene(fadeSeconds = FADE_ALL_SECONDS) {
+  async stopScene(fadeSeconds = this.fadeOutSeconds) {
     const playback = this.playback
     this.playback = null
     const { scene, music, combat } = usePlayer.getState()
@@ -279,6 +279,10 @@ class Engine {
 
   setCrossfade(seconds: number) {
     usePlayer.setState({ crossfadeSeconds: seconds })
+  }
+
+  setFadeOut(seconds: number) {
+    this.fadeOutSeconds = seconds
   }
 }
 

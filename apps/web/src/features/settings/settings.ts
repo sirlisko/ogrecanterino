@@ -7,10 +7,11 @@ const KEY = 'ogre.settings'
 
 export interface Settings {
   crossfadeSeconds: number
+  fadeOutSeconds: number
   lightsFollowSound: boolean
 }
 
-const DEFAULTS: Settings = { crossfadeSeconds: 3, lightsFollowSound: false }
+const DEFAULTS: Settings = { crossfadeSeconds: 3, fadeOutSeconds: 1.5, lightsFollowSound: false }
 
 function saved() {
   try {
@@ -35,6 +36,7 @@ export function changeSettings(patch: Partial<Settings>) {
 /** The engine doesn't know about settings; it's told whenever they change. */
 function applyToEngine(s: Settings) {
   engine.setCrossfade(s.crossfadeSeconds)
+  engine.setFadeOut(s.fadeOutSeconds)
 }
 
 applyToEngine(useSettings.getState())
