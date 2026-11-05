@@ -8,6 +8,7 @@ import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { EFFECT_KEYS, EffectPad } from '../player/EffectsLane.tsx'
 import { ResumeToast } from '../player/ResumeToast.tsx'
 import { TableControls } from './TableControls.tsx'
+import { TableMixer } from './TableMixer.tsx'
 import { TableMusic } from './TableMusic.tsx'
 import { TablePads } from './TablePads.tsx'
 
@@ -65,6 +66,7 @@ export function TablePage() {
         {scene ? (
           <>
             <TableControls scene={scene} />
+            <TableMixer />
             <TableMusic scene={scene} />
             <section aria-label="Effects">
               {scene.data.effects.length === 0 ? (

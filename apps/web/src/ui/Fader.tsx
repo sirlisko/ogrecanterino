@@ -6,12 +6,15 @@ export function Fader({
   label,
   color,
   className = '',
+  large,
 }: {
   value: number
   onChange: (v: number) => void
   label: string
   color?: string
   className?: string
+  /** Touch-sized track and thumb. */
+  large?: boolean
 }) {
   return (
     <input
@@ -22,7 +25,7 @@ export function Fader({
       aria-label={label}
       aria-valuetext={`${Math.round(value)}%`}
       onChange={(e) => onChange(Number(e.target.value))}
-      className={`fader ${className}`}
+      className={`fader ${large ? 'fader-lg' : ''} ${className}`}
       style={{ '--fader-color': color } as CSSProperties}
     />
   )

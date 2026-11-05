@@ -107,3 +107,16 @@ input[type='range'].fader::-moz-range-thumb {
   @apply h-4 w-4 rounded-full border-2 border-peat-900;
   background: var(--fader-color, var(--color-ink));
 }
+
+/* Touch-sized, for table mode. Declared after .fader so the larger sizes win. */
+input[type='range'].fader-lg {
+  @apply h-3;
+}
+
+input[type='range'].fader-lg::-webkit-slider-thumb {
+  @apply h-8 w-8 border-4;
+}
+
+input[type='range'].fader-lg::-moz-range-thumb {
+  @apply h-8 w-8 border-4;
+}
