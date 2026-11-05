@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import type { SaveStatus } from '../player/useLiveScene.ts'
 import { artForTags, SCENE_ART_TITLES } from '../scenes/art/kinds.ts'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
+import { hasNoSounds } from './blankScene.ts'
 import { SaveIndicator } from './SaveIndicator.tsx'
 
 function pictureLabel(scene: Scene) {
@@ -56,12 +57,24 @@ export function EditorHeader({
           >
             Change picture
           </button>
-          <Link
-            to={`/scenes/${scene.id}`}
-            className="rounded-lg bg-brass px-4 py-2 font-medium text-peat-950 hover:bg-[#e6ba5e]"
-          >
-            Open player
-          </Link>
+          {/* An empty scene has nothing to play, so the accent waits for its first sound. */}
+          {hasNoSounds(scene) ? (
+            <button
+              type="button"
+              disabled
+              title="Add a sound to the scene first"
+              className="rounded-lg bg-peat-950/80 px-4 py-2 text-ink-muted ring-1 ring-peat-600 disabled:opacity-60"
+            >
+              Open player
+            </button>
+          ) : (
+            <Link
+              to={`/scenes/${scene.id}`}
+              className="rounded-lg bg-brass px-4 py-2 font-medium text-peat-950 hover:bg-[#e6ba5e]"
+            >
+              Open player
+            </Link>
+          )}
         </div>
       </div>
     </header>
