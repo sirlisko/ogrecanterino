@@ -4,7 +4,7 @@ A self-hosted soundboard for tabletop RPG sessions. You build **scenes** out of 
 ambience layers (constant loops, or one-shots that fire at random intervals) and effect pads, then run them
 live at the table or stream them into a Discord voice channel.
 
-- Imports bardic.tools sound libraries (CSV) and scene exports (`scenes.json`)
+- Imports a sound library from a CSV (`Title`, `By`, `Tags`, `Filename`) and scenes from JSON exports
 - Crossfades between tracks and between whole scenes; fade everything out with Esc, then resume if you didn't mean it
 - Collections: ordered sets of scenes for a campaign or one-shot, stepped through with `[` and `]` like a setlist
 - Keyboard-driven: `1`–`0` fire effects, `Shift+1`–`9` fire your quick pads, `Space` plays or pauses music, hold `D` to lower the music while you talk (press `?` for the full list)
@@ -35,8 +35,8 @@ Requires Node 22+, pnpm and ffmpeg (`brew install ffmpeg`).
 ```sh
 pnpm install
 cp .env.example .env          # set DEV_LOGIN=true and ADMIN_DISCORD_IDS=dev for a local login button
-pnpm --filter @ogre/server import:library ~/Documents/rpg/tools/bardic_tools_sounds.csv ~/Documents/rpg/tools/soundk
-pnpm --filter @ogre/server import:scenes ~/Documents/rpg/tools/soundk/scenes.json
+pnpm --filter @ogre/server import:library ~/path/to/sounds.csv ~/path/to/audio
+pnpm --filter @ogre/server import:scenes ~/path/to/audio/scenes.json
 pnpm dev                      # API on :3000, app on http://localhost:5173
 pnpm test
 ```
@@ -82,8 +82,8 @@ From your machine, copy only the audio files plus the CSV and scene export:
 
 ```sh
 rsync -av --include='*/' --include='*.mp3' --include='*.ogg' --include='*.wav' --include='scenes.json' \
-  --exclude='*' ~/Documents/rpg/tools/soundk/ server:ogre-import/soundk/
-rsync -av ~/Documents/rpg/tools/bardic_tools_sounds.csv server:ogre-import/
+  --exclude='*' ~/path/to/audio/ server:ogre-import/audio/
+rsync -av ~/path/to/sounds.csv server:ogre-import/
 ```
 
 Then on the server:
@@ -91,9 +91,9 @@ Then on the server:
 ```sh
 cd ogrecanterino
 docker compose run --rm -v ~/ogre-import:/import:ro app \
-  node_modules/.bin/tsx scripts/import-library.ts /import/bardic_tools_sounds.csv /import/soundk
+  node_modules/.bin/tsx scripts/import-library.ts /import/sounds.csv /import/audio
 docker compose run --rm -v ~/ogre-import:/import:ro app \
-  node_modules/.bin/tsx scripts/import-scenes.ts /import/soundk/scenes.json
+  node_modules/.bin/tsx scripts/import-scenes.ts /import/audio/scenes.json
 rm -rf ~/ogre-import    # the import copied the files into ./data/audio
 ```
 
@@ -131,16 +131,16 @@ the mount as root:
 ```sh
 ssh server 'sudo mkdir -p /srv/ogrecanterino/data/import && sudo chown -R $USER: /srv/ogrecanterino/data/import'
 rsync -av --include='*/' --include='*.mp3' --include='*.ogg' --include='*.wav' --include='scenes.json' \
-  --exclude='*' ~/Documents/rpg/tools/soundk/ server:/srv/ogrecanterino/data/import/soundk/
-rsync -av ~/Documents/rpg/tools/bardic_tools_sounds.csv server:/srv/ogrecanterino/data/import/
+  --exclude='*' ~/path/to/audio/ server:/srv/ogrecanterino/data/import/audio/
+rsync -av ~/path/to/sounds.csv server:/srv/ogrecanterino/data/import/
 ```
 
 Then in Coolify's container **Terminal**:
 
 ```sh
 cd /app/apps/server
-node_modules/.bin/tsx scripts/import-library.ts /data/import/bardic_tools_sounds.csv /data/import/soundk
-node_modules/.bin/tsx scripts/import-scenes.ts /data/import/soundk/scenes.json
+node_modules/.bin/tsx scripts/import-library.ts /data/import/sounds.csv /data/import/audio
+node_modules/.bin/tsx scripts/import-scenes.ts /data/import/audio/scenes.json
 rm -rf /data/import
 ```
 
