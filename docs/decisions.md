@@ -3,6 +3,23 @@
 Why the app works the way it does. Newest first. Each entry says what was decided, why, and what
 it rules out, so a later change can tell whether the reason still holds.
 
+## 2026-11-05: Redesign
+
+### A scene's picture: upload, chosen illustration, or its tags
+
+Every scene shows a picture on its card, in the player and in the editor. An uploaded banner wins;
+otherwise `data.art` names one of 16 drawn illustrations (`sceneArtKinds`); otherwise the first
+setting its tags name picks one (`artForTags`: case-insensitive, with synonyms). A fight is picked
+only when no place is named, because "Battle" is usually the mood of a place: a sea battle shows
+the sea, and scenes full of fights don't all look the same. The choice lives in the scene's JSON data, so it needed no migration.
+While an upload is in use the illustrations are disabled in the picker rather than silently
+replacing it: removing the upload is an explicit step, since it deletes the file.
+
+The illustrations are drawn in code (`features/scenes/art`), seeded by the scene's id rather than
+its name, so renaming a scene keeps its picture and two forest scenes still look different. They
+replace the blurred colour washes, which matched only capitalised tags and so ignored lower-case
+ones like the starter pack's.
+
 ## 2026-11-05: Session safety
 
 ### The Discord stream reconnects by itself
