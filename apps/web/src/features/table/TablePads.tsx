@@ -12,7 +12,7 @@ export function TablePads() {
   return (
     <section aria-label="Quick pads">
       <h2 className="mb-3 font-display text-2xl font-bold">Quick pads</h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-3">
         {[...pads]
           .sort((a, b) => a.slot - b.slot)
           .map((pad) => (

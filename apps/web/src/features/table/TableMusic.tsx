@@ -3,7 +3,6 @@ import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
-import { SeekBar } from '../../ui/SeekBar.tsx'
 
 export function TableMusic({ scene }: { scene: Scene }) {
   const music = usePlayer((s) => s.music)
@@ -17,14 +16,7 @@ export function TableMusic({ scene }: { scene: Scene }) {
   }
 
   return (
-    <section aria-label="Tracks" className="flex flex-col gap-3">
-      {music.duration > 0 && (
-        <SeekBar
-          current={music.current}
-          duration={music.duration}
-          onSeek={(seconds) => engine.music?.seek(seconds)}
-        />
-      )}
+    <section aria-label="Tracks">
       {cards.length > 0 && (
         <details className="group rounded-xl ring-1 ring-peat-700">
           <summary className="flex cursor-pointer list-none items-center [&::-webkit-details-marker]:hidden gap-2 px-4 py-3 text-lg text-ink-muted hover:text-ink">

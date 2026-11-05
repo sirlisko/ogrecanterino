@@ -120,3 +120,10 @@ input[type='range'].fader-lg::-webkit-slider-thumb {
 input[type='range'].fader-lg::-moz-range-thumb {
   @apply h-8 w-8 border-4;
 }
+
+/* Upright, like a mixing desk: drag up for louder. */
+input[type='range'].fader-vertical {
+  @apply h-60 w-3;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}

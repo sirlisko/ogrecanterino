@@ -22,7 +22,7 @@ export function TableAmbience({
   return (
     <section aria-label="Ambience">
       <h2 className="mb-3 font-display text-2xl font-bold text-lichen">Ambience</h2>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-3">
         {cards.map((card) => {
           const ready = soundStatus(card.soundId) === 'ready'
           const on = card.enabled && ready

@@ -1,56 +1,47 @@
 import { Link } from 'react-router'
 import { usePlayer } from '../../audio/store.ts'
-import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
+import { SceneArt } from '../scenes/art/SceneArt.tsx'
+import { useSceneGlow } from '../scenes/art/useSceneGlow.ts'
 
-const quiet = 'rounded-lg px-4 py-3 text-ink-muted ring-1 ring-peat-600 hover:text-ink'
+const onArt =
+  'rounded-lg bg-peat-950/70 px-4 py-3 text-ink-muted ring-1 ring-peat-600 hover:text-ink'
 
+/** The live scene's picture across the top, lit by its sound, under the few ways out. */
 export function TableHeader({ onPickScene }: { onPickScene: () => void }) {
   const scene = usePlayer((s) => s.scene)
-  const setlist = useSetlist()
-  const goTo = useGoToScene()
+  const glow = useSceneGlow(!!scene)
 
   return (
-    <header className="flex flex-wrap items-center gap-3">
-      <Link to={scene ? `/scenes/${scene.id}` : '/'} className={quiet}>
-        Exit table mode
-      </Link>
-      <h1 className="order-first min-w-0 flex-1 basis-full truncate font-display text-3xl font-bold sm:order-none sm:basis-0">
-        {scene?.name ?? 'Nothing playing'}
-      </h1>
-      <button type="button" onClick={onPickScene} className={quiet}>
-        Scenes
-      </button>
-      {setlist.previous && (
+    <header className="relative overflow-hidden bg-peat-950">
+      {scene && <SceneArt scene={scene} wide glowRef={glow} className="absolute inset-0" />}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-linear-to-b from-peat-950/50 to-peat-900/95"
+      />
+      <div className="relative flex min-h-28 flex-wrap items-center gap-3 px-4 py-4 sm:px-5">
+        <Link to={scene ? `/scenes/${scene.id}` : '/'} className={onArt}>
+          Exit table mode
+        </Link>
+        <h1 className="order-first min-w-0 flex-1 basis-full truncate font-display text-4xl font-bold sm:order-none sm:basis-0">
+          {scene?.name ?? 'Nothing playing'}
+        </h1>
+        <DiscordControl below />
+        <button type="button" onClick={onPickScene} className={onArt}>
+          Scenes
+        </button>
         <button
           type="button"
-          onClick={() => setlist.previous && goTo(setlist.previous)}
-          className={`max-w-64 truncate ${quiet}`}
+          onClick={() =>
+            document.fullscreenElement
+              ? void document.exitFullscreen()
+              : void document.documentElement.requestFullscreen()
+          }
+          className={onArt}
         >
-          Back: {setlist.previous.name}
+          Full screen
         </button>
-      )}
-      {setlist.next && (
-        <button
-          type="button"
-          onClick={() => setlist.next && goTo(setlist.next)}
-          className="max-w-64 truncate rounded-lg bg-brass px-4 py-3 font-medium text-peat-950"
-        >
-          {scene ? 'Next' : 'Start'}: {setlist.next.name}
-        </button>
-      )}
-      <DiscordControl below />
-      <button
-        type="button"
-        onClick={() =>
-          document.fullscreenElement
-            ? void document.exitFullscreen()
-            : void document.documentElement.requestFullscreen()
-        }
-        className={quiet}
-      >
-        Full screen
-      </button>
+      </div>
     </header>
   )
 }
