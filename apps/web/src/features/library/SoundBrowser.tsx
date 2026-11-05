@@ -3,7 +3,15 @@ import { type ReactNode, useMemo, useState } from 'react'
 import { useFavourites, useRecent } from '../../api/me.ts'
 import { useSounds } from '../../api/sounds.ts'
 import { Chip } from '../../ui/Chip.tsx'
-import { emptyFilter, filterSounds, tagCounts, type SoundFilter } from './filters.ts'
+import {
+  emptyFilter,
+  filterSounds,
+  SOUND_SORTS,
+  sortSounds,
+  tagCounts,
+  type SoundFilter,
+  type SoundSort,
+} from './filters.ts'
 import { SoundRow } from './SoundRow.tsx'
 import { usePreview } from './usePreview.ts'
 
@@ -34,15 +42,18 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
   })
   const [view, setView] = useState<View>('all')
   const [limit, setLimit] = useState(PAGE)
+  const [sort, setSort] = useState<SoundSort>('title')
 
   const all = sounds.data ?? []
   const tags = useMemo(() => tagCounts(all).slice(0, compact ? 12 : 24), [all, compact])
   const base = view === 'recent' ? recent.flatMap((id) => all.find((s) => s.id === id) ?? []) : all
-  const results = filterSounds(
+  const matches = filterSounds(
     base,
     { ...filter, favouritesOnly: view === 'favourites' },
     favourites,
   )
+  // "Recently previewed" keeps its own order: newest first is the point of it.
+  const results = view === 'recent' ? matches : sortSounds(matches, sort)
   const update = (patch: Partial<SoundFilter>) => {
     setFilter((f) => ({ ...f, ...patch }))
     setLimit(PAGE)
@@ -79,6 +90,23 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
             {c.label}
           </Chip>
         ))}
+        {view !== 'recent' && (
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value as SoundSort)
+              setLimit(PAGE)
+            }}
+            aria-label="Sort sounds"
+            className="rounded-full bg-peat-800 px-3 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
+          >
+            {SOUND_SORTS.map((s) => (
+              <option key={s.value} value={s.value}>
+                Sort by {s.label.toLowerCase()}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
       <div className="mt-3 flex flex-wrap gap-1.5">
         {tags.map(([t, n]) => (
