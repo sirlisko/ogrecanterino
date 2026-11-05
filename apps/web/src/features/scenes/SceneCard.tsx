@@ -68,7 +68,7 @@ export function SceneCard({
       <button
         type="button"
         onClick={start}
-        aria-label={playing ? `${scene.name} is playing` : `Play ${scene.name}`}
+        aria-label={playing ? `${scene.name} is playing` : `Start scene: ${scene.name}`}
         className={`absolute top-3 left-3 z-10 grid h-11 w-11 place-items-center rounded-full shadow-lg transition ${
           playing
             ? 'bg-brass text-peat-950'

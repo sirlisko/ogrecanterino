@@ -32,13 +32,13 @@ export function LibraryActions({ sound }: { sound: Sound }) {
         <Icon name="star" outline={!fav} className="h-5 w-5" />
       </button>
       <select
-        aria-label={`Pin ${sound.title} to a quick pad`}
+        aria-label={`Assign ${sound.title} to a quick pad`}
         value=""
         onChange={(e) => assign(Number(e.target.value), sound.id, sound.title)}
-        className="w-24 rounded-md bg-peat-800 px-1.5 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
+        className="w-32 rounded-md bg-peat-800 px-1.5 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
       >
         <option value="" disabled>
-          Pin to pad
+          Assign to pad
         </option>
         {PAD_SLOTS.map((slot) => {
           const current = pads.find((p) => p.slot === slot)

@@ -110,7 +110,7 @@ export function TransportBar() {
               title="Unmute this device (M)"
               className="rounded-lg bg-danger/15 px-3 py-2 font-medium text-danger hover:bg-danger/25"
             >
-              Muted here
+              Unmute this device
             </button>
           )}
           <button

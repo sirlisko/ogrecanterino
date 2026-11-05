@@ -58,7 +58,7 @@ export function PlayerPage() {
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
             {active ? (
-              <Button onClick={() => void engine.stopScene()}>Fade out scene</Button>
+              <Button onClick={() => void engine.stopScene()}>Fade out</Button>
             ) : (
               <Button variant="primary" onClick={() => void engine.playScene(scene)}>
                 Start scene
