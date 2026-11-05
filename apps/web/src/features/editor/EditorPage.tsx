@@ -1,11 +1,12 @@
 import { DndContext } from '@dnd-kit/core'
 import { emptySceneData, type SceneData, sceneSections } from '@ogre/shared'
-import { useEffect } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { useEffect, useState } from 'react'
+import { useLocation, useParams } from 'react-router'
 import { useLiveScene } from '../player/useLiveScene.ts'
 import { cardForSound, insertCard, removeCard, updateCard } from './cards.ts'
+import { EditorHeader } from './EditorHeader.tsx'
 import { LibraryPanel } from './LibraryPanel.tsx'
-import { SaveIndicator } from './SaveIndicator.tsx'
+import { PicturePicker } from './PicturePicker.tsx'
 import { SceneDetailsForm } from './SceneDetailsForm.tsx'
 import { SectionEditor } from './SectionEditor.tsx'
 import { useDiscardIfBlank } from './useDiscardIfBlank.ts'
@@ -17,6 +18,7 @@ export function EditorPage() {
   const draft = live.scene
   const dnd = useSceneDnd(draft?.data ?? emptySceneData(), (data) => live.updateData(() => data))
   const { flush } = live
+  const [picking, setPicking] = useState(false)
   useDiscardIfBlank(draft, useLocation().state?.fresh === true)
 
   useEffect(() => {
@@ -46,21 +48,21 @@ export function EditorPage() {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="font-display text-4xl font-bold">Edit scene</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <SaveIndicator
-            status={draft.name.trim() ? live.saveStatus : 'unnamed'}
-            error={live.saveError?.message}
-          />
-          <Link
-            to={`/scenes/${draft.id}`}
-            className="rounded-lg bg-brass px-4 py-2 font-medium text-peat-950 hover:bg-[#e6ba5e]"
-          >
-            Open player
-          </Link>
-        </div>
-      </div>
+      <EditorHeader
+        scene={draft}
+        status={draft.name.trim() ? live.saveStatus : 'unnamed'}
+        error={live.saveError?.message}
+        onRename={(name) => live.update((s) => ({ ...s, name }))}
+        picking={picking}
+        onTogglePicture={() => setPicking((p) => !p)}
+      />
+      {picking && (
+        <PicturePicker
+          scene={draft}
+          onPick={(art) => live.updateData((d) => ({ ...d, art }))}
+          onClose={() => setPicking(false)}
+        />
+      )}
 
       <SceneDetailsForm
         key={draft.id}
