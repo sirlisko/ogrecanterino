@@ -1,75 +1,62 @@
 import type { Scene } from '@ogre/shared'
-import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
-import { combatSceneIdFor } from '../collections/setlist.ts'
-import { useActiveCollectionData } from '../collections/useSetlist.ts'
+import { SeekBar } from '../../ui/SeekBar.tsx'
 
-const big = 'grid h-16 min-w-16 place-items-center rounded-xl px-5 text-xl ring-1 ring-peat-600'
+const side =
+  'grid h-16 w-16 shrink-0 place-items-center rounded-xl ring-1 ring-peat-600 hover:bg-peat-700'
 
+/** Transport with the playing track and where it is, sized for fingers. */
 export function TableControls({ scene }: { scene: Scene }) {
   const music = usePlayer((s) => s.music)
   const combat = usePlayer((s) => s.combat)
-  const ducked = usePlayer((s) => s.ducked)
-  const collection = useActiveCollectionData()
-  const combatScene = useScene(combatSceneIdFor(scene, collection) ?? undefined).data
   const track = scene.data.music.find((c) => c.id === music.cardId)
-  const duck = (on: boolean) => () => engine.setDucked(on)
 
   return (
-    <section aria-label="Music" className="flex flex-wrap items-center gap-3">
-      <button
-        type="button"
-        aria-label="Previous track"
-        onClick={() => engine.music?.previous()}
-        className={big}
-      >
-        <Icon name="previous" className="h-6 w-6" />
-      </button>
-      <button
-        type="button"
-        aria-label={music.playing ? 'Pause music' : 'Play music'}
-        onClick={() => engine.music?.toggle()}
-        className={`${big} bg-brass text-peat-950 ring-0`}
-      >
-        <Icon name={music.playing ? 'pause' : 'play'} className="h-7 w-7" />
-      </button>
-      <button
-        type="button"
-        aria-label="Next track"
-        onClick={() => engine.music?.next()}
-        className={big}
-      >
-        <Icon name="next" className="h-6 w-6" />
-      </button>
-      <p className="min-w-0 flex-1 truncate text-lg text-ink-muted">
-        {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
-      </p>
-      <button
-        type="button"
-        aria-pressed={ducked}
-        onPointerDown={duck(true)}
-        onPointerUp={duck(false)}
-        onPointerCancel={duck(false)}
-        onPointerLeave={duck(false)}
-        onContextMenu={(e) => e.preventDefault()}
-        className={`${big} touch-none select-none ${ducked ? 'bg-brass/20 text-brass ring-brass' : ''}`}
-      >
-        Hold to talk
-      </button>
-      {combatScene && (
+    <section
+      aria-label="Music"
+      className="flex flex-wrap items-center gap-3.5 rounded-2xl bg-peat-800 p-3 ring-1 ring-peat-700"
+    >
+      <div className="flex items-center gap-2.5">
         <button
           type="button"
-          onClick={() => engine.toggleCombat(combatScene)}
-          className={`${big} ${combat ? 'bg-danger/20 text-danger ring-danger' : ''}`}
+          aria-label="Previous track"
+          onClick={() => engine.music?.previous()}
+          className={side}
         >
-          {combat ? 'End combat' : 'Combat'}
+          <Icon name="previous" className="h-6 w-6" />
         </button>
-      )}
-      <button type="button" onClick={() => void engine.stopScene()} className={big}>
-        Fade out
-      </button>
+        <button
+          type="button"
+          aria-label={music.playing ? 'Pause music' : 'Play music'}
+          onClick={() => engine.music?.toggle()}
+          className="grid h-[72px] w-[72px] shrink-0 place-items-center rounded-2xl bg-brass text-peat-950"
+        >
+          <Icon name={music.playing ? 'pause' : 'play'} className="h-7 w-7" />
+        </button>
+        <button
+          type="button"
+          aria-label="Next track"
+          onClick={() => engine.music?.next()}
+          className={side}
+        >
+          <Icon name="next" className="h-6 w-6" />
+        </button>
+      </div>
+      <div className="min-w-48 flex-1">
+        <p className="truncate text-xl">
+          {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
+        </p>
+        {music.duration > 0 && (
+          <SeekBar
+            current={music.current}
+            duration={music.duration}
+            onSeek={(seconds) => engine.music?.seek(seconds)}
+            className="mt-1"
+          />
+        )}
+      </div>
     </section>
   )
 }
