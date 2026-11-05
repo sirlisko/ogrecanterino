@@ -1,5 +1,6 @@
 import type { Sound } from '@ogre/shared'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useFavourites, useMe, useToggleFavourite } from '../../api/me.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { Menu, MenuItem } from '../../ui/Menu.tsx'
@@ -12,13 +13,19 @@ export function LibraryActions({ sound }: { sound: Sound }) {
   const favourites = useFavourites().data ?? []
   const toggleFav = useToggleFavourite()
   const [dialog, setDialog] = useState<'assign' | 'edit' | 'delete' | null>(null)
-  const close = () => setDialog(null)
+  const root = useRef<HTMLDivElement>(null)
+  // The menu item that opened the dialog is gone, so focus would otherwise fall to the page.
+  // The dialog has to unmount first: while it's open, everything behind it is inert.
+  const close = () => {
+    flushSync(() => setDialog(null))
+    root.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')?.focus()
+  }
   const fav = favourites.includes(sound.id)
   const canEdit =
     !!me && (me.role === 'admin' || (sound.uploadedBy !== null && sound.uploadedBy === me.id))
 
   return (
-    <div className="flex items-center gap-1">
+    <div ref={root} className="flex items-center gap-1">
       <button
         type="button"
         aria-pressed={fav}
