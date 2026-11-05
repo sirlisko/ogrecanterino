@@ -8,15 +8,7 @@ import { SceneCounts } from './SceneCounts.tsx'
 import { SceneMenu } from './SceneMenu.tsx'
 import { useConfirmStart } from './useConfirmStart.ts'
 
-export function SceneCard({
-  scene,
-  canEdit,
-  position,
-}: {
-  scene: Scene
-  canEdit: boolean
-  position?: number
-}) {
+export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }) {
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const confirm = useConfirmStart(scene.id)
@@ -44,11 +36,6 @@ export function SceneCard({
         <h2 className="font-display text-[19px] leading-tight font-bold">
           <Link to={`/scenes/${scene.id}`} className="outline-none">
             <span className="absolute inset-0" aria-hidden />
-            {position !== undefined && (
-              <span className="mr-2 font-sans text-base font-normal text-ink-muted tabular">
-                {position}
-              </span>
-            )}
             {scene.name}
           </Link>
         </h2>

@@ -1,6 +1,6 @@
 import { type Collection, emptySceneData, type Scene } from '@ogre/shared'
 import { describe, expect, it } from 'vitest'
-import { adjacentScene, combatSceneIdFor } from './setlist.ts'
+import { adjacentScene, combatSceneIdFor, stepStatus } from './setlist.ts'
 
 const scene = (id: string, combatSceneId: string | null = null): Scene => ({
   id,
@@ -44,5 +44,22 @@ describe('combatSceneIdFor', () => {
     expect(combatSceneIdFor(scene('c', 'boss'), collection)).toBe('boss')
     expect(combatSceneIdFor(scene('a'), collection)).toBe('fight')
     expect(combatSceneIdFor(scene('elsewhere'), collection)).toBeNull()
+  })
+})
+
+describe('stepStatus', () => {
+  const run = { liveId: 'b', nextId: 'c', played: new Set(['a', 'b']) }
+
+  it('marks the live scene, the next one and what was played this session', () => {
+    expect(['a', 'b', 'c', 'd'].map((id) => stepStatus(id, run))).toEqual([
+      'played',
+      'live',
+      'next',
+      'later',
+    ])
+  })
+
+  it('offers the first scene as next before anything plays', () => {
+    expect(stepStatus('a', { liveId: null, nextId: 'a', played: new Set() })).toBe('next')
   })
 })

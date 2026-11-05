@@ -6,7 +6,7 @@ import { useSceneLayout } from './sceneLayout.ts'
 import { SceneRow } from './SceneRow.tsx'
 
 /** Scenes as tiles or as a list, whichever this device last chose. */
-export function SceneGrid({ scenes, numbered }: { scenes: Scene[]; numbered?: boolean }) {
+export function SceneGrid({ scenes }: { scenes: Scene[] }) {
   const me = useMe().data
   const deleting = usePendingDelete((s) => s.pending?.scene.id)
   const layout = useSceneLayout((s) => s.layout)
@@ -24,13 +24,8 @@ export function SceneGrid({ scenes, numbered }: { scenes: Scene[]; numbered?: bo
   }
   return (
     <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3.5">
-      {shown.map((s, i) => (
-        <SceneCard
-          key={s.id}
-          scene={s}
-          canEdit={canEdit(s)}
-          position={numbered ? i + 1 : undefined}
-        />
+      {shown.map((s) => (
+        <SceneCard key={s.id} scene={s} canEdit={canEdit(s)} />
       ))}
     </div>
   )

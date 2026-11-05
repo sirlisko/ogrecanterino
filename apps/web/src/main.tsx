@@ -8,6 +8,7 @@ import { ErrorBoundary } from './ui/ErrorBoundary.tsx'
 import './styles.css'
 // Loaded up front so scenes started before visiting the scenes page are still recorded.
 import './features/scenes/recentScenes.ts'
+import './features/collections/sessionPlays.ts'
 
 const router = createBrowserRouter([{ path: '*', element: <App /> }])
 
