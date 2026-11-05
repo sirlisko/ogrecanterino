@@ -52,6 +52,23 @@ We tried and dropped a beam per section rising from the bar: effects are one-off
 was dark nearly all the time and the display looked lopsided. The thin music progress line on top
 of the transport bar made way for the edge; the bar still shows the time.
 
+### Settings belong to the device
+
+Settings (in the header) are this device's preferences and live in `localStorage`, like the pads row
+and the scenes layout: a GM may want a quiet laptop at home and a touch-friendly tablet at the
+table. Only the choices a GM changed are saved, so a setting they never touched follows its
+default when that default changes.
+
+The audio engine doesn't read settings. `features/settings` hands it the crossfade, the fade-out
+length and how far the music ducks at startup and whenever they change, so `audio/` stays free of
+UI state. Scene crossfade moved here from the Mixer, which now holds only levels and the mute; it
+used to reset to 3 s on every reload.
+
+Keyboard hints default to off on touch screens (`pointer: coarse`), where there's usually no
+keyboard to press them on. "Mute this device while sending to Discord" gives the sound back when
+the GM stops sending, but only if the stream muted it, and only once per stream: a GM who unmutes
+mid-stream isn't muted again by a reconnect.
+
 ## 2026-11-05: Session safety
 
 ### The Discord stream reconnects by itself
@@ -96,7 +113,8 @@ While a scene is live, the start button on a scene card or in "Recently played" 
 "Start scene?" for three seconds, and only a second click replaces the live scene. The button sits
 where you'd click to open the scene, so browsing mid-session could crossfade the table by
 accident. With nothing playing it starts straight away, and the `[`/`]` hotkeys and table mode's
-Next button are deliberate enough to skip the question.
+Next button are deliberate enough to skip the question. A GM who finds it in the way can turn it
+off in Settings.
 
 ### Deleting a scene is undone, not confirmed
 
@@ -181,8 +199,8 @@ still work.
 
 ### Ducking is a gain stage, not a volume change
 
-Holding D lowers music to about −10 dB through a gain node after the music bus. It never touches
-the music volume setting. It releases on key-up or when the window loses focus. Table mode has a
+Holding D lowers music to about −10 dB through a gain node after the music bus (Settings also
+offers about −6 and −20 dB). It never touches the music volume setting. It releases on key-up or when the window loses focus. Table mode has a
 "Hold to talk" button that does the same.
 
 Effect cards can opt in to the same duck ("Lower the music while it plays") for narration and big
