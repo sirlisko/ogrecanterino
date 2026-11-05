@@ -5,6 +5,7 @@ import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { sceneGradient } from './sceneArt.ts'
 import { SceneMenu } from './SceneMenu.tsx'
+import { useConfirmStart } from './useConfirmStart.ts'
 
 export function SceneCard({
   scene,
@@ -20,11 +21,13 @@ export function SceneCard({
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const { music, ambiences, effects } = scene.data
+  const confirm = useConfirmStart(scene.id)
 
-  const start = () => {
-    void engine.playScene(scene)
-    navigate(`/scenes/${scene.id}`)
-  }
+  const start = () =>
+    confirm.attempt(() => {
+      void engine.playScene(scene)
+      navigate(`/scenes/${scene.id}`)
+    })
 
   return (
     <article className="group relative overflow-hidden rounded-xl bg-peat-800 ring-1 ring-peat-700 has-[:focus-visible]:ring-brass">
@@ -68,18 +71,25 @@ export function SceneCard({
       <button
         type="button"
         onClick={start}
-        aria-label={playing ? `${scene.name} is playing` : `Start scene: ${scene.name}`}
-        className={`absolute top-3 left-3 z-10 grid h-11 w-11 place-items-center rounded-full shadow-lg transition ${
+        aria-label={
           playing
+            ? `${scene.name} is playing`
+            : confirm.armed
+              ? `Click again to replace the playing scene with ${scene.name}`
+              : `Start scene: ${scene.name}`
+        }
+        className={`absolute top-3 left-3 z-10 flex h-11 min-w-11 items-center justify-center gap-2 rounded-full shadow-lg transition ${
+          playing || confirm.armed
             ? 'bg-brass text-peat-950'
             : 'bg-peat-950/70 text-ink hover:bg-brass hover:text-peat-950'
-        }`}
+        } ${confirm.armed ? 'px-4 font-medium' : ''}`}
       >
         {playing ? (
           <Icon name="note" className="h-5 w-5 animate-breathe" />
         ) : (
           <Icon name="play" className="ml-0.5 h-4 w-4" />
         )}
+        {confirm.armed && 'Start scene?'}
       </button>
       <div className="absolute top-3 right-3 z-10">
         <SceneMenu scene={scene} canEdit={canEdit} />
