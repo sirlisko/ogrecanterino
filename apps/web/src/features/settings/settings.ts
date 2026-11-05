@@ -8,10 +8,17 @@ const KEY = 'ogre.settings'
 export interface Settings {
   crossfadeSeconds: number
   fadeOutSeconds: number
+  /** Music gain while ducked, as a fraction. */
+  duckGain: number
   lightsFollowSound: boolean
 }
 
-const DEFAULTS: Settings = { crossfadeSeconds: 3, fadeOutSeconds: 1.5, lightsFollowSound: false }
+const DEFAULTS: Settings = {
+  crossfadeSeconds: 3,
+  fadeOutSeconds: 1.5,
+  duckGain: 0.3,
+  lightsFollowSound: false,
+}
 
 function saved() {
   try {
@@ -37,6 +44,7 @@ export function changeSettings(patch: Partial<Settings>) {
 function applyToEngine(s: Settings) {
   engine.setCrossfade(s.crossfadeSeconds)
   engine.setFadeOut(s.fadeOutSeconds)
+  engine.setDuckGain(s.duckGain)
 }
 
 applyToEngine(useSettings.getState())

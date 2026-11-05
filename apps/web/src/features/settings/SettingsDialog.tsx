@@ -28,6 +28,17 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             options={seconds([0.5, 1.5, 3, 5])}
             onChange={(fadeOutSeconds) => changeSettings({ fadeOutSeconds })}
           />
+          <SelectRow
+            label="Hold to talk lowers the music"
+            description="While you hold D or Hold to talk, and under effects set to lower the music."
+            value={settings.duckGain}
+            options={[
+              { value: 0.5, label: 'A little' },
+              { value: 0.3, label: 'By half' },
+              { value: 0.1, label: 'Almost off' },
+            ]}
+            onChange={(duckGain) => changeSettings({ duckGain })}
+          />
         </SettingsSection>
         <SettingsSection title="Display">
           <CheckRow

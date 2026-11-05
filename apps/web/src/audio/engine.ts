@@ -39,6 +39,8 @@ class Engine {
   private effectVoices = new Map<string, { voices: Set<Voice>; startedAt: number }>()
   private duckingVoices = new Set<Voice>()
   private fadeOutSeconds = 1.5
+  /** About -10 dB: music stays audible under a speaking voice. */
+  private duckGain = 0.3
 
   readonly lookup = (id: string) => this.sounds.get(id)
 
@@ -274,7 +276,12 @@ class Engine {
   private applyDuck() {
     const effectDucking = this.duckingVoices.size > 0
     usePlayer.setState({ effectDucking })
-    this.mixer?.setDucked(usePlayer.getState().ducked || effectDucking)
+    this.mixer?.setDucked(usePlayer.getState().ducked || effectDucking, this.duckGain)
+  }
+
+  setDuckGain(gain: number) {
+    this.duckGain = gain
+    this.applyDuck()
   }
 
   setCrossfade(seconds: number) {

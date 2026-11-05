@@ -3,9 +3,6 @@ import { rampTo, toGain } from './volume.ts'
 export type BusName = 'music' | 'ambience' | 'effect'
 export type MeterName = BusName | 'master'
 
-/** About -10 dB: music stays audible under a speaking voice. */
-const DUCK_GAIN = 0.3
-
 /**
  * Global audio graph: buses → master → (monitor → speakers) and → a MediaStream that
  * the Discord bridge records, so remote players hear exactly the local mix.
@@ -70,8 +67,8 @@ export class Mixer {
     return g
   }
 
-  setDucked(on: boolean) {
-    rampTo(this.duck.gain, on ? DUCK_GAIN : 1, on ? 0.3 : 0.8, this.ctx)
+  setDucked(on: boolean, gain: number) {
+    rampTo(this.duck.gain, on ? gain : 1, on ? 0.3 : 0.8, this.ctx)
   }
 
   setBusVolume(bus: BusName, volume: number) {
