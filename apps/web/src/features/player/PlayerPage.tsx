@@ -1,4 +1,5 @@
-import type { SceneSettings } from '@ogre/shared'
+import type { SceneSection, SceneSettings } from '@ogre/shared'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
@@ -9,6 +10,7 @@ import { useActiveCollectionData } from '../collections/useSetlist.ts'
 import { sceneGradient } from '../scenes/sceneArt.ts'
 import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
+import { LaneTabs } from './LaneTabs.tsx'
 import { MusicLane } from './MusicLane.tsx'
 import { useLiveScene } from './useLiveScene.ts'
 
@@ -19,6 +21,7 @@ export function PlayerPage() {
   const combat = usePlayer((s) => s.combat)
   const collection = useActiveCollectionData()
   const combatScene = useScene((scene && combatSceneIdFor(scene, collection)) ?? undefined).data
+  const [tab, setTab] = useState<SceneSection>('music')
 
   if (isPending) return <p className="text-ink-muted">Loading scene…</p>
   if (error || !scene) {
@@ -34,6 +37,8 @@ export function PlayerPage() {
 
   const onSettings = (patch: Partial<SceneSettings>) =>
     updateData((d) => ({ ...d, settings: { ...d.settings, ...patch } }))
+  // min-w-0 lets long labels truncate inside the grid columns.
+  const shown = (section: SceneSection) => `min-w-0 ${tab === section ? '' : 'max-lg:hidden'}`
 
   return (
     <>
@@ -110,19 +115,34 @@ export function PlayerPage() {
         </p>
       )}
 
+      <LaneTabs
+        value={tab}
+        onChange={setTab}
+        counts={{
+          music: scene.data.music.length,
+          ambiences: scene.data.ambiences.length,
+          effects: scene.data.effects.length,
+        }}
+      />
       <div className="grid gap-8 lg:grid-cols-[1fr_1fr_1.15fr]">
-        <MusicLane
-          scene={scene}
-          active={active}
-          onCard={(cid, p) => updateCard('music', cid, p)}
-          onSettings={onSettings}
-        />
-        <AmbienceLane
-          scene={scene}
-          active={active}
-          onCard={(cid, p) => updateCard('ambiences', cid, p)}
-        />
-        <EffectsLane scene={scene} active={active} />
+        <div className={shown('music')}>
+          <MusicLane
+            scene={scene}
+            active={active}
+            onCard={(cid, p) => updateCard('music', cid, p)}
+            onSettings={onSettings}
+          />
+        </div>
+        <div className={shown('ambiences')}>
+          <AmbienceLane
+            scene={scene}
+            active={active}
+            onCard={(cid, p) => updateCard('ambiences', cid, p)}
+          />
+        </div>
+        <div className={shown('effects')}>
+          <EffectsLane scene={scene} active={active} />
+        </div>
       </div>
     </>
   )
