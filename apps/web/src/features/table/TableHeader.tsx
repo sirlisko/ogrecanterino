@@ -13,12 +13,15 @@ export function TableHeader({ onPickScene }: { onPickScene: () => void }) {
   const glow = useSceneGlow(!!scene)
 
   return (
-    <header className="relative overflow-hidden bg-peat-950">
-      {scene && <SceneArt scene={scene} wide {...glow} className="absolute inset-0" />}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-linear-to-b from-peat-950/50 to-peat-900/95"
-      />
+    // Only the picture is clipped: the Discord panel opens below the header.
+    <header className="relative bg-peat-950">
+      <div className="absolute inset-0 overflow-hidden">
+        {scene && <SceneArt scene={scene} wide {...glow} className="absolute inset-0" />}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-linear-to-b from-peat-950/50 to-peat-900/95"
+        />
+      </div>
       <div className="relative flex min-h-28 flex-wrap items-center gap-3 px-4 py-4 sm:px-5">
         <Link to={scene ? `/scenes/${scene.id}` : '/'} className={onArt}>
           Exit table mode

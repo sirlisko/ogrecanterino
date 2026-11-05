@@ -1,4 +1,7 @@
-import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+
+/** Matches the `100vw - 2rem` cap on the panel's width. */
+const GUTTER = 16
 
 /** Panel anchored above its trigger (the transport bar lives at the bottom of the screen), or below it. */
 export function Popover({
@@ -20,7 +23,15 @@ export function Popover({
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
   const id = useId()
+
+  // Hung from the trigger's right edge, a panel can run off the left of a phone screen.
+  useLayoutEffect(() => {
+    if (!open || !panel.current) return
+    const overflow = GUTTER - panel.current.getBoundingClientRect().left
+    if (overflow > 0) panel.current.style.translate = `${overflow}px 0`
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -57,6 +68,7 @@ export function Popover({
       </button>
       {open && (
         <div
+          ref={panel}
           id={id}
           role="dialog"
           aria-label={label}
