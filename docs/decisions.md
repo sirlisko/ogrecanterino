@@ -49,6 +49,31 @@ where you'd click to open the scene, so browsing mid-session could crossfade the
 accident. With nothing playing it starts straight away, and the `[`/`]` hotkeys and table mode's
 Next button are deliberate enough to skip the question.
 
+### Deleting a scene is undone, not confirmed
+
+Delete hides the scene at once and shows "Deleted … Undo" for eight seconds; the request goes out
+when that closes, when another scene is deleted, or when the tab closes (`fetch` with `keepalive`).
+It matches Esc and Resume: act now, take it back if it was a mistake. Sounds still ask first, in a
+dialog that names the scenes using them, because deleting a sound deletes its file and an undo
+would mean keeping the file around. No `confirm()` is left in the app.
+
+### Previews of long sounds can seek
+
+Sounds of 90 s or more stream through a media element, so their preview shows a seek bar in the
+library, the editor and a scene that isn't live. Shorter ones play from a decoded buffer and get
+none; restarting a buffer at an offset wasn't worth it for clips that short.
+
+### Missing sounds are replaced in the editor
+
+A card whose sound is missing gets "Missing, replace", which opens the library at the section's
+category and relinks the card. The label and settings stay, since the GM may have renamed it.
+
+### The app stays one bundle
+
+Splitting the editor and library into lazy chunks would save about 40 KB of the 184 KB (gzip),
+once, as the bundle is cached for a year. But a redeploy removes old chunks, so a tab left open
+through a deploy would fail to open those pages mid-session. Revisit if the bundle grows a lot.
+
 ## 2026-10-30: UX review
 
 ### Collections, not folders
