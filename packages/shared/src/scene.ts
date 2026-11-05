@@ -28,9 +28,33 @@ export const sceneSettings = z.object({
 })
 export type SceneSettings = z.infer<typeof sceneSettings>
 
+/** The drawn illustrations a scene can use when it has no uploaded picture. */
+export const sceneArtKinds = [
+  'town',
+  'night',
+  'forest',
+  'horror',
+  'camp',
+  'mountain',
+  'desert',
+  'sea',
+  'storm',
+  'dungeon',
+  'crypt',
+  'caverns',
+  'castle',
+  'temple',
+  'tower',
+  'battle',
+] as const
+export const sceneArt = z.enum(sceneArtKinds)
+export type SceneArt = z.infer<typeof sceneArt>
+
 export const sceneData = z.object({
   settings: sceneSettings,
   globalVolume: z.number().min(0).max(100).default(100),
+  /** A chosen illustration. Absent: one is picked from the tags. An uploaded banner wins over both. */
+  art: sceneArt.optional(),
   music: z.array(card),
   ambiences: z.array(card),
   effects: z.array(card),
