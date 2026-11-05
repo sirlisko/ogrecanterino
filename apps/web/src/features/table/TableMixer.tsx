@@ -9,26 +9,29 @@ const CHANNELS: { key: keyof Volumes; label: string; color: string }[] = [
   { key: 'effect', label: 'Effects', color: 'var(--color-arcane)' },
 ]
 
-/** The mixer's volumes with touch-sized faders; same settings as the Mixer popover. */
+/** The mixer as four upright faders; same settings as the Mixer popover. */
 export function TableMixer() {
   const volumes = usePlayer((s) => s.volumes)
   const monitor = usePlayer((s) => s.monitor)
 
   return (
-    <section aria-label="Volume" className="flex flex-wrap items-center gap-x-6 gap-y-4">
-      <div className="grid min-w-0 flex-1 gap-x-6 gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
+    <section
+      aria-label="Volume"
+      className="flex flex-col gap-4 rounded-2xl bg-peat-800 p-4 ring-1 ring-peat-700"
+    >
+      <div className="grid grid-cols-4 gap-2">
         {CHANNELS.map(({ key, label, color }) => (
-          <label key={key} className="flex items-center gap-3 text-lg">
-            <span className="w-24 shrink-0" style={{ color }}>
-              {label}
-            </span>
+          <label key={key} className="flex flex-col items-center gap-2 text-[15px]">
+            <span className="text-ink-muted tabular">{volumes[key]}</span>
             <Fader
               large
+              vertical
               value={volumes[key]}
               label={`${label} volume`}
               color={color}
               onChange={(v) => engine.setVolume(key, v)}
             />
+            <span style={{ color }}>{label}</span>
           </label>
         ))}
       </div>
@@ -36,7 +39,7 @@ export function TableMixer() {
         type="button"
         aria-pressed={!monitor}
         onClick={() => engine.setMonitor(!monitor)}
-        className={`h-16 rounded-xl px-5 text-lg ring-1 ${monitor ? 'text-ink-muted ring-peat-600 hover:text-ink' : 'bg-danger/15 font-medium text-danger ring-danger/40'}`}
+        className={`min-h-14 w-full rounded-xl px-5 text-lg ring-1 ${monitor ? 'text-ink-muted ring-peat-600 hover:text-ink' : 'bg-danger/15 font-medium text-danger ring-danger/40'}`}
       >
         {monitor ? 'Mute this device' : 'Unmute this device'}
       </button>

@@ -29,19 +29,18 @@ export function TablePage() {
     <div className="flex min-h-dvh flex-col">
       <TableHeader onPickScene={() => setPicking(true)} />
       <TableStrip scene={scene} />
-      <div className="flex flex-col gap-6 p-4 sm:p-5">
-        <ErrorBoundary resetKey={scene?.id} fallback={(retry) => <PageCrash retry={retry} />}>
-          {scene ? (
-            <>
+      <ErrorBoundary resetKey={scene?.id} fallback={(retry) => <PageCrash retry={retry} />}>
+        {scene ? (
+          <main className="flex flex-1 flex-wrap items-start gap-5 p-4 sm:p-5">
+            <div className="flex min-w-0 flex-[1_1_34rem] flex-col gap-5">
               <TableControls scene={scene} />
-              <TableMixer />
               <TableMusic scene={scene} />
               <section aria-label="Effects">
                 <h2 className="mb-3 font-display text-2xl font-bold text-arcane">Effects</h2>
                 {scene.data.effects.length === 0 ? (
                   <p className="text-ink-muted">No effects in this scene.</p>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-3">
                     {scene.data.effects.map((card, i) => (
                       <EffectPad key={card.id} card={card} hotkey={EFFECT_KEYS[i]} active large />
                     ))}
@@ -54,24 +53,29 @@ export function TablePage() {
                   onCard={(id, patch) => live.updateCard('ambiences', id, patch)}
                 />
               )}
-            </>
-          ) : (
-            <div className="flex flex-col items-start gap-4">
-              <p className="max-w-prose text-lg text-ink-muted">
-                Start a scene to get its music and effects here.
-              </p>
-              <Button
-                variant="primary"
-                className="px-5 py-3 text-lg"
-                onClick={() => setPicking(true)}
-              >
-                Pick a scene
-              </Button>
+              <TablePads />
             </div>
-          )}
-          <TablePads />
-        </ErrorBoundary>
-      </div>
+            {/* The mixer sits beside the pads on a tablet, and under them on a phone. */}
+            <div className="min-w-[17rem] flex-[0_1_22rem] lg:sticky lg:top-4">
+              <TableMixer />
+            </div>
+          </main>
+        ) : (
+          <div className="flex flex-col items-start gap-4 p-4 sm:p-5">
+            <p className="max-w-prose text-lg text-ink-muted">
+              Start a scene to get its music and effects here.
+            </p>
+            <Button
+              variant="primary"
+              className="px-5 py-3 text-lg"
+              onClick={() => setPicking(true)}
+            >
+              Pick a scene
+            </Button>
+            <TablePads />
+          </div>
+        )}
+      </ErrorBoundary>
       {picking && <ScenePicker onClose={() => setPicking(false)} />}
       <HotkeyLayer />
       <ResumeToast floating />
