@@ -33,6 +33,8 @@ interface VoiceSession {
   connection: VoiceConnection
   player: AudioPlayer
   input: PassThrough | null
+  /** Tells the browser feeding `input` that another tab or device has taken over. */
+  evict: (() => void) | null
   leaveTimer: NodeJS.Timeout | null
 }
 
@@ -117,6 +119,7 @@ export class VoiceSessions {
       connection,
       player,
       input: existing?.input ?? null,
+      evict: existing?.evict ?? null,
       leaveTimer: null,
     }
     this.sessions.set(guildId, session)
@@ -131,9 +134,11 @@ export class VoiceSessions {
   }
 
   /** Starts a fresh WebM/Opus stream from the browser; returns a writer for incoming chunks. */
-  openStream(userId: string) {
+  openStream(userId: string, evict: () => void) {
     const session = [...this.sessions.values()].find((s) => s.ownerId === userId)
     if (!session) throw httpError(409, 'Connect to a voice channel first')
+    session.evict?.()
+    session.evict = evict
     session.input?.end()
     if (session.leaveTimer) clearTimeout(session.leaveTimer)
     session.leaveTimer = null
@@ -152,6 +157,7 @@ export class VoiceSessions {
         input.end()
         if (session.input !== input) return
         session.input = null
+        session.evict = null
         if (session.player.state.status !== AudioPlayerStatus.Idle) session.player.stop()
         this.scheduleLeave(session, abandoned ? ABANDONED_LEAVE_MS : IDLE_LEAVE_MS)
       },

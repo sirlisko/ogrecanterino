@@ -5,6 +5,8 @@ import { parseBody } from '../http/body.ts'
 import type { DiscordBot } from './bot.ts'
 import type { VoiceSessions } from './voiceSessions.ts'
 
+const STREAM_TAKEN_OVER = 4000
+
 const connectBody = z.object({ guildId: z.string(), channelId: z.string() })
 
 export function discordRoutes(bot: DiscordBot | null, sessions: VoiceSessions | null) {
@@ -37,7 +39,9 @@ export function discordRoutes(bot: DiscordBot | null, sessions: VoiceSessions | 
     app.get('/api/discord/stream', { websocket: true }, (socket, req) => {
       let stream: ReturnType<VoiceSessions['openStream']>
       try {
-        stream = sessions.openStream(authed(req).id)
+        stream = sessions.openStream(authed(req).id, () =>
+          socket.close(STREAM_TAKEN_OVER, 'Streaming moved to another tab or device'),
+        )
       } catch (e) {
         socket.close(1008, e instanceof Error ? e.message : 'Not allowed')
         return
