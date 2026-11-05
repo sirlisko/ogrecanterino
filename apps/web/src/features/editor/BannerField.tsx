@@ -1,6 +1,6 @@
 import type { Scene } from '@ogre/shared'
 import { useRemoveBanner, useUploadBanner } from '../../api/scenes.ts'
-import { sceneGradient } from '../scenes/sceneArt.ts'
+import { SceneArt } from '../scenes/art/SceneArt.tsx'
 
 export function BannerField({ scene }: { scene: Scene }) {
   const upload = useUploadBanner()
@@ -12,14 +12,9 @@ export function BannerField({ scene }: { scene: Scene }) {
     <div className="flex flex-col gap-1">
       <span>Banner image</span>
       <div className="flex items-center gap-3">
-        <div
-          className="aspect-[16/7] w-40 shrink-0 rounded-lg bg-cover bg-center ring-1 ring-peat-600"
-          style={{
-            backgroundImage: scene.bannerPath
-              ? `url(/banners/${encodeURIComponent(scene.bannerPath)})`
-              : sceneGradient(scene.name, scene.tags),
-          }}
-          aria-hidden
+        <SceneArt
+          scene={scene}
+          className="aspect-[16/7] w-40 shrink-0 rounded-lg ring-1 ring-peat-600"
         />
         <div className="flex flex-col items-start gap-1">
           <label
@@ -49,7 +44,7 @@ export function BannerField({ scene }: { scene: Scene }) {
             </button>
           ) : (
             <span className="text-sm text-peat-400">
-              Without one, the scene gets a colour wash.
+              Without one, the scene gets an illustration from its tags.
             </span>
           )}
         </div>
