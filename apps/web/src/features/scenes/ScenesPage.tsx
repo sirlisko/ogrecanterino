@@ -7,7 +7,8 @@ import { Button } from '../../ui/Button.tsx'
 import { setActiveCollection, useActiveCollection } from '../collections/activeCollection.ts'
 import { CollectionBar } from '../collections/CollectionBar.tsx'
 import { CollectionScenes } from '../collections/CollectionScenes.tsx'
-import { UNTITLED } from '../editor/useDiscardIfBlank.ts'
+import { UNTITLED } from '../editor/blankScene.ts'
+import { useSweepBlankScenes } from '../editor/useDiscardIfBlank.ts'
 import { AllScenes } from './AllScenes.tsx'
 import { ImportScenesButton } from './ImportScenesButton.tsx'
 
@@ -18,6 +19,7 @@ export function ScenesPage() {
   const save = useSaveScene()
   const navigate = useNavigate()
   const collection = collections.data?.find((c) => c.id === activeId)
+  useSweepBlankScenes(scenes.data)
 
   useEffect(() => {
     // The remembered collection was deleted or unshared.
