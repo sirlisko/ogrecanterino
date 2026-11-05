@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
-import { Icon } from '../../ui/Icon.tsx'
+import { Toast } from '../../ui/Toast.tsx'
 
 const SHOW_MS = 8000
 
-/** `aboveBar`: rendered inside the transport bar, so it clears the bar and its pads at any height. */
-export function ResumeToast({ aboveBar }: { aboveBar?: boolean }) {
+/** `floating`: for pages without a transport bar to stack it on (table mode). */
+export function ResumeToast({ floating }: { floating?: boolean }) {
   const faded = usePlayer((s) => s.faded)
 
   useEffect(() => {
@@ -18,30 +18,15 @@ export function ResumeToast({ aboveBar }: { aboveBar?: boolean }) {
 
   if (!faded) return null
   return (
-    <div
-      role="status"
-      className={`${aboveBar ? 'absolute bottom-full mb-3' : 'fixed bottom-6'} inset-x-0 z-40 mx-auto flex w-fit max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl bg-peat-700 py-2 pr-2 pl-4 shadow-2xl ring-1 ring-peat-600`}
+    <Toast
+      action="Resume"
+      onAction={() => void engine.resumeFaded()}
+      onDismiss={() => engine.dismissFaded()}
+      className={floating ? 'fixed inset-x-0 bottom-6 z-40 mx-auto' : ''}
     >
-      <span className="line-clamp-2 min-w-0">
-        {faded.reason === 'reload'
-          ? `${faded.scene.name} was playing before the page reloaded`
-          : `Faded out ${faded.scene.name}`}
-      </span>
-      <button
-        type="button"
-        onClick={() => void engine.resumeFaded()}
-        className="shrink-0 rounded-lg bg-brass px-3 py-1.5 font-medium text-peat-950"
-      >
-        Resume
-      </button>
-      <button
-        type="button"
-        onClick={() => engine.dismissFaded()}
-        aria-label="Dismiss"
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink-muted hover:text-ink"
-      >
-        <Icon name="close" />
-      </button>
-    </div>
+      {faded.reason === 'reload'
+        ? `${faded.scene.name} was playing before the page reloaded`
+        : `Faded out ${faded.scene.name}`}
+    </Toast>
   )
 }

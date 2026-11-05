@@ -71,7 +71,7 @@ export function TablePage() {
       </ErrorBoundary>
       {picking && <ScenePicker onClose={() => setPicking(false)} />}
       <HotkeyLayer />
-      <ResumeToast />
+      <ResumeToast floating />
     </div>
   )
 }
