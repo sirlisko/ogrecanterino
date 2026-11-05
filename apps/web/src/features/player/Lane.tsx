@@ -14,7 +14,8 @@ export function Lane({
   return (
     <section aria-label={title} className="min-w-0">
       <div className="mb-3 flex items-center gap-2 border-b-2 pb-2" style={{ borderColor: color }}>
-        <h2 className="font-display text-2xl font-bold" style={{ color }}>
+        {/* As tall as the icon buttons, so lanes with and without actions line up. */}
+        <h2 className="font-display text-2xl leading-9 font-bold" style={{ color }}>
           {title}
         </h2>
         <div className="ml-auto flex items-center gap-1">{actions}</div>
