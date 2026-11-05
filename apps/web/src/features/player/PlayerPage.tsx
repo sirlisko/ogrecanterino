@@ -38,7 +38,7 @@ export function PlayerPage() {
   return (
     <>
       <header
-        className="-mx-4 -mt-6 mb-6 bg-cover bg-center px-4 pt-14 pb-5"
+        className="-mt-6 mb-6 mx-[calc(50%-50vw)] bg-cover bg-center pt-14 pb-5"
         style={{
           backgroundImage: `linear-gradient(to bottom, transparent, var(--color-peat-900)), ${
             scene.bannerPath
@@ -47,7 +47,7 @@ export function PlayerPage() {
           }`,
         }}
       >
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-4 px-4">
           <div className="min-w-0">
             <h1 className="font-display text-4xl leading-tight font-bold text-balance sm:text-5xl">
               {scene.name}

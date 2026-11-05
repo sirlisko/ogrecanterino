@@ -25,7 +25,8 @@ export function Layout() {
   const { pathname } = useLocation()
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    // Clip, not hide: full-bleed banners reach 100vw (which counts the scrollbar) without breaking sticky.
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <header className="sticky top-0 z-30 border-b border-peat-700 bg-peat-900/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2.5">
           <NavLink to="/" className="mr-3 flex items-center gap-2 font-display text-xl font-bold">
