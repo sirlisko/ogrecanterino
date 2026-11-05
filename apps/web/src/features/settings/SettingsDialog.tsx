@@ -47,6 +47,12 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             checked={settings.confirmStart}
             onChange={(confirmStart) => changeSettings({ confirmStart })}
           />
+          <CheckRow
+            label="Show keyboard shortcuts"
+            description="Keys like 1 and ⇧1 on effects, quick pads and the setlist. Off at first on touch screens."
+            checked={settings.keyHints}
+            onChange={(keyHints) => changeSettings({ keyHints })}
+          />
         </SettingsSection>
         <SettingsSection title="Display">
           <CheckRow

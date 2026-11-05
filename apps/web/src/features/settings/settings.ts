@@ -11,6 +11,8 @@ export interface Settings {
   /** Music gain while ducked, as a fraction. */
   duckGain: number
   confirmStart: boolean
+  /** Keys shown on effects, pads and the setlist. */
+  keyHints: boolean
   lightsFollowSound: boolean
 }
 
@@ -19,6 +21,8 @@ const DEFAULTS: Settings = {
   fadeOutSeconds: 1.5,
   duckGain: 0.3,
   confirmStart: true,
+  // A touch screen usually has no keyboard to press them on.
+  keyHints: !window.matchMedia('(pointer: coarse)').matches,
   lightsFollowSound: false,
 }
 

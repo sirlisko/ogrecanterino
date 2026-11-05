@@ -2,11 +2,13 @@ import { useRef } from 'react'
 import { engine } from '../../audio/engine.ts'
 import { flash } from '../../ui/flash.ts'
 import { usePadSlots } from '../pads/usePadSlots.ts'
+import { useSettings } from '../settings/settings.ts'
 
 /** Only the pads that have a sound: empty slots are assigned from the transport bar, not here. */
 export function TablePads() {
   const { pads } = usePadSlots()
   const refs = useRef(new Map<number, HTMLButtonElement>())
+  const hints = useSettings((s) => s.keyHints)
   if (!pads.length) return null
 
   return (
@@ -29,9 +31,11 @@ export function TablePads() {
               }}
               className="relative flex min-h-24 items-end rounded-xl bg-peat-800 p-3 text-left text-lg ring-1 ring-peat-700 hover:bg-peat-700"
             >
-              <kbd className="absolute top-2 right-2 grid h-6 min-w-6 place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs text-ink tabular">
-                ⇧{pad.slot}
-              </kbd>
+              {hints && (
+                <kbd className="absolute top-2 right-2 grid h-6 min-w-6 place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs text-ink tabular">
+                  ⇧{pad.slot}
+                </kbd>
+              )}
               <span className="pr-8 leading-tight">{pad.label}</span>
             </button>
           ))}

@@ -6,6 +6,7 @@ import { Icon } from '../../ui/Icon.tsx'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
 import { SceneCounts } from '../scenes/SceneCounts.tsx'
 import { useConfirmStart } from '../scenes/useConfirmStart.ts'
+import { useSettings } from '../settings/settings.ts'
 import type { StepStatus } from './setlist.ts'
 
 const DOT: Record<StepStatus, string> = {
@@ -30,6 +31,7 @@ export function SetlistStep({
   last: boolean
 }) {
   const confirm = useConfirmStart(scene.id)
+  const hints = useSettings((s) => s.keyHints)
   const start = () => void engine.playScene(scene)
   const played = status === 'played'
 
@@ -83,9 +85,11 @@ export function SetlistStep({
           <>
             <span className="flex items-center gap-2">
               Up next
-              <kbd className="grid h-[22px] min-w-[22px] place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs tabular">
-                ]
-              </kbd>
+              {hints && (
+                <kbd className="grid h-[22px] min-w-[22px] place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs tabular">
+                  ]
+                </kbd>
+              )}
             </span>
             {/* As deliberate as pressing ], so it skips the second click. */}
             <Button variant="primary" onClick={start}>
