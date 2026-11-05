@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useScenes } from '../../api/scenes.ts'
 import { fieldClass } from '../../ui/Dialog.tsx'
 import { Fader } from '../../ui/Fader.tsx'
+import { Segmented } from '../../ui/Segmented.tsx'
 import { BannerField } from './BannerField.tsx'
 
 const SETTINGS: { key: keyof SceneSettings; label: string }[] = [
@@ -55,17 +56,18 @@ export function SceneDetailsForm({
           className={fieldClass}
         />
       </label>
-      <label className="flex flex-col gap-1">
-        Who can use it
-        <select
+      <div className="flex flex-col items-start gap-1">
+        <span>Who can use it</span>
+        <Segmented
+          label="Who can use it"
           value={scene.visibility}
-          onChange={(e) => onChange({ visibility: e.target.value as Scene['visibility'] })}
-          className={fieldClass}
-        >
-          <option value="private">Only me</option>
-          <option value="group">Everyone in the group</option>
-        </select>
-      </label>
+          options={[
+            { value: 'private', label: 'Only me' },
+            { value: 'group', label: 'Everyone in the group' },
+          ]}
+          onChange={(visibility) => onChange({ visibility })}
+        />
+      </div>
       <label className="flex flex-col gap-1">
         Combat music
         <select
