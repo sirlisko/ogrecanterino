@@ -77,7 +77,7 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
           placeholder={`Search ${all.length} sounds`}
           aria-label="Search sounds"
           data-hotkey-search
-          className="w-full rounded-lg bg-peat-800 px-3 py-2 ring-1 ring-peat-700 placeholder:text-peat-400 sm:w-72"
+          className="w-full rounded-lg bg-peat-800 px-3 py-2 ring-1 ring-peat-700 placeholder:text-peat-400 sm:w-64"
         />
         <Segmented
           label="Which sounds"
@@ -89,7 +89,6 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
             { value: 'recent', label: 'Recently previewed' },
           ]}
         />
-        <span className="mx-1 hidden h-5 w-px bg-peat-600 sm:block" />
         {CATEGORIES.map((c) => (
           <Chip
             key={c.value}
@@ -114,7 +113,7 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
               setLimit(PAGE)
             }}
             aria-label="Sort sounds"
-            className="rounded-full bg-peat-800 px-3 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
+            className="ml-auto rounded-lg bg-peat-800 py-1.5 pr-2 pl-3 text-[15px] text-ink-muted ring-1 ring-peat-700 hover:text-ink"
           >
             {SOUND_SORTS.map((s) => (
               <option key={s.value} value={s.value}>
