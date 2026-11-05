@@ -5,7 +5,7 @@ import { DiscordControl } from '../discord/DiscordControl.tsx'
 
 const quiet = 'rounded-lg px-4 py-3 text-ink-muted ring-1 ring-peat-600 hover:text-ink'
 
-export function TableHeader() {
+export function TableHeader({ onPickScene }: { onPickScene: () => void }) {
   const scene = usePlayer((s) => s.scene)
   const setlist = useSetlist()
   const goTo = useGoToScene()
@@ -18,6 +18,9 @@ export function TableHeader() {
       <h1 className="order-first min-w-0 flex-1 basis-full truncate font-display text-3xl font-bold sm:order-none sm:basis-0">
         {scene?.name ?? 'Nothing playing'}
       </h1>
+      <button type="button" onClick={onPickScene} className={quiet}>
+        Scenes
+      </button>
       {setlist.previous && (
         <button
           type="button"
