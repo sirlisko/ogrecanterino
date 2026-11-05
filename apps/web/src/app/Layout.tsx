@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
 import { ResumeToast } from '../features/player/ResumeToast.tsx'
@@ -40,9 +40,6 @@ export function Layout() {
             <NavLink to="/library" className={navClass}>
               Library
             </NavLink>
-            <NavLink to="/credits" className={navClass}>
-              Credits
-            </NavLink>
           </nav>
           <div className="ml-auto">
             <UserMenu />
@@ -53,6 +50,12 @@ export function Layout() {
         <ErrorBoundary resetKey={pathname} fallback={(retry) => <PageCrash retry={retry} />}>
           <Outlet />
         </ErrorBoundary>
+        <footer className="mt-16 border-t border-peat-800 pt-4 text-sm text-peat-400">
+          Music and sounds by many artists.{' '}
+          <Link to="/credits" className="underline hover:text-ink">
+            See the credits
+          </Link>
+        </footer>
       </main>
       <TransportBar />
       <ResumeToast />
