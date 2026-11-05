@@ -40,6 +40,14 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
             onChange={(duckGain) => changeSettings({ duckGain })}
           />
         </SettingsSection>
+        <SettingsSection title="Controls">
+          <CheckRow
+            label="Ask before replacing a live scene"
+            description="While a scene plays, starting another from a scene card, list or setlist needs a second click."
+            checked={settings.confirmStart}
+            onChange={(confirmStart) => changeSettings({ confirmStart })}
+          />
+        </SettingsSection>
         <SettingsSection title="Display">
           <CheckRow
             label="Lights follow the sound"

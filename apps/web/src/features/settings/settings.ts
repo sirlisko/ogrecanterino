@@ -10,6 +10,7 @@ export interface Settings {
   fadeOutSeconds: number
   /** Music gain while ducked, as a fraction. */
   duckGain: number
+  confirmStart: boolean
   lightsFollowSound: boolean
 }
 
@@ -17,6 +18,7 @@ const DEFAULTS: Settings = {
   crossfadeSeconds: 3,
   fadeOutSeconds: 1.5,
   duckGain: 0.3,
+  confirmStart: true,
   lightsFollowSound: false,
 }
 

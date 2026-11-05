@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { usePlayer } from '../../audio/store.ts'
+import { useSettings } from '../settings/settings.ts'
 
 const ARMED_MS = 3000
 
 /**
  * While another scene is live, the first click on a start button only arms it, so a misclick
- * while browsing scenes mid-session can't crossfade the table. Nothing live: starts straight away.
+ * while browsing scenes mid-session can't crossfade the table. Nothing live, or the GM turned
+ * the question off in Settings: starts straight away.
  */
 export function useConfirmStart(sceneId: string) {
-  const otherLive = usePlayer((s) => s.sceneId !== null && s.sceneId !== sceneId)
+  const ask = useSettings((s) => s.confirmStart)
+  const guarded = usePlayer((s) => s.sceneId !== null && s.sceneId !== sceneId) && ask
   const [armed, setArmed] = useState(false)
 
   useEffect(() => {
@@ -18,9 +21,9 @@ export function useConfirmStart(sceneId: string) {
   }, [armed])
 
   return {
-    armed: armed && otherLive,
+    armed: armed && guarded,
     attempt: (start: () => void) => {
-      if (otherLive && !armed) return setArmed(true)
+      if (guarded && !armed) return setArmed(true)
       setArmed(false)
       start()
     },
