@@ -1,37 +1,37 @@
 import { useRef } from 'react'
 import { engine } from '../../audio/engine.ts'
 import { flash } from '../../ui/flash.ts'
-import { PAD_SLOTS, usePadSlots } from '../pads/usePadSlots.ts'
+import { usePadSlots } from '../pads/usePadSlots.ts'
 
+/** Only the pads that have a sound: empty slots are assigned from the transport bar, not here. */
 export function TablePads() {
-  const slots = usePadSlots()
+  const { pads } = usePadSlots()
   const refs = useRef(new Map<number, HTMLButtonElement>())
-  if (!slots.pads.length) return null
+  if (!pads.length) return null
 
   return (
     <section aria-label="Quick pads">
       <h2 className="mb-3 font-display text-2xl font-bold">Quick pads</h2>
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-9">
-        {PAD_SLOTS.map((slot) => {
-          const pad = slots.at(slot)
-          return (
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {[...pads]
+          .sort((a, b) => a.slot - b.slot)
+          .map((pad) => (
             <button
-              key={slot}
+              key={pad.slot}
               type="button"
-              disabled={!pad}
-              data-pad-slot={slot}
-              ref={(el) => void (el ? refs.current.set(slot, el) : refs.current.delete(slot))}
+              data-pad-slot={pad.slot}
+              ref={(el) =>
+                void (el ? refs.current.set(pad.slot, el) : refs.current.delete(pad.slot))
+              }
               onClick={() => {
-                if (!pad) return
                 void engine.firePad(pad.soundId)
-                flash(refs.current.get(slot) ?? null, 'var(--color-ink)')
+                flash(refs.current.get(pad.slot) ?? null, 'var(--color-ink)')
               }}
-              className="flex min-h-24 items-end rounded-xl bg-peat-800 p-3 text-left text-lg ring-1 ring-peat-700 hover:bg-peat-700 disabled:opacity-30"
+              className="flex min-h-24 items-end rounded-xl bg-peat-800 p-3 text-left text-lg ring-1 ring-peat-700 hover:bg-peat-700"
             >
-              {pad?.label ?? ''}
+              {pad.label}
             </button>
-          )
-        })}
+          ))}
       </div>
     </section>
   )
