@@ -19,7 +19,7 @@ export function TableHeader({ onPickScene }: { onPickScene: () => void }) {
         {scene && <SceneArt scene={scene} wide {...glow} className="absolute inset-0" />}
         <div
           aria-hidden
-          className="absolute inset-0 bg-linear-to-b from-peat-950/50 to-peat-900/95"
+          className="absolute inset-0 bg-linear-to-b from-peat-950/20 to-peat-900/75"
         />
       </div>
       <div className="relative flex min-h-28 flex-wrap items-center gap-3 px-4 py-4 sm:px-5">
