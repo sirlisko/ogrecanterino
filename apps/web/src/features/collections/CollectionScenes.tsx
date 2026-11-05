@@ -1,10 +1,14 @@
 import type { Collection, Scene } from '@ogre/shared'
 import { useState } from 'react'
 import { useMe } from '../../api/me.ts'
+import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
-import { SceneGrid } from '../scenes/SceneGrid.tsx'
 import { matchesQuery, SceneSearch } from '../scenes/SceneSearch.tsx'
 import { CollectionDialog } from './CollectionDialog.tsx'
+import { useSessionPlays } from './sessionPlays.ts'
+import { stepStatus } from './setlist.ts'
+import { SetlistStep } from './SetlistStep.tsx'
+import { useSetlist } from './useSetlist.ts'
 
 export function CollectionScenes({
   collection,
@@ -19,25 +23,30 @@ export function CollectionScenes({
   const byId = new Map(scenes.map((s) => [s.id, s]))
   const ordered = collection.sceneIds.flatMap((id) => byId.get(id) ?? [])
   const unavailable = collection.sceneIds.length - ordered.length
-  const visible = ordered.filter((s) => matchesQuery(s, query))
   const mine = collection.ownerId === me?.id
   const canEdit = mine || me?.role === 'admin'
+  const liveId = usePlayer((s) => s.sceneId)
+  const nextId = useSetlist().next?.id ?? null
+  const played = new Set(useSessionPlays((s) => s.ids))
+  const combat = collection.combatSceneId ? byId.get(collection.combatSceneId) : undefined
+  // Numbered by their place in the collection, so searching doesn't renumber them.
+  const steps = ordered
+    .map((scene, i) => ({ scene, position: i + 1 }))
+    .filter(({ scene }) => matchesQuery(scene, query))
 
   return (
     <>
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="min-w-0">
-          <h2 className="font-display text-2xl font-bold">{collection.name}</h2>
-          <p className="text-sm text-ink-muted">
-            {collection.visibility === 'private'
-              ? 'Only you'
-              : mine
-                ? 'Shared with the group'
-                : `Shared by ${collection.ownerName}`}
-            {unavailable > 0 &&
-              `. ${unavailable} scene${unavailable === 1 ? ' is' : 's are'} no longer shared with you.`}
-          </p>
-        </div>
+        <p className="min-w-0 text-ink-muted">
+          {collection.visibility === 'private'
+            ? 'Only you'
+            : mine
+              ? 'Shared with the group'
+              : `Shared by ${collection.ownerName}`}
+          .{combat && ` Combat music for these scenes: ${combat.name}.`}
+          {unavailable > 0 &&
+            ` ${unavailable} scene${unavailable === 1 ? ' is' : 's are'} no longer shared with you.`}
+        </p>
         <div className="ml-auto flex items-center gap-2">
           <SceneSearch value={query} onChange={setQuery} />
           {canEdit && <Button onClick={() => setEditing(true)}>Edit collection</Button>}
@@ -55,10 +64,28 @@ export function CollectionScenes({
             </Button>
           )}
         </div>
-      ) : visible.length === 0 ? (
+      ) : steps.length === 0 ? (
         <p className="mt-10 text-ink-muted">No scenes match. Clear the search.</p>
       ) : (
-        <SceneGrid scenes={visible} numbered={!query} />
+        <>
+          <ol className="mt-5 max-w-5xl">
+            {steps.map(({ scene, position }, i) => (
+              <SetlistStep
+                key={scene.id}
+                scene={scene}
+                position={position}
+                status={stepStatus(scene.id, { liveId, nextId, played })}
+                first={i === 0}
+                last={i === steps.length - 1}
+              />
+            ))}
+          </ol>
+          {canEdit && (
+            <Button className="mt-4 ml-[3.75rem]" onClick={() => setEditing(true)}>
+              Add scenes
+            </Button>
+          )}
+        </>
       )}
       {editing && <CollectionDialog collection={collection} onClose={() => setEditing(false)} />}
     </>
