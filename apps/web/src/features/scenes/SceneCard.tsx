@@ -4,6 +4,7 @@ import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { SceneArt } from './art/SceneArt.tsx'
+import { useSceneGlow } from './art/useSceneGlow.ts'
 import { SceneCounts } from './SceneCounts.tsx'
 import { SceneMenu } from './SceneMenu.tsx'
 import { useConfirmStart } from './useConfirmStart.ts'
@@ -12,6 +13,7 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const confirm = useConfirmStart(scene.id)
+  const glow = useSceneGlow(playing)
 
   const start = () =>
     confirm.attempt(() => {
@@ -24,7 +26,7 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
       className={`relative overflow-hidden rounded-[10px] bg-peat-800 has-[:focus-visible]:ring-brass ${playing ? 'ring-2 ring-brass' : 'ring-1 ring-peat-700'}`}
     >
       <div className="relative h-[76px]">
-        <SceneArt scene={scene} className="h-full" />
+        <SceneArt scene={scene} glowRef={glow} className="h-full" />
         {playing && (
           <span className="absolute top-[15px] left-[52px] flex items-center gap-1.5 rounded-full bg-peat-950/80 px-2.5 text-[13px] font-medium text-brass">
             <span aria-hidden className="h-[7px] w-[7px] animate-breathe rounded-full bg-brass" />
