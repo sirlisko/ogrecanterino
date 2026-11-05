@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { engine } from '../../audio/engine.ts'
+import { toLevel } from '../../audio/levels.ts'
 import type { MeterName } from '../../audio/mixer.ts'
 
-const FLOOR_DB = -60
 /** Per animation frame: slow enough to read, fast enough to follow a hit. */
 const FALLOFF = 0.9
 
@@ -14,10 +14,7 @@ export function LevelMeter({ channel, color }: { channel: MeterName; color: stri
     let frame = 0
     let shown = 0
     const draw = () => {
-      const peak = engine.peak(channel)
-      const db = peak > 0 ? 20 * Math.log10(peak) : FLOOR_DB
-      const level = Math.max(0, Math.min(1, 1 - db / FLOOR_DB))
-      shown = Math.max(level, shown * FALLOFF)
+      shown = Math.max(toLevel(engine.peak(channel)), shown * FALLOFF)
       if (bar.current) bar.current.style.width = `${shown * 100}%`
       frame = requestAnimationFrame(draw)
     }
