@@ -2,6 +2,7 @@ import type { Scene } from '@ogre/shared'
 import { useMemo, useState } from 'react'
 import { useMe } from '../../api/me.ts'
 import { Chip } from '../../ui/Chip.tsx'
+import { FoldButton } from '../../ui/FoldButton.tsx'
 import { Segmented } from '../../ui/Segmented.tsx'
 import { LayoutToggle } from './LayoutToggle.tsx'
 import { RecentScenes } from './RecentScenes.tsx'
@@ -49,14 +50,9 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
             { value: 'shared', label: 'Shared with me' },
           ]}
         />
-        <button
-          type="button"
-          aria-expanded={tagsOpen}
-          onClick={() => setTagsOpen((o) => !o)}
-          className={`rounded-lg px-3 py-1.5 text-[15px] ring-1 ${tag ? 'text-ink ring-ink-muted' : 'text-ink-muted ring-peat-700 hover:text-ink'}`}
-        >
+        <FoldButton open={tagsOpen} active={!!tag} onToggle={() => setTagsOpen((o) => !o)}>
           {tag ? `Tags: ${tag}` : 'Tags'}
-        </button>
+        </FoldButton>
         <LayoutToggle className="ml-auto" />
       </div>
       {tagsOpen && (

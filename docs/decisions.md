@@ -196,8 +196,9 @@ Sounds too short or quiet to measure play unchanged.
 ### Quick pads live in the transport bar
 
 Pads moved from the bottom of the player page into a **Pads** tray, so they're reachable on every
-page. You assign, rename and clear them there; empty pads open a sound picker. The library's
-"Assign to pad" select remains as a shortcut.
+page. You assign, rename and clear them there; empty pads open a sound picker. "Assign to pad…"
+in a sound's menu in the library remains as a shortcut. It was a select on every row until the
+library's rows took the scene list's shape (a star and a menu), which gave titles room on a phone.
 
 ### Table mode is a separate route
 

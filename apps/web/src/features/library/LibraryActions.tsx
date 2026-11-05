@@ -1,24 +1,31 @@
 import type { Sound } from '@ogre/shared'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useFavourites, useMe, useToggleFavourite } from '../../api/me.ts'
 import { Icon } from '../../ui/Icon.tsx'
-import { PAD_SLOTS, usePadSlots } from '../pads/usePadSlots.ts'
+import { Menu, MenuItem } from '../../ui/Menu.tsx'
+import { AssignPadDialog } from '../pads/AssignPadDialog.tsx'
 import { DeleteSoundDialog } from './DeleteSoundDialog.tsx'
 import { EditSoundDialog } from './EditSoundDialog.tsx'
 
 export function LibraryActions({ sound }: { sound: Sound }) {
   const me = useMe().data
   const favourites = useFavourites().data ?? []
-  const { pads, assign } = usePadSlots()
   const toggleFav = useToggleFavourite()
-  const [editing, setEditing] = useState(false)
-  const [deleting, setDeleting] = useState(false)
+  const [dialog, setDialog] = useState<'assign' | 'edit' | 'delete' | null>(null)
+  const root = useRef<HTMLDivElement>(null)
+  // The menu item that opened the dialog is gone, so focus would otherwise fall to the page.
+  // The dialog has to unmount first: while it's open, everything behind it is inert.
+  const close = () => {
+    flushSync(() => setDialog(null))
+    root.current?.querySelector<HTMLElement>('[aria-haspopup="menu"]')?.focus()
+  }
   const fav = favourites.includes(sound.id)
-  const canDelete =
+  const canEdit =
     !!me && (me.role === 'admin' || (sound.uploadedBy !== null && sound.uploadedBy === me.id))
 
   return (
-    <div className="flex items-center gap-1">
+    <div ref={root} className="flex items-center gap-1">
       <button
         type="button"
         aria-pressed={fav}
@@ -26,49 +33,22 @@ export function LibraryActions({ sound }: { sound: Sound }) {
           fav ? `Remove ${sound.title} from favourites` : `Add ${sound.title} to favourites`
         }
         onClick={() => toggleFav.mutate({ soundId: sound.id, on: !fav })}
-        className={`grid h-8 w-8 place-items-center rounded-full text-lg hover:bg-peat-700 ${fav ? 'text-brass' : 'text-peat-400'}`}
+        className={`grid h-9 w-9 place-items-center rounded-full text-lg hover:bg-peat-700 ${fav ? 'text-brass' : 'text-peat-400'}`}
       >
         <Icon name="star" outline={!fav} className="h-5 w-5" />
       </button>
-      <select
-        aria-label={`Assign ${sound.title} to a quick pad`}
-        value=""
-        onChange={(e) => assign(Number(e.target.value), sound.id, sound.title)}
-        className="w-32 rounded-md bg-peat-800 px-1.5 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
-      >
-        <option value="" disabled>
-          Assign to pad
-        </option>
-        {PAD_SLOTS.map((slot) => {
-          const current = pads.find((p) => p.slot === slot)
-          return (
-            <option key={slot} value={slot}>
-              {slot}: {current ? current.label : 'empty'}
-            </option>
-          )
-        })}
-      </select>
-      {canDelete && (
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className="rounded-md px-2 py-1 text-sm text-ink-muted hover:bg-peat-700 hover:text-ink"
-        >
-          Edit
-        </button>
-      )}
-      {editing && <EditSoundDialog sound={sound} onClose={() => setEditing(false)} />}
-      {canDelete && (
-        <button
-          type="button"
-          aria-label={`Delete ${sound.title}`}
-          onClick={() => setDeleting(true)}
-          className="grid h-8 w-8 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
-        >
-          <Icon name="close" />
-        </button>
-      )}
-      {deleting && <DeleteSoundDialog sound={sound} onClose={() => setDeleting(false)} />}
+      <Menu label={`Actions for ${sound.title}`}>
+        <MenuItem onSelect={() => setDialog('assign')}>Assign to pad…</MenuItem>
+        {canEdit && <MenuItem onSelect={() => setDialog('edit')}>Edit</MenuItem>}
+        {canEdit && (
+          <MenuItem danger onSelect={() => setDialog('delete')}>
+            Delete
+          </MenuItem>
+        )}
+      </Menu>
+      {dialog === 'assign' && <AssignPadDialog sound={sound} onClose={close} />}
+      {dialog === 'edit' && <EditSoundDialog sound={sound} onClose={close} />}
+      {dialog === 'delete' && <DeleteSoundDialog sound={sound} onClose={close} />}
     </div>
   )
 }

@@ -27,14 +27,14 @@ export function SoundRow({
   const color = CATEGORY_COLOR[sound.category]
   const tags = sound.tags.filter((t) => !STRUCTURAL_TAGS.has(t))
   return (
-    <div className="rounded-lg hover:bg-peat-800">
-      <div className="flex items-center gap-3 px-2 py-1.5">
+    <div className="hover:bg-peat-800 has-[:focus-visible]:bg-peat-800">
+      <div className="flex items-center gap-3.5 px-1.5 py-2">
         {dragHandle}
         <button
           type="button"
           onClick={onPreview}
           aria-label={previewing ? `Stop ${sound.title}` : `Preview ${sound.title}`}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm ring-1 transition-colors"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm ring-1 transition-colors"
           style={{
             color: previewing ? 'var(--color-peat-950)' : color,
             backgroundColor: previewing ? color : 'transparent',
@@ -55,8 +55,8 @@ export function SoundRow({
         </span>
         {actions}
       </div>
-      {/* Lines up under the title: past the 2rem play button, its gap and the row padding. */}
-      {previewing && <PreviewSeek className="pr-3 pb-2 pl-[3.25rem]" />}
+      {/* Lines up under the title: past the 2.25rem play button, its gap and the row padding. */}
+      {previewing && <PreviewSeek className="pr-3 pb-2 pl-[3.5rem]" />}
     </div>
   )
 }

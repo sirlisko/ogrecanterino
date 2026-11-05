@@ -3,6 +3,8 @@ import { type ReactNode, useMemo, useState } from 'react'
 import { useFavourites, useRecent } from '../../api/me.ts'
 import { useSounds } from '../../api/sounds.ts'
 import { Chip } from '../../ui/Chip.tsx'
+import { FoldButton } from '../../ui/FoldButton.tsx'
+import { Segmented } from '../../ui/Segmented.tsx'
 import {
   emptyFilter,
   filterSounds,
@@ -43,6 +45,8 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
   const [view, setView] = useState<View>('all')
   const [limit, setLimit] = useState(PAGE)
   const [sort, setSort] = useState<SoundSort>('title')
+  // Folded like the scenes page's, so the sounds start near the top.
+  const [tagsOpen, setTagsOpen] = useState(false)
 
   const all = sounds.data ?? []
   const tags = useMemo(() => tagCounts(all).slice(0, compact ? 12 : 24), [all, compact])
@@ -73,14 +77,18 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
           placeholder={`Search ${all.length} sounds`}
           aria-label="Search sounds"
           data-hotkey-search
-          className="w-full rounded-lg bg-peat-800 px-3 py-2 ring-1 ring-peat-700 placeholder:text-peat-400 sm:w-72"
+          className="w-full rounded-lg bg-peat-800 px-3 py-2 ring-1 ring-peat-700 placeholder:text-peat-400 sm:w-64"
         />
-        {(['all', 'favourites', 'recent'] as const).map((v) => (
-          <Chip key={v} active={view === v} onClick={() => setView(v)}>
-            {{ all: 'All', favourites: 'Favourites', recent: 'Recently previewed' }[v]}
-          </Chip>
-        ))}
-        <span className="mx-1 hidden h-5 w-px bg-peat-600 sm:block" />
+        <Segmented
+          label="Which sounds"
+          value={view}
+          onChange={setView}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'favourites', label: 'Favourites' },
+            { value: 'recent', label: 'Recently previewed' },
+          ]}
+        />
         {CATEGORIES.map((c) => (
           <Chip
             key={c.value}
@@ -90,6 +98,13 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
             {c.label}
           </Chip>
         ))}
+        <FoldButton
+          open={tagsOpen}
+          active={filter.tags.length > 0}
+          onToggle={() => setTagsOpen((o) => !o)}
+        >
+          {filter.tags.length ? `Tags: ${filter.tags.join(', ')}` : 'Tags'}
+        </FoldButton>
         {view !== 'recent' && (
           <select
             value={sort}
@@ -98,7 +113,7 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
               setLimit(PAGE)
             }}
             aria-label="Sort sounds"
-            className="rounded-full bg-peat-800 px-3 py-1 text-sm text-ink-muted ring-1 ring-peat-700"
+            className="ml-auto rounded-lg bg-peat-800 py-1.5 pr-2 pl-3 text-[15px] text-ink-muted ring-1 ring-peat-700 hover:text-ink"
           >
             {SOUND_SORTS.map((s) => (
               <option key={s.value} value={s.value}>
@@ -108,13 +123,15 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
           </select>
         )}
       </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {tags.map(([t, n]) => (
-          <Chip key={t} active={filter.tags.includes(t)} onClick={() => toggleTag(t)}>
-            {t} <span className="opacity-60">{n}</span>
-          </Chip>
-        ))}
-      </div>
+      {tagsOpen && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {tags.map(([t, n]) => (
+            <Chip key={t} active={filter.tags.includes(t)} onClick={() => toggleTag(t)}>
+              {t} <span className="opacity-60">{n}</span>
+            </Chip>
+          ))}
+        </div>
+      )}
 
       <p className="mt-4 mb-2 text-sm text-ink-muted" aria-live="polite">
         {sounds.isPending
@@ -127,10 +144,10 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
             ? 'No favourites yet. Star sounds to collect them here.'
             : view === 'recent'
               ? 'Sounds you preview show up here.'
-              : 'Nothing matches. Remove a tag or change the search.'}
+              : 'No sounds match. Clear the search or remove a tag.'}
         </p>
       )}
-      <ul className="flex flex-col">
+      <ul className="flex flex-col border-t border-peat-700">
         {results.slice(0, limit).map((s) => {
           const row = (
             <SoundRow
@@ -140,7 +157,11 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
               actions={actions?.(s)}
             />
           )
-          return <li key={s.id}>{wrapRow ? wrapRow(s, row) : row}</li>
+          return (
+            <li key={s.id} className="border-b border-peat-700">
+              {wrapRow ? wrapRow(s, row) : row}
+            </li>
+          )
         })}
       </ul>
       {results.length > limit && (
