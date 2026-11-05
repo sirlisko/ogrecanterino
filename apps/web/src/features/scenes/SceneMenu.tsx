@@ -1,14 +1,16 @@
 import type { Collection, Scene } from '@ogre/shared'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { collectionInputOf, useCollections, useSaveCollection } from '../../api/collections.ts'
 import { useMe } from '../../api/me.ts'
-import { useDeleteScene, useDuplicateScene } from '../../api/scenes.ts'
+import { useDuplicateScene } from '../../api/scenes.ts'
 import { Menu, MenuItem } from '../../ui/Menu.tsx'
+import { deleteWithUndo } from './pendingDelete.ts'
 
 export function SceneMenu({ scene, canEdit }: { scene: Scene; canEdit: boolean }) {
   const navigate = useNavigate()
   const duplicate = useDuplicateScene()
-  const remove = useDeleteScene()
+  const qc = useQueryClient()
   const me = useMe().data
   const collections = (useCollections().data ?? []).filter(
     (c) => me?.role === 'admin' || c.ownerId === me?.id,
@@ -46,12 +48,7 @@ export function SceneMenu({ scene, canEdit }: { scene: Scene; canEdit: boolean }
         Export JSON
       </MenuItem>
       {canEdit && (
-        <MenuItem
-          danger
-          onSelect={() => {
-            if (confirm(`Delete "${scene.name}"? This can't be undone.`)) remove.mutate(scene.id)
-          }}
-        >
+        <MenuItem danger onSelect={() => deleteWithUndo(qc, scene)}>
           Delete
         </MenuItem>
       )}
