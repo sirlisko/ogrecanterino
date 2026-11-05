@@ -2,6 +2,7 @@ import type { Scene } from '@ogre/shared'
 import { useMemo, useState } from 'react'
 import { useMe } from '../../api/me.ts'
 import { Chip } from '../../ui/Chip.tsx'
+import { LayoutToggle } from './LayoutToggle.tsx'
 import { RecentScenes } from './RecentScenes.tsx'
 import { SceneGrid } from './SceneGrid.tsx'
 import { SceneSearch, matchesQuery } from './SceneSearch.tsx'
@@ -56,6 +57,7 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
             </Chip>
           ))}
         </div>
+        <LayoutToggle className="ml-auto" />
       </div>
       <div className={`mt-3 flex flex-wrap gap-1.5 ${folded}`}>
         {tags.map((t) => (
