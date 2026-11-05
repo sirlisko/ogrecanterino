@@ -132,8 +132,15 @@ page. You assign, rename and clear them there; empty pads open a sound picker. T
 
 ### Table mode is a separate route
 
-`/table` drops navigation and editing for big touch targets. It shows whatever is playing and never
-starts a scene itself, consistent with "only Start scene changes what the table hears".
+`/table` drops navigation and editing for big touch targets. It shows whatever is playing and only
+starts a scene from its explicit controls, consistent with "only Start scene changes what the table
+hears".
+
+Updated 2026-11-05: a tablet is often the only screen at the table, so table mode now has the
+mixer volumes, "Mute this device", ambience switches (with "Now" for interval layers), the Discord
+status and a **Scenes** picker. Ambience switches go through the same working copy as the player
+page, so they save for the scene's owner and stay session-only on shared scenes. Only assigned
+quick pads show; assigning happens in the transport bar.
 
 ### Where state lives
 
