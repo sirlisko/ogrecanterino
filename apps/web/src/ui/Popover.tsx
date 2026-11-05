@@ -1,12 +1,13 @@
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 
-/** Panel anchored above its trigger (the transport bar lives at the bottom of the screen). */
+/** Panel anchored above its trigger (the transport bar lives at the bottom of the screen), or below it. */
 export function Popover({
   trigger,
   label,
   children,
   wide,
   alert,
+  below,
 }: {
   trigger: ReactNode
   label: string
@@ -14,6 +15,8 @@ export function Popover({
   wide?: boolean
   /** Styles the trigger as a warning that needs the GM's attention. */
   alert?: boolean
+  /** Opens downwards, for triggers at the top of the screen. */
+  below?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -57,7 +60,7 @@ export function Popover({
           id={id}
           role="dialog"
           aria-label={label}
-          className={`absolute right-0 bottom-full mb-3 ${wide ? 'w-[min(26rem,calc(100vw-2rem))]' : 'w-[min(20rem,calc(100vw-2rem))]'} rounded-xl bg-peat-800 p-4 shadow-2xl ring-1 ring-peat-600`}
+          className={`absolute right-0 ${below ? 'top-full mt-3' : 'bottom-full mb-3'} z-40 ${wide ? 'w-[min(26rem,calc(100vw-2rem))]' : 'w-[min(20rem,calc(100vw-2rem))]'} rounded-xl bg-peat-800 p-4 shadow-2xl ring-1 ring-peat-600`}
         >
           {children}
         </div>

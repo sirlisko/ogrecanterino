@@ -12,7 +12,8 @@ const LABELS: Record<StreamStatus, { full: string; short: string }> = {
   stopped: { full: 'Discord', short: 'DC' },
 }
 
-export function DiscordControl() {
+/** `below`: for a trigger at the top of the screen (table mode) instead of in the transport bar. */
+export function DiscordControl({ below }: { below?: boolean }) {
   const status = useDiscordStatus().data
   const stream = useDiscordStream()
   if (!status?.configured) return null
@@ -29,6 +30,7 @@ export function DiscordControl() {
     <Popover
       label="Discord"
       alert={stream.status === 'error'}
+      below={below}
       trigger={
         <span className="flex items-center gap-2">
           <span aria-hidden className={`h-2 w-2 rounded-full ${dot}`} />

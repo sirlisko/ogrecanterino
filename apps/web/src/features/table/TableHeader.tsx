@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { usePlayer } from '../../audio/store.ts'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
+import { DiscordControl } from '../discord/DiscordControl.tsx'
 
 const quiet = 'rounded-lg px-4 py-3 text-ink-muted ring-1 ring-peat-600 hover:text-ink'
 
@@ -35,6 +36,7 @@ export function TableHeader() {
           {scene ? 'Next' : 'Start'}: {setlist.next.name}
         </button>
       )}
+      <DiscordControl below />
       <button
         type="button"
         onClick={() =>
