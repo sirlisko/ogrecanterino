@@ -2,6 +2,8 @@ import type { Scene } from '@ogre/shared'
 import { useMemo, useState } from 'react'
 import { useMe } from '../../api/me.ts'
 import { Chip } from '../../ui/Chip.tsx'
+import { Segmented } from '../../ui/Segmented.tsx'
+import { LayoutToggle } from './LayoutToggle.tsx'
 import { RecentScenes } from './RecentScenes.tsx'
 import { SceneGrid } from './SceneGrid.tsx'
 import { SceneSearch, matchesQuery } from './SceneSearch.tsx'
@@ -14,10 +16,8 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
   const [query, setQuery] = useState('')
   const [owner, setOwner] = useState<Owner>('all')
   const [tag, setTag] = useState<string | null>(null)
-  const [filtersOpen, setFiltersOpen] = useState(false)
-  const activeFilters = (owner !== 'all' ? 1 : 0) + (tag ? 1 : 0)
-  // On phones the filters fold behind a button, so the first scenes show without scrolling.
-  const folded = filtersOpen ? '' : 'max-sm:hidden'
+  // Tags fold behind a button, so the scenes start near the top of the page.
+  const [tagsOpen, setTagsOpen] = useState(false)
 
   const tags = useMemo(
     () =>
@@ -38,32 +38,36 @@ export function AllScenes({ scenes }: { scenes: Scene[] }) {
     <>
       <RecentScenes scenes={scenes} />
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <div className="flex w-full items-center gap-2 sm:contents">
-          <SceneSearch value={query} onChange={setQuery} />
-          <button
-            type="button"
-            aria-expanded={filtersOpen}
-            onClick={() => setFiltersOpen((o) => !o)}
-            className={`shrink-0 rounded-lg px-3 py-2 ring-1 sm:hidden ${activeFilters ? 'text-ink ring-ink-muted' : 'text-ink-muted ring-peat-700'}`}
-          >
-            Filters{activeFilters > 0 && ` (${activeFilters})`}
-          </button>
-        </div>
-        <div className={`flex flex-wrap gap-2 ${folded}`}>
-          {(['all', 'mine', 'shared'] as const).map((o) => (
-            <Chip key={o} active={owner === o} onClick={() => setOwner(o)}>
-              {{ all: 'All', mine: 'Mine', shared: 'Shared with me' }[o]}
+        <SceneSearch value={query} onChange={setQuery} />
+        <Segmented
+          label="Whose scenes"
+          value={owner}
+          onChange={setOwner}
+          options={[
+            { value: 'all', label: 'All' },
+            { value: 'mine', label: 'Mine' },
+            { value: 'shared', label: 'Shared with me' },
+          ]}
+        />
+        <button
+          type="button"
+          aria-expanded={tagsOpen}
+          onClick={() => setTagsOpen((o) => !o)}
+          className={`rounded-lg px-3 py-1.5 text-[15px] ring-1 ${tag ? 'text-ink ring-ink-muted' : 'text-ink-muted ring-peat-700 hover:text-ink'}`}
+        >
+          {tag ? `Tags: ${tag}` : 'Tags'}
+        </button>
+        <LayoutToggle className="ml-auto" />
+      </div>
+      {tagsOpen && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {tags.map((t) => (
+            <Chip key={t} active={tag === t} onClick={() => setTag(tag === t ? null : t)}>
+              {t}
             </Chip>
           ))}
         </div>
-      </div>
-      <div className={`mt-3 flex flex-wrap gap-1.5 ${folded}`}>
-        {tags.map((t) => (
-          <Chip key={t} active={tag === t} onClick={() => setTag(tag === t ? null : t)}>
-            {t}
-          </Chip>
-        ))}
-      </div>
+      )}
       {visible.length === 0 ? (
         <p className="mt-10 max-w-prose text-ink-muted">
           {scenes.length === 0
