@@ -3,6 +3,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { App } from './app/App.tsx'
+import { AppCrash } from './app/CrashNotice.tsx'
+import { ErrorBoundary } from './ui/ErrorBoundary.tsx'
 import './styles.css'
 // Loaded up front so scenes started before visiting the scenes page are still recorded.
 import './features/scenes/recentScenes.ts'
@@ -16,7 +18,9 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ErrorBoundary fallback={() => <AppCrash />}>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
     </QueryClientProvider>
   </StrictMode>,
 )

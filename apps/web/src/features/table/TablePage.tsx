@@ -2,6 +2,8 @@ import { Link } from 'react-router'
 import { useLibrarySync } from '../../app/Layout.tsx'
 import { usePlayer } from '../../audio/store.ts'
 import { HotkeyLayer } from '../../hotkeys/HotkeyLayer.tsx'
+import { ErrorBoundary } from '../../ui/ErrorBoundary.tsx'
+import { PageCrash } from '../../app/CrashNotice.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { EFFECT_KEYS, EffectPad } from '../player/EffectsLane.tsx'
 import { ResumeToast } from '../player/ResumeToast.tsx'
@@ -59,33 +61,35 @@ export function TablePage() {
         </button>
       </header>
 
-      {scene ? (
-        <>
-          <TableControls scene={scene} />
-          <TableMusic scene={scene} />
-          <section aria-label="Effects">
-            {scene.data.effects.length === 0 ? (
-              <p className="text-ink-muted">No effects in this scene.</p>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {scene.data.effects.map((card, i) => (
-                  <EffectPad key={card.id} card={card} hotkey={EFFECT_KEYS[i]} active large />
-                ))}
-              </div>
+      <ErrorBoundary resetKey={scene?.id} fallback={(retry) => <PageCrash retry={retry} />}>
+        {scene ? (
+          <>
+            <TableControls scene={scene} />
+            <TableMusic scene={scene} />
+            <section aria-label="Effects">
+              {scene.data.effects.length === 0 ? (
+                <p className="text-ink-muted">No effects in this scene.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  {scene.data.effects.map((card, i) => (
+                    <EffectPad key={card.id} card={card} hotkey={EFFECT_KEYS[i]} active large />
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
+        ) : (
+          <p className="max-w-prose text-lg text-ink-muted">
+            Start a scene to get its music and effects here.{' '}
+            {!setlist.next && (
+              <Link to="/" className="text-brass underline">
+                Pick a scene
+              </Link>
             )}
-          </section>
-        </>
-      ) : (
-        <p className="max-w-prose text-lg text-ink-muted">
-          Start a scene to get its music and effects here.{' '}
-          {!setlist.next && (
-            <Link to="/" className="text-brass underline">
-              Pick a scene
-            </Link>
-          )}
-        </p>
-      )}
-      <TablePads />
+          </p>
+        )}
+        <TablePads />
+      </ErrorBoundary>
       <HotkeyLayer />
       <ResumeToast />
     </div>
