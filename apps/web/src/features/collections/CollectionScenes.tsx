@@ -4,6 +4,7 @@ import { useMe } from '../../api/me.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
 import { matchesQuery, SceneSearch } from '../scenes/SceneSearch.tsx'
+import { AddScenesDialog } from './AddScenesDialog.tsx'
 import { CollectionDialog } from './CollectionDialog.tsx'
 import { useSessionPlays } from './sessionPlays.ts'
 import { stepStatus } from './setlist.ts'
@@ -19,6 +20,7 @@ export function CollectionScenes({
 }) {
   const me = useMe().data
   const [editing, setEditing] = useState(false)
+  const [adding, setAdding] = useState(false)
   const [query, setQuery] = useState('')
   const byId = new Map(scenes.map((s) => [s.id, s]))
   const ordered = collection.sceneIds.flatMap((id) => byId.get(id) ?? [])
@@ -59,7 +61,7 @@ export function CollectionScenes({
             {canEdit && " Add them here, or from any scene's actions menu."}
           </p>
           {canEdit && (
-            <Button variant="primary" onClick={() => setEditing(true)}>
+            <Button variant="primary" onClick={() => setAdding(true)}>
               Add scenes
             </Button>
           )}
@@ -81,13 +83,14 @@ export function CollectionScenes({
             ))}
           </ol>
           {canEdit && (
-            <Button className="mt-4 ml-[3.75rem]" onClick={() => setEditing(true)}>
+            <Button className="mt-4 ml-[3.75rem]" onClick={() => setAdding(true)}>
               Add scenes
             </Button>
           )}
         </>
       )}
       {editing && <CollectionDialog collection={collection} onClose={() => setEditing(false)} />}
+      {adding && <AddScenesDialog collection={collection} onClose={() => setAdding(false)} />}
     </>
   )
 }
