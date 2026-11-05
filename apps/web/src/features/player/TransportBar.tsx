@@ -44,7 +44,7 @@ export function TransportBar() {
           {scene ? (
             <>
               <div className="hidden shrink-0 overflow-hidden rounded-md sm:block">
-                <SceneArt scene={scene} glowRef={glow} className="h-10 w-[72px]" />
+                <SceneArt scene={scene} {...glow} className="h-10 w-[72px]" />
               </div>
               <div className="min-w-0">
                 <Link
