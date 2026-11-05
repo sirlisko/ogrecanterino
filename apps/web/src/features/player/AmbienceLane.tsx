@@ -50,7 +50,7 @@ export function AmbienceLane({
                 <input
                   type="checkbox"
                   className="peer sr-only"
-                  checked={card.enabled}
+                  checked={card.enabled && !missing}
                   disabled={status !== 'ready'}
                   onChange={(e) => onCard(card.id, { enabled: e.target.checked })}
                 />
@@ -63,7 +63,9 @@ export function AmbienceLane({
                 className={`h-2 w-2 shrink-0 rounded-full ${s?.sounding ? 'animate-breathe bg-lichen' : 'bg-transparent'}`}
               />
               <span className="min-w-0 flex-1">
-                <span className={`block truncate ${card.enabled ? '' : 'text-peat-400'}`}>
+                <span
+                  className={`block truncate ${card.enabled && !missing ? '' : 'text-peat-400'}`}
+                >
                   {card.label}
                 </span>
                 {missing ? (
@@ -78,7 +80,7 @@ export function AmbienceLane({
                   )
                 )}
               </span>
-              {interval && active && card.enabled && (
+              {interval && active && card.enabled && status === 'ready' && (
                 <button
                   type="button"
                   onClick={() => engine.triggerAmbience(card.id)}
