@@ -1,6 +1,4 @@
-import { Button } from '../../ui/Button.tsx'
-import { Dialog } from '../../ui/Dialog.tsx'
-import { SoundBrowser } from '../library/SoundBrowser.tsx'
+import { SoundPicker } from '../library/SoundPicker.tsx'
 
 export function PadPicker({
   slot,
@@ -12,27 +10,11 @@ export function PadPicker({
   onClose: () => void
 }) {
   return (
-    <Dialog title={`Choose a sound for pad ${slot}`} onClose={onClose} wide>
-      <div className="-m-1 max-h-[60dvh] overflow-y-auto p-1">
-        <SoundBrowser
-          compact
-          initialCategory="effect"
-          actions={(sound) => (
-            <Button
-              className="px-3 py-1 text-sm"
-              onClick={() => {
-                onPick(sound.id, sound.title)
-                onClose()
-              }}
-            >
-              Choose
-            </Button>
-          )}
-        />
-      </div>
-      <div className="mt-4 text-right">
-        <Button onClick={onClose}>Cancel</Button>
-      </div>
-    </Dialog>
+    <SoundPicker
+      title={`Choose a sound for pad ${slot}`}
+      category="effect"
+      onPick={(sound) => onPick(sound.id, sound.title)}
+      onClose={onClose}
+    />
   )
 }
