@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
-import { ResumeToast } from '../features/player/ResumeToast.tsx'
 import { TransportBar } from '../features/player/TransportBar.tsx'
 import { HotkeyLayer } from '../hotkeys/HotkeyLayer.tsx'
 import { ErrorBoundary } from '../ui/ErrorBoundary.tsx'
@@ -58,7 +57,6 @@ export function Layout() {
         </footer>
       </main>
       <TransportBar />
-      <ResumeToast />
       <HotkeyLayer />
     </div>
   )
