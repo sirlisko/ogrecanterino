@@ -12,7 +12,7 @@ export function SettingsDialog({ onClose }: { onClose: () => void }) {
   const discord = useDiscordStatus().data?.configured
 
   return (
-    <Dialog title="Settings" onClose={onClose}>
+    <Dialog title="Settings" onClose={onClose} wide>
       <p className="-mt-2 text-sm text-ink-muted">These apply to this device only.</p>
       <div className="mt-5 flex flex-col gap-6">
         <SettingsSection title="Playback">
