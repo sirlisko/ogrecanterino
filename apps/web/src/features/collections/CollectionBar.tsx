@@ -36,7 +36,7 @@ export function CollectionBar() {
           className={tab(active === c.id)}
         >
           {c.name}{' '}
-          <span className="font-sans text-[15px] font-normal text-ink-muted">
+          <span className="font-sans text-[15px] font-normal text-ink-muted lining-nums">
             {c.sceneIds.length}
           </span>
         </button>
