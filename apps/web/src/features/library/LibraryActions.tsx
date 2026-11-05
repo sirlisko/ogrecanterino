@@ -1,10 +1,9 @@
 import type { Sound } from '@ogre/shared'
 import { useState } from 'react'
 import { useFavourites, useMe, useToggleFavourite } from '../../api/me.ts'
-import { fetchSoundUsage, useDeleteSound } from '../../api/sounds.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { PAD_SLOTS, usePadSlots } from '../pads/usePadSlots.ts'
-import { deleteSoundMessage } from './deleteMessage.ts'
+import { DeleteSoundDialog } from './DeleteSoundDialog.tsx'
 import { EditSoundDialog } from './EditSoundDialog.tsx'
 
 export function LibraryActions({ sound }: { sound: Sound }) {
@@ -12,8 +11,8 @@ export function LibraryActions({ sound }: { sound: Sound }) {
   const favourites = useFavourites().data ?? []
   const { pads, assign } = usePadSlots()
   const toggleFav = useToggleFavourite()
-  const remove = useDeleteSound()
   const [editing, setEditing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const fav = favourites.includes(sound.id)
   const canDelete =
     !!me && (me.role === 'admin' || (sound.uploadedBy !== null && sound.uploadedBy === me.id))
@@ -63,15 +62,13 @@ export function LibraryActions({ sound }: { sound: Sound }) {
         <button
           type="button"
           aria-label={`Delete ${sound.title}`}
-          onClick={async () => {
-            const usage = await fetchSoundUsage(sound.id)
-            if (confirm(deleteSoundMessage(sound.title, usage))) remove.mutate(sound.id)
-          }}
+          onClick={() => setDeleting(true)}
           className="grid h-8 w-8 place-items-center rounded-full text-peat-400 hover:bg-danger/15 hover:text-danger"
         >
           <Icon name="close" />
         </button>
       )}
+      {deleting && <DeleteSoundDialog sound={sound} onClose={() => setDeleting(false)} />}
     </div>
   )
 }
