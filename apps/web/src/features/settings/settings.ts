@@ -1,14 +1,16 @@
 import { create } from 'zustand'
+import { engine } from '../../audio/engine.ts'
 import { prefersReducedMotion } from '../../ui/motion.ts'
 import { withChoice, withSaved } from './stored.ts'
 
 const KEY = 'ogre.settings'
 
 export interface Settings {
+  crossfadeSeconds: number
   lightsFollowSound: boolean
 }
 
-const DEFAULTS: Settings = { lightsFollowSound: false }
+const DEFAULTS: Settings = { crossfadeSeconds: 3, lightsFollowSound: false }
 
 function saved() {
   try {
@@ -29,6 +31,14 @@ export function changeSettings(patch: Partial<Settings>) {
     // storage unavailable: the choice just won't survive a reload
   }
 }
+
+/** The engine doesn't know about settings; it's told whenever they change. */
+function applyToEngine(s: Settings) {
+  engine.setCrossfade(s.crossfadeSeconds)
+}
+
+applyToEngine(useSettings.getState())
+useSettings.subscribe(applyToEngine)
 
 /** Reduced motion wins over the setting: the lights then stay steady. */
 export const useLightsFollowSound = () =>

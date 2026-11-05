@@ -9,6 +9,8 @@ import './styles.css'
 // Loaded up front so scenes started before visiting the scenes page are still recorded.
 import './features/scenes/recentScenes.ts'
 import './features/collections/sessionPlays.ts'
+// Hands the saved settings to the audio engine before anything plays.
+import './features/settings/settings.ts'
 
 const router = createBrowserRouter([{ path: '*', element: <App /> }])
 

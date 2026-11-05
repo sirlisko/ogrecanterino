@@ -11,12 +11,9 @@ const CHANNELS: { key: keyof Volumes; label: string; color: string }[] = [
   { key: 'effect', label: 'Effects', color: 'var(--color-arcane)' },
 ]
 
-const CROSSFADES = [0, 1, 3, 5, 8]
-
 export function MixerPopover() {
   const volumes = usePlayer((s) => s.volumes)
   const monitor = usePlayer((s) => s.monitor)
-  const crossfade = usePlayer((s) => s.crossfadeSeconds)
 
   return (
     <Popover trigger="Mixer" label="Mixer">
@@ -47,20 +44,6 @@ export function MixerPopover() {
             className="accent-brass"
           />
           Mute this device (M)
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          Scene crossfade
-          <select
-            value={crossfade}
-            onChange={(e) => engine.setCrossfade(Number(e.target.value))}
-            className="ml-auto rounded-md bg-peat-700 px-2 py-1"
-          >
-            {CROSSFADES.map((s) => (
-              <option key={s} value={s}>
-                {s === 0 ? 'Cut' : `${s} s`}
-              </option>
-            ))}
-          </select>
         </label>
       </div>
     </Popover>

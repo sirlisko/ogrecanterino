@@ -1,28 +1,36 @@
 import { Button } from '../../ui/Button.tsx'
 import { Dialog } from '../../ui/Dialog.tsx'
+import { CheckRow, SelectRow, SettingsSection } from './SettingRows.tsx'
 import { changeSettings, useSettings } from './settings.ts'
 
+const seconds = (values: number[], zero?: string) =>
+  values.map((s) => ({ value: s, label: s === 0 && zero ? zero : `${s} s` }))
+
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
-  const lightsFollowSound = useSettings((s) => s.lightsFollowSound)
+  const settings = useSettings()
 
   return (
     <Dialog title="Settings" onClose={onClose}>
-      <p className="text-sm text-ink-muted">These apply to this device only.</p>
-      <label className="mt-4 flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={lightsFollowSound}
-          onChange={(e) => changeSettings({ lightsFollowSound: e.target.checked })}
-          className="mt-1 accent-brass"
-        />
-        <span>
-          Lights follow the sound
-          <span className="block text-sm text-ink-muted">
-            While a scene plays, its picture and the edge of the transport bar flicker with the
-            music and flash on effects. When off, they stay steadily lit.
-          </span>
-        </span>
-      </label>
+      <p className="-mt-2 text-sm text-ink-muted">These apply to this device only.</p>
+      <div className="mt-5 flex flex-col gap-6">
+        <SettingsSection title="Playback">
+          <SelectRow
+            label="Scene crossfade"
+            description="How long one scene's sound takes to blend into the next."
+            value={settings.crossfadeSeconds}
+            options={seconds([0, 1, 3, 5, 8], 'Cut')}
+            onChange={(crossfadeSeconds) => changeSettings({ crossfadeSeconds })}
+          />
+        </SettingsSection>
+        <SettingsSection title="Display">
+          <CheckRow
+            label="Lights follow the sound"
+            description="While a scene plays, its picture and the edge of the transport bar flicker with the music and flash on effects. When off, they stay steadily lit."
+            checked={settings.lightsFollowSound}
+            onChange={(lightsFollowSound) => changeSettings({ lightsFollowSound })}
+          />
+        </SettingsSection>
+      </div>
       <div className="mt-6 text-right">
         <Button onClick={onClose}>Close</Button>
       </div>
