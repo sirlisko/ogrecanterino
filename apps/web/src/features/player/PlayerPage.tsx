@@ -7,7 +7,7 @@ import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
 import { combatSceneIdFor } from '../collections/setlist.ts'
 import { useActiveCollectionData } from '../collections/useSetlist.ts'
-import { sceneGradient } from '../scenes/sceneArt.ts'
+import { SceneArt } from '../scenes/art/SceneArt.tsx'
 import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
 import { LaneTabs } from './LaneTabs.tsx'
@@ -42,17 +42,13 @@ export function PlayerPage() {
 
   return (
     <>
-      <header
-        className="-mt-6 mb-6 mx-[calc(50%-50vw)] bg-cover bg-center pt-14 pb-5"
-        style={{
-          backgroundImage: `linear-gradient(to bottom, transparent, var(--color-peat-900)), ${
-            scene.bannerPath
-              ? `url(/banners/${encodeURIComponent(scene.bannerPath)})`
-              : sceneGradient(scene.name, scene.tags)
-          }`,
-        }}
-      >
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-4 px-4">
+      <header className="relative -mt-6 mb-6 mx-[calc(50%-50vw)] pt-20 pb-5">
+        <SceneArt scene={scene} wide className="absolute inset-0" />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-linear-to-b from-transparent from-30% to-peat-900"
+        />
+        <div className="relative mx-auto flex max-w-7xl flex-wrap items-end gap-4 px-4">
           <div className="min-w-0">
             <h1 className="font-display text-4xl leading-tight font-bold text-balance sm:text-5xl">
               {scene.name}

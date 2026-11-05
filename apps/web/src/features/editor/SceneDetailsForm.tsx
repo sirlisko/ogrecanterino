@@ -1,24 +1,17 @@
 import type { Scene, SceneSettings } from '@ogre/shared'
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { useScenes } from '../../api/scenes.ts'
 import { fieldClass } from '../../ui/Dialog.tsx'
 import { Fader } from '../../ui/Fader.tsx'
-import { BannerField } from './BannerField.tsx'
+import { Segmented } from '../../ui/Segmented.tsx'
+import { topTags } from '../scenes/topTags.ts'
+import { TagInput } from './TagInput.tsx'
 
 const SETTINGS: { key: keyof SceneSettings; label: string }[] = [
   { key: 'autoStartMusic', label: 'Start music when the scene starts' },
   { key: 'musicIsPlaylist', label: 'Play music as a playlist' },
   { key: 'musicCrossfade', label: 'Crossfade between tracks' },
   { key: 'shuffle', label: 'Shuffle' },
-]
-
-const parseTags = (text: string) => [
-  ...new Set(
-    text
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean),
-  ),
 ]
 
 export function SceneDetailsForm({
@@ -29,43 +22,41 @@ export function SceneDetailsForm({
   onChange: (patch: Partial<Scene>) => void
 }) {
   const scenes = useScenes().data ?? []
-  const [tagText, setTagText] = useState(scene.tags.join(', '))
+  const suggestions = useMemo(
+    () =>
+      topTags(
+        scenes.map((s) => s.tags),
+        16,
+      ),
+    [scenes],
+  )
   const setSetting = (key: keyof SceneSettings, value: boolean) =>
     onChange({ data: { ...scene.data, settings: { ...scene.data.settings, [key]: value } } })
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <label className="flex flex-col gap-1 md:col-span-2">
-        Name
-        <input
-          value={scene.name}
-          onChange={(e) => onChange({ name: e.target.value })}
-          className={`${fieldClass} font-display text-2xl font-bold`}
-        />
-      </label>
-      <label className="flex flex-col gap-1">
-        Tags
-        <input
-          value={tagText}
-          onChange={(e) => {
-            setTagText(e.target.value)
-            onChange({ tags: parseTags(e.target.value) })
-          }}
-          placeholder="Forest, Night, Tense"
-          className={fieldClass}
-        />
-      </label>
-      <label className="flex flex-col gap-1">
-        Who can use it
-        <select
+      <div className="flex flex-col gap-1">
+        <span id="scene-tags">Tags</span>
+        <div role="group" aria-labelledby="scene-tags">
+          <TagInput
+            tags={scene.tags}
+            suggestions={suggestions}
+            onChange={(tags) => onChange({ tags })}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col items-start gap-1">
+        <span>Who can use it</span>
+        <Segmented
+          label="Who can use it"
           value={scene.visibility}
-          onChange={(e) => onChange({ visibility: e.target.value as Scene['visibility'] })}
-          className={fieldClass}
-        >
-          <option value="private">Only me</option>
-          <option value="group">Everyone in the group</option>
-        </select>
-      </label>
+          options={[
+            { value: 'private', label: 'Only me' },
+            { value: 'group', label: 'Everyone in the group' },
+          ]}
+          onChange={(visibility) => onChange({ visibility })}
+        />
+      </div>
       <label className="flex flex-col gap-1">
         Combat music
         <select
@@ -86,7 +77,6 @@ export function SceneDetailsForm({
           The Combat button swaps to this scene's music and back.
         </span>
       </label>
-      <BannerField scene={scene} />
       <fieldset className="flex flex-col gap-1.5 md:col-span-2">
         <legend className="mb-1">Playback</legend>
         <div className="flex flex-wrap gap-x-6 gap-y-1.5">

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
-import { sceneGradient } from './sceneArt.ts'
+import { SceneArt } from './art/SceneArt.tsx'
 import { SceneMenu } from './SceneMenu.tsx'
 import { useConfirmStart } from './useConfirmStart.ts'
 
@@ -31,14 +31,7 @@ export function SceneCard({
 
   return (
     <article className="group relative overflow-hidden rounded-xl bg-peat-800 ring-1 ring-peat-700 has-[:focus-visible]:ring-brass">
-      <div
-        className="aspect-[16/7] bg-cover bg-center"
-        style={{
-          backgroundImage: scene.bannerPath
-            ? `url(/banners/${encodeURIComponent(scene.bannerPath)})`
-            : sceneGradient(scene.name, scene.tags),
-        }}
-      />
+      <SceneArt scene={scene} className="aspect-[16/7]" />
       <div className="p-4 pt-3">
         <Link
           to={`/scenes/${scene.id}`}
