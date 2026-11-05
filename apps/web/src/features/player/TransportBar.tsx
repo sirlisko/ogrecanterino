@@ -5,7 +5,9 @@ import { usePlayer } from '../../audio/store.ts'
 import { toggleHotkeyHelp } from '../../hotkeys/helpStore.ts'
 import { formatTime } from '../../ui/format.ts'
 import { Icon } from '../../ui/Icon.tsx'
+import { ToastStack } from '../../ui/Toast.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
+import { DeleteToast } from '../scenes/DeleteToast.tsx'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
 import { PadsStrip } from '../pads/PadsStrip.tsx'
 import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
@@ -28,7 +30,10 @@ export function TransportBar() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
-      <ResumeToast aboveBar />
+      <ToastStack>
+        <ResumeToast />
+        <DeleteToast />
+      </ToastStack>
       {padsVisible && <PadsStrip />}
       <div
         className="h-0.5 bg-brass transition-[width] duration-500"

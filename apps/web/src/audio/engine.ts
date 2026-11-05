@@ -5,7 +5,7 @@ import { Mixer, type BusName, type MeterName } from './mixer.ts'
 import { ScenePlayback } from './scenePlayback.ts'
 import { createVoice, preload } from './sources.ts'
 import { saveVolumes, usePlayer } from './store.ts'
-import type { Voice } from './voice.ts'
+import { ElementVoice, type Voice } from './voice.ts'
 
 const FADE_ALL_SECONDS = 1.5
 /** Effects at least this long stop when triggered again instead of layering. */
@@ -215,6 +215,15 @@ class Engine {
   /** Follows a card's fader while it previews; ignored if another sound took over. */
   setPreviewVolume(soundId: string, level: PreviewLevel) {
     if (usePlayer.getState().previewId === soundId) this.previewVoice?.setVolume(level.volume)
+  }
+
+  /** Where the preview is, for long (streamed) sounds; short ones play from memory and can't seek. */
+  previewPosition() {
+    return this.previewVoice?.position() ?? null
+  }
+
+  seekPreview(seconds: number) {
+    if (this.previewVoice instanceof ElementVoice) this.previewVoice.seek(seconds)
   }
 
   stopPreview() {

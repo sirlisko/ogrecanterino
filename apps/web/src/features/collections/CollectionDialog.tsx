@@ -61,9 +61,10 @@ export function CollectionDialog({
     onClose()
   }
 
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+
   const onDelete = async () => {
-    if (!collection || !confirm(`Delete the collection "${collection.name}"? Its scenes stay.`))
-      return
+    if (!collection) return
     await remove.mutateAsync(collection.id)
     setActiveCollection(null)
     onClose()
@@ -156,19 +157,30 @@ export function CollectionDialog({
         </fieldset>
 
         {save.error && <p className="text-danger">{save.error.message}</p>}
-        <div className="mt-2 flex items-center gap-2">
-          {collection && (
+        {remove.error && <p className="text-danger">{remove.error.message}</p>}
+        {confirmingDelete ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-danger/10 p-3 ring-1 ring-danger/30">
+            <p className="min-w-0 flex-1">Delete this collection? Its scenes stay.</p>
+            <Button onClick={() => setConfirmingDelete(false)}>Keep it</Button>
             <Button variant="danger" onClick={onDelete} disabled={remove.isPending}>
-              Delete
+              Delete collection
             </Button>
-          )}
-          <Button className="ml-auto" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="primary" disabled={save.isPending}>
-            {collection ? 'Save collection' : 'Create collection'}
-          </Button>
-        </div>
+          </div>
+        ) : (
+          <div className="mt-2 flex items-center gap-2">
+            {collection && (
+              <Button variant="danger" onClick={() => setConfirmingDelete(true)}>
+                Delete
+              </Button>
+            )}
+            <Button className="ml-auto" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={save.isPending}>
+              {collection ? 'Save collection' : 'Create collection'}
+            </Button>
+          </div>
+        )}
       </form>
     </Dialog>
   )

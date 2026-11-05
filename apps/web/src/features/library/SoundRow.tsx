@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { formatTime } from '../../ui/format.ts'
 import { Icon } from '../../ui/Icon.tsx'
 import { STRUCTURAL_TAGS } from './filters.ts'
+import { PreviewSeek } from './PreviewSeek.tsx'
 
 const CATEGORY_COLOR = {
   music: 'var(--color-brass)',
@@ -26,32 +27,36 @@ export function SoundRow({
   const color = CATEGORY_COLOR[sound.category]
   const tags = sound.tags.filter((t) => !STRUCTURAL_TAGS.has(t))
   return (
-    <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-peat-800">
-      {dragHandle}
-      <button
-        type="button"
-        onClick={onPreview}
-        aria-label={previewing ? `Stop ${sound.title}` : `Preview ${sound.title}`}
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm ring-1 transition-colors"
-        style={{
-          color: previewing ? 'var(--color-peat-950)' : color,
-          backgroundColor: previewing ? color : 'transparent',
-          ['--tw-ring-color' as string]: color,
-        }}
-      >
-        <Icon name={previewing ? 'stop' : 'play'} className="h-3.5 w-3.5" />
-      </button>
-      <div className="min-w-0 flex-1">
-        <p className="truncate">{sound.title}</p>
-        <p className="truncate text-sm text-ink-muted">
-          {sound.artist || 'Unknown artist'}
-          {tags.length > 0 && <span className="text-peat-400">, {tags.join(', ')}</span>}
-        </p>
+    <div className="rounded-lg hover:bg-peat-800">
+      <div className="flex items-center gap-3 px-2 py-1.5">
+        {dragHandle}
+        <button
+          type="button"
+          onClick={onPreview}
+          aria-label={previewing ? `Stop ${sound.title}` : `Preview ${sound.title}`}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm ring-1 transition-colors"
+          style={{
+            color: previewing ? 'var(--color-peat-950)' : color,
+            backgroundColor: previewing ? color : 'transparent',
+            ['--tw-ring-color' as string]: color,
+          }}
+        >
+          <Icon name={previewing ? 'stop' : 'play'} className="h-3.5 w-3.5" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <p className="truncate">{sound.title}</p>
+          <p className="truncate text-sm text-ink-muted">
+            {sound.artist || 'Unknown artist'}
+            {tags.length > 0 && <span className="text-peat-400">, {tags.join(', ')}</span>}
+          </p>
+        </div>
+        <span className="hidden text-sm text-ink-muted tabular sm:block">
+          {sound.durationMs ? formatTime(sound.durationMs / 1000) : ''}
+        </span>
+        {actions}
       </div>
-      <span className="hidden text-sm text-ink-muted tabular sm:block">
-        {sound.durationMs ? formatTime(sound.durationMs / 1000) : ''}
-      </span>
-      {actions}
+      {/* Lines up under the title: past the 2rem play button, its gap and the row padding. */}
+      {previewing && <PreviewSeek className="pr-3 pb-2 pl-[3.25rem]" />}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { Icon } from '../../ui/Icon.tsx'
 import { SeekBar } from '../../ui/SeekBar.tsx'
+import { PreviewSeek } from '../library/PreviewSeek.tsx'
 import { EmptyLane, IconButton, Lane } from './Lane.tsx'
 
 interface Props {
@@ -123,6 +124,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                   className="px-3 pb-2"
                 />
               )}
+              {previewing && <PreviewSeek className="px-3 pb-2" />}
             </li>
           )
         })}

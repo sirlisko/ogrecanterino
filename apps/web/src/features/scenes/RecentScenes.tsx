@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
+import { usePendingDelete } from './pendingDelete.ts'
 import { useRecentScenes } from './recentScenes.ts'
 import { useConfirmStart } from './useConfirmStart.ts'
 
 export function RecentScenes({ scenes }: { scenes: Scene[] }) {
   const ids = useRecentScenes((s) => s.ids)
+  const deleting = usePendingDelete((s) => s.pending?.scene.id)
   const byId = new Map(scenes.map((s) => [s.id, s]))
-  const recent = ids.flatMap((id) => byId.get(id) ?? [])
+  const recent = ids.flatMap((id) => (id === deleting ? [] : (byId.get(id) ?? [])))
   if (!recent.length) return null
 
   return (

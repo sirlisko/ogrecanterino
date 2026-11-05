@@ -39,3 +39,32 @@ export function tagCounts(sounds: Sound[]): [string, number][] {
     for (const t of s.tags) if (!STRUCTURAL_TAGS.has(t)) counts.set(t, (counts.get(t) ?? 0) + 1)
   return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
 }
+
+export type SoundSort = 'title' | 'artist' | 'longest' | 'shortest'
+
+export const SOUND_SORTS: { value: SoundSort; label: string }[] = [
+  { value: 'title', label: 'Title' },
+  { value: 'artist', label: 'Artist' },
+  { value: 'longest', label: 'Longest first' },
+  { value: 'shortest', label: 'Shortest first' },
+]
+
+const byTitle = (a: Sound, b: Sound) => a.title.localeCompare(b.title)
+
+/** Sounds without an artist or a measured length go last, whichever way the list runs. */
+export function sortSounds(sounds: Sound[], sort: SoundSort): Sound[] {
+  const list = [...sounds]
+  if (sort === 'title') return list.sort(byTitle)
+  if (sort === 'artist')
+    return list.sort(
+      (a, b) =>
+        Number(!a.artist) - Number(!b.artist) || a.artist.localeCompare(b.artist) || byTitle(a, b),
+    )
+  const sign = sort === 'longest' ? -1 : 1
+  return list.sort(
+    (a, b) =>
+      Number(a.durationMs === null) - Number(b.durationMs === null) ||
+      sign * ((a.durationMs ?? 0) - (b.durationMs ?? 0)) ||
+      byTitle(a, b),
+  )
+}

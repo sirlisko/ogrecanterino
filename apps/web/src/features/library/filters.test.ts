@@ -1,6 +1,6 @@
 import type { Sound } from '@ogre/shared'
 import { describe, expect, it } from 'vitest'
-import { emptyFilter, filterSounds, tagCounts } from './filters.ts'
+import { emptyFilter, filterSounds, sortSounds, tagCounts } from './filters.ts'
 
 const sound = (
   id: string,
@@ -48,5 +48,34 @@ describe('tagCounts', () => {
   it('ranks descriptive tags and skips category tags', () => {
     expect(tagCounts(sounds)[0]).toEqual(['Battle', 2])
     expect(tagCounts(sounds).map(([t]) => t)).not.toContain('Music')
+  })
+})
+
+describe('sortSounds', () => {
+  const timed = (id: string, title: string, artist: string, durationMs: number | null) => ({
+    ...sound(id, title, 'music', []),
+    artist,
+    durationMs,
+  })
+  const list = [
+    timed('a', 'Tavern', 'Kevin', 120_000),
+    timed('b', 'Ambush', '', null),
+    timed('c', 'Market', 'Alexander', 30_000),
+  ]
+  const ids = (s: Sound[]) => s.map((x) => x.id)
+
+  it('sorts by title or artist, with unknown artists last', () => {
+    expect(ids(sortSounds(list, 'title'))).toEqual(['b', 'c', 'a'])
+    expect(ids(sortSounds(list, 'artist'))).toEqual(['c', 'a', 'b'])
+  })
+
+  it('sorts by length either way, with unmeasured sounds last', () => {
+    expect(ids(sortSounds(list, 'longest'))).toEqual(['a', 'c', 'b'])
+    expect(ids(sortSounds(list, 'shortest'))).toEqual(['c', 'a', 'b'])
+  })
+
+  it('leaves the original list alone', () => {
+    sortSounds(list, 'title')
+    expect(ids(list)).toEqual(['a', 'b', 'c'])
   })
 })

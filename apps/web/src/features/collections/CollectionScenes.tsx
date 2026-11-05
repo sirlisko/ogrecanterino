@@ -44,10 +44,17 @@ export function CollectionScenes({
         </div>
       </div>
       {ordered.length === 0 ? (
-        <p className="mt-10 max-w-prose text-ink-muted">
-          No scenes in this collection yet. Add them with Edit collection, or from a scene's actions
-          menu.
-        </p>
+        <div className="mt-10 flex max-w-prose flex-col items-start gap-4">
+          <p className="text-ink-muted">
+            No scenes in this collection yet.
+            {canEdit && " Add them here, or from any scene's actions menu."}
+          </p>
+          {canEdit && (
+            <Button variant="primary" onClick={() => setEditing(true)}>
+              Add scenes
+            </Button>
+          )}
+        </div>
       ) : visible.length === 0 ? (
         <p className="mt-10 text-ink-muted">No scenes match. Clear the search.</p>
       ) : (
