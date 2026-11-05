@@ -144,7 +144,7 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
             ? 'No favourites yet. Star sounds to collect them here.'
             : view === 'recent'
               ? 'Sounds you preview show up here.'
-              : 'Nothing matches. Remove a tag or change the search.'}
+              : 'No sounds match. Clear the search or remove a tag.'}
         </p>
       )}
       <ul className="flex flex-col">
