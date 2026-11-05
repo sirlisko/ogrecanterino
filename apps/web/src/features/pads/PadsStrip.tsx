@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { engine } from '../../audio/engine.ts'
 import { flash } from '../../ui/flash.ts'
+import { useSettings } from '../settings/settings.ts'
 import { PadEditor } from './PadEditor.tsx'
 import { PadPicker } from './PadPicker.tsx'
 import { PAD_SLOTS, usePadSlots } from './usePadSlots.ts'
@@ -10,6 +11,7 @@ export function PadsStrip() {
   const [editing, setEditing] = useState(false)
   const [picking, setPicking] = useState<number | null>(null)
   const refs = useRef(new Map<number, HTMLButtonElement>())
+  const hints = useSettings((s) => s.keyHints)
 
   return (
     <section aria-label="Quick pads" className="border-b border-peat-800">
@@ -44,9 +46,11 @@ export function PadsStrip() {
                 className={`flex h-10 items-center gap-2 rounded-lg px-2.5 text-left text-sm ring-1 ring-peat-700 hover:bg-peat-700 ${pad ? 'bg-peat-900' : 'text-peat-400'}`}
               >
                 <span className="min-w-0 flex-1 truncate">{pad?.label ?? 'Assign'}</span>
-                <kbd className="rounded border-b-2 border-peat-950 bg-peat-600 px-1 text-[11px] text-ink tabular">
-                  ⇧{slot}
-                </kbd>
+                {hints && (
+                  <kbd className="rounded border-b-2 border-peat-950 bg-peat-600 px-1 text-[11px] text-ink tabular">
+                    ⇧{slot}
+                  </kbd>
+                )}
               </button>
             )
           })}

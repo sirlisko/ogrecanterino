@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { api, ApiError, json } from '../../api/client.ts'
 import { DiscordStreamer } from '../../audio/discordOut.ts'
 import { engine } from '../../audio/engine.ts'
+import { usePlayer } from '../../audio/store.ts'
+import { useSettings } from '../settings/settings.ts'
 import { afterClose } from './reconnect.ts'
 
 export type StreamStatus = 'stopped' | 'streaming' | 'reconnecting' | 'error'
@@ -16,11 +18,26 @@ let status: { value: StreamStatus; message?: string } = { value: 'stopped' }
 /** Where the bot should be, so a stream that lost its voice session can rejoin by itself. */
 let target: VoiceTarget | null = null
 let retry: { attempt: number; since: number; timer: number } | null = null
+/** Set when the stream muted this device, so stopping it gives the GM their sound back. */
+let mutedForStream = false
 const listeners = new Set<() => void>()
 
 function setStatus(value: StreamStatus, message?: string) {
   status = { value, message }
   for (const l of listeners) l()
+}
+
+// Only once per stream: if the GM unmutes while streaming, a reconnect mustn't mute them again.
+function muteForStream() {
+  if (mutedForStream || !useSettings.getState().muteWhileStreaming) return
+  if (!usePlayer.getState().monitor) return
+  engine.setMonitor(false)
+  mutedForStream = true
+}
+
+function unmuteAfterStream() {
+  if (mutedForStream) engine.setMonitor(true)
+  mutedForStream = false
 }
 
 function cancelRetry() {
@@ -33,6 +50,7 @@ function getStreamer() {
     () => {
       cancelRetry()
       setStatus('streaming')
+      muteForStream()
     },
     (code, reason) => onDrop(code, reason),
   )
@@ -95,6 +113,7 @@ export function useDiscordStream() {
       cancelRetry()
       getStreamer().stop()
       setStatus('stopped')
+      unmuteAfterStream()
     },
   }
 }
