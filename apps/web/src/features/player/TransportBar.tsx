@@ -120,7 +120,7 @@ export function TransportBar() {
               type="button"
               onClick={() => engine.setMonitor(true)}
               title="Unmute this device (M)"
-              className="rounded-lg bg-danger/15 px-3 py-2 font-medium text-danger hover:bg-danger/25"
+              className="rounded-lg bg-danger/15 px-3 py-2 font-medium whitespace-nowrap text-danger hover:bg-danger/25"
             >
               Unmute this device
             </button>
@@ -130,7 +130,7 @@ export function TransportBar() {
             disabled={!scene}
             onClick={() => void engine.stopScene()}
             title="Fade out everything (Esc)"
-            className="hidden rounded-lg px-3 py-2 text-ink-muted ring-1 ring-peat-600 hover:text-ink disabled:opacity-40 sm:block"
+            className="hidden rounded-lg px-3 py-2 whitespace-nowrap text-ink-muted ring-1 ring-peat-600 hover:text-ink disabled:opacity-40 sm:block"
           >
             Fade out
           </button>

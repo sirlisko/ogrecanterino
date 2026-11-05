@@ -39,8 +39,9 @@ export function StageEdge() {
     <div aria-hidden className="pointer-events-none relative h-[3px]">
       <div
         ref={glow}
-        className="absolute inset-x-0 bottom-full h-24"
-        style={still ? { background: glowFor(STEADY), opacity: 0.35 } : { opacity: 0 }}
+        // Steady, a tall glow just hazes the page; it only needs to say the edge is lit.
+        className={`absolute inset-x-0 bottom-full ${still ? 'h-8' : 'h-24'}`}
+        style={still ? { background: glowFor(STEADY), opacity: 0.25 } : { opacity: 0 }}
       />
       <div
         ref={line}

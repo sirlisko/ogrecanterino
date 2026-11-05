@@ -58,7 +58,7 @@ export function Popover({
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className={`rounded-lg px-3 py-2 ring-1 ${
+        className={`rounded-lg px-3 py-2 whitespace-nowrap ring-1 ${
           alert
             ? 'bg-danger/15 font-medium text-danger ring-danger/40 hover:bg-danger/25'
             : `ring-peat-600 hover:text-ink ${open ? 'bg-peat-700 text-ink' : 'text-ink-muted'}`
