@@ -3,6 +3,7 @@ import { type ReactNode, useMemo, useState } from 'react'
 import { useFavourites, useRecent } from '../../api/me.ts'
 import { useSounds } from '../../api/sounds.ts'
 import { Chip } from '../../ui/Chip.tsx'
+import { FoldButton } from '../../ui/FoldButton.tsx'
 import {
   emptyFilter,
   filterSounds,
@@ -43,6 +44,8 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
   const [view, setView] = useState<View>('all')
   const [limit, setLimit] = useState(PAGE)
   const [sort, setSort] = useState<SoundSort>('title')
+  // Folded like the scenes page's, so the sounds start near the top.
+  const [tagsOpen, setTagsOpen] = useState(false)
 
   const all = sounds.data ?? []
   const tags = useMemo(() => tagCounts(all).slice(0, compact ? 12 : 24), [all, compact])
@@ -90,6 +93,13 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
             {c.label}
           </Chip>
         ))}
+        <FoldButton
+          open={tagsOpen}
+          active={filter.tags.length > 0}
+          onToggle={() => setTagsOpen((o) => !o)}
+        >
+          {filter.tags.length ? `Tags: ${filter.tags.join(', ')}` : 'Tags'}
+        </FoldButton>
         {view !== 'recent' && (
           <select
             value={sort}
@@ -108,13 +118,15 @@ export function SoundBrowser({ actions, wrapRow, compact, initialCategory }: Pro
           </select>
         )}
       </div>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {tags.map(([t, n]) => (
-          <Chip key={t} active={filter.tags.includes(t)} onClick={() => toggleTag(t)}>
-            {t} <span className="opacity-60">{n}</span>
-          </Chip>
-        ))}
-      </div>
+      {tagsOpen && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {tags.map(([t, n]) => (
+            <Chip key={t} active={filter.tags.includes(t)} onClick={() => toggleTag(t)}>
+              {t} <span className="opacity-60">{n}</span>
+            </Chip>
+          ))}
+        </div>
+      )}
 
       <p className="mt-4 mb-2 text-sm text-ink-muted" aria-live="polite">
         {sounds.isPending

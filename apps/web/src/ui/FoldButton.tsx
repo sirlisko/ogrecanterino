@@ -17,7 +17,7 @@ export function FoldButton({
       type="button"
       aria-expanded={open}
       onClick={onToggle}
-      className={`rounded-lg px-3 py-1.5 text-[15px] ring-1 ${active ? 'text-ink ring-ink-muted' : 'text-ink-muted ring-peat-700 hover:text-ink'}`}
+      className={`max-w-64 truncate rounded-lg px-3 py-1.5 text-[15px] ring-1 ${active ? 'text-ink ring-ink-muted' : 'text-ink-muted ring-peat-700 hover:text-ink'}`}
     >
       {children}
     </button>
