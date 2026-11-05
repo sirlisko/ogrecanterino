@@ -14,7 +14,9 @@ export class DiscordStreamer {
   private socket: WebSocket | null = null
 
   constructor(
-    private onStatus: (status: 'streaming' | 'stopped' | 'error', message?: string) => void,
+    private onOpen: () => void,
+    /** Not called for `stop()`: only for closes the GM didn't ask for. */
+    private onClose: (code: number, reason: string) => void,
   ) {}
 
   start(stream: MediaStream) {
@@ -31,13 +33,13 @@ export class DiscordStreamer {
       }
       recorder.start(CHUNK_MS)
       this.recorder = recorder
-      this.onStatus('streaming')
+      this.onOpen()
     }
     socket.onclose = (e) => {
       if (this.socket !== socket) return
       this.stopRecorder()
       this.socket = null
-      this.onStatus(e.code === 1000 ? 'stopped' : 'error', e.reason || undefined)
+      this.onClose(e.code, e.reason)
     }
   }
 
@@ -46,7 +48,6 @@ export class DiscordStreamer {
     const socket = this.socket
     this.socket = null
     socket?.close(1000)
-    this.onStatus('stopped')
   }
 
   private stopRecorder() {

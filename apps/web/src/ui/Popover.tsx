@@ -6,11 +6,14 @@ export function Popover({
   label,
   children,
   wide,
+  alert,
 }: {
   trigger: ReactNode
   label: string
   children: ReactNode
   wide?: boolean
+  /** Styles the trigger as a warning that needs the GM's attention. */
+  alert?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -41,7 +44,11 @@ export function Popover({
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className={`rounded-lg px-3 py-2 ring-1 ring-peat-600 hover:text-ink ${open ? 'bg-peat-700 text-ink' : 'text-ink-muted'}`}
+        className={`rounded-lg px-3 py-2 ring-1 ${
+          alert
+            ? 'bg-danger/15 font-medium text-danger ring-danger/40 hover:bg-danger/25'
+            : `ring-peat-600 hover:text-ink ${open ? 'bg-peat-700 text-ink' : 'text-ink-muted'}`
+        }`}
       >
         {trigger}
       </button>

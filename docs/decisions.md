@@ -3,6 +3,44 @@
 Why the app works the way it does. Newest first. Each entry says what was decided, why, and what
 it rules out, so a later change can tell whether the reason still holds.
 
+## 2026-11-05: Session safety
+
+### The Discord stream reconnects by itself
+
+A dropped stream socket (Wi-Fi, a redeploy) retries after 1, 2, 4, 8, then every 15 seconds, for
+up to two minutes, and the transport bar says so: "Reconnecting to Discord", then a red "Discord
+stream dropped" if it gives up. If the server has forgotten the voice channel (it restarted, or the
+tab was gone longer than 30 s) it closes the socket with 4001 and the browser joins the same
+channel again before retrying. It never retries after the GM stopped (1000), another tab took over
+(4000) or the server refused (1008), so two tabs can't fight over the bot.
+
+### A crash stays inside the page
+
+Pages render inside an error boundary; the transport bar, quick pads and hotkeys sit outside it, so
+the GM can still fade out when a page breaks. The audio engine is a singleton and keeps playing
+regardless, which is why losing the controls was the real risk.
+
+### A reload offers to resume
+
+While a scene plays, the scene, track and position are saved to `localStorage` (on every track
+change, every 5 s and when the tab hides). The next load offers them through the Resume toast,
+which stays until dismissed because the GM may not be looking. A fade-out clears the record, and
+anything older than 12 hours is ignored. Audio can't start without a click, so this is an offer,
+not an automatic restart.
+
+### Blank new scenes are swept, not deleted on close
+
+The editor still discards an untouched new scene when you leave it. Scenes left behind by a closed
+tab, reload or crash are deleted the next time their owner opens the scenes page, once they're an
+hour old. Deleting on `pagehide` was rejected: a reload keeps the editor's "fresh" state, so it
+would delete the scene out from under the page being reloaded.
+
+### The health check only fails on the database
+
+`GET /healthz` is public and returns `{ ok, discord }`. Only a database failure returns 503. A
+proxy that routes on health would otherwise take the whole app offline during a Discord outage, so
+monitors that care about the bot should check the `discord` field instead.
+
 ## 2026-10-30: UX review
 
 ### Collections, not folders

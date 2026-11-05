@@ -27,15 +27,19 @@ export function DiscordPanel({ status, stream }: { status: DiscordStatus; stream
 
   if (session) {
     const live = stream.status === 'streaming'
+    const reconnecting = stream.status === 'reconnecting'
     return (
       <div className="flex flex-col gap-3">
         <p>
           Bot is in <strong>#{session.channelName}</strong>
         </p>
-        {live ? (
+        {reconnecting && (
+          <p className="text-sm text-brass">The connection dropped. Reconnecting…</p>
+        )}
+        {live || reconnecting ? (
           <Button onClick={stream.stop}>Stop sending audio</Button>
         ) : (
-          <Button variant="primary" onClick={() => void stream.start()}>
+          <Button variant="primary" onClick={() => void stream.start(session)}>
             Send audio to Discord
           </Button>
         )}
@@ -95,8 +99,9 @@ export function DiscordPanel({ status, stream }: { status: DiscordStatus; stream
               type="button"
               disabled={connect.isPending}
               onClick={async () => {
-                await connect.mutateAsync({ guildId: c.guildId, channelId: c.channelId })
-                await stream.start()
+                const to = { guildId: c.guildId, channelId: c.channelId }
+                await connect.mutateAsync(to)
+                await stream.start(to)
               }}
               className="w-full rounded-lg px-3 py-2 text-left hover:bg-peat-700 disabled:opacity-50"
             >

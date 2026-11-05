@@ -106,6 +106,12 @@ consistent copy of the database:
 0 4 * * * sqlite3 ~/ogrecanterino/data/app.db ".backup '/backups/ogre-$(date +\%a).db'"
 ```
 
+### Monitoring
+
+`GET /healthz` answers without a login, for an uptime monitor: `{"ok":true,"discord":"ready"}`. The
+status code only reflects the database. To be told when the bot is down, alert on the `discord`
+field (`ready`, `down`, or `off` when Discord isn't configured) with a keyword check.
+
 ## Deploying with Coolify
 
 Coolify's own proxy handles HTTPS, so skip `compose.yaml` and its Caddy service and build the Dockerfile directly:

@@ -76,4 +76,22 @@ describe('discord stream route', () => {
     expect(await closed).toEqual([4000, 'Streaming moved to another tab or device'])
     await app.close()
   })
+
+  it('closes with its own code when the bot is no longer in a channel, so the browser can rejoin', async () => {
+    const sessions = {
+      forUser: () => null,
+      openStream: () => {
+        throw Object.assign(new Error('Connect to a voice channel first'), { statusCode: 409 })
+      },
+    } as unknown as VoiceSessions
+    const { app, cookie } = await setup(sessions)
+
+    const ws = await app.injectWS('/api/discord/stream', { headers: { cookie } })
+    const closed = new Promise<[number, string]>((r) =>
+      ws.on('close', (code, reason) => r([code, reason.toString()])),
+    )
+
+    expect(await closed).toEqual([4001, 'Connect to a voice channel first'])
+    await app.close()
+  })
 })

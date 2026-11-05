@@ -4,6 +4,7 @@ import fastifyCookie from '@fastify/cookie'
 import fastifyMultipart from '@fastify/multipart'
 import fastifyStatic from '@fastify/static'
 import fastifyWebsocket from '@fastify/websocket'
+import { sql } from 'drizzle-orm'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { authRoutes } from './auth/routes.ts'
 import { collectionRoutes } from './collections/routes.ts'
@@ -21,6 +22,8 @@ export interface AppOptions {
   webDist?: string
   /** Protected routes registered by optional features (e.g. the Discord bridge). */
   extraRoutes?: (app: FastifyInstance) => Promise<void>
+  /** Whether the Discord bot is logged in; omitted when Discord isn't configured. */
+  discordReady?: () => boolean
   logger?: boolean
 }
 
@@ -32,6 +35,18 @@ export async function buildApp(opts: AppOptions) {
   await app.register(fastifyMultipart, { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 } })
   await app.register(fastifyWebsocket)
   registerUserResolver(app, opts.db)
+
+  // Public, for uptime monitors. Only the database decides the status code: a Discord outage
+  // shouldn't make a reverse proxy take the app offline.
+  app.get('/healthz', async (_req, reply) => {
+    const discord = opts.discordReady ? (opts.discordReady() ? 'ready' : 'down') : 'off'
+    try {
+      opts.db.run(sql`select 1`)
+      return { ok: true, discord }
+    } catch {
+      return reply.code(503).send({ ok: false, discord })
+    }
+  })
 
   await app.register(authRoutes, { db: opts.db })
   await app.register(async (scope) => {

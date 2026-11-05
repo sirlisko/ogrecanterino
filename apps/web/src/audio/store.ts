@@ -25,8 +25,16 @@ export interface PlayerState {
   previewId: string | null
   /** Effect card id → when its latest voice started, for cards still sounding. */
   effects: Record<string, number>
-  /** What the last fade-out stopped, so it can be resumed. */
-  faded: { scene: Scene; cardId: string | null } | null
+  /** What the last fade-out (or a reload) stopped, so it can be resumed. */
+  faded: Faded | null
+}
+
+export interface Faded {
+  scene: Scene
+  cardId: string | null
+  /** Seconds into the track to resume from; a fade-out restarts it. */
+  at?: number
+  reason: 'fadeOut' | 'reload'
 }
 
 const VOLUME_KEY = 'ogre.volumes'

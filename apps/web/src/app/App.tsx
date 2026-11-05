@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { Navigate, Route, Routes } from 'react-router'
 import { useMe } from '../api/me.ts'
 import { CreditsPage } from '../features/credits/CreditsPage.tsx'
@@ -5,6 +6,7 @@ import { EditorPage } from '../features/editor/EditorPage.tsx'
 import { LibraryPage } from '../features/library/LibraryPage.tsx'
 import { LoginPage } from '../features/login/LoginPage.tsx'
 import { PlayerPage } from '../features/player/PlayerPage.tsx'
+import { useOfferLastSession } from '../features/player/useLastSession.ts'
 import { ScenesPage } from '../features/scenes/ScenesPage.tsx'
 import { TablePage } from '../features/table/TablePage.tsx'
 import { Layout } from './Layout.tsx'
@@ -13,6 +15,7 @@ import { usePlayingGuards } from './usePlayingGuards.ts'
 export function App() {
   const me = useMe()
   usePlayingGuards()
+  useOfferLastSession(useQueryClient(), !!me.data)
   if (me.isPending)
     return (
       <div className="grid min-h-dvh place-items-center">

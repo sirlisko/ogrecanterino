@@ -6,6 +6,8 @@ import type { DiscordBot } from './bot.ts'
 import type { VoiceSessions } from './voiceSessions.ts'
 
 const STREAM_TAKEN_OVER = 4000
+/** The bot isn't in a channel for this GM (e.g. after a restart); the browser can rejoin and retry. */
+const NO_VOICE_SESSION = 4001
 
 const connectBody = z.object({ guildId: z.string(), channelId: z.string() })
 
@@ -43,7 +45,11 @@ export function discordRoutes(bot: DiscordBot | null, sessions: VoiceSessions | 
           socket.close(STREAM_TAKEN_OVER, 'Streaming moved to another tab or device'),
         )
       } catch (e) {
-        socket.close(1008, e instanceof Error ? e.message : 'Not allowed')
+        const noSession = (e as { statusCode?: number }).statusCode === 409
+        socket.close(
+          noSession ? NO_VOICE_SESSION : 1008,
+          e instanceof Error ? e.message : 'Not allowed',
+        )
         return
       }
       socket.on('message', (data, isBinary) => {

@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, useLocation } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
 import { ResumeToast } from '../features/player/ResumeToast.tsx'
 import { TransportBar } from '../features/player/TransportBar.tsx'
 import { HotkeyLayer } from '../hotkeys/HotkeyLayer.tsx'
+import { ErrorBoundary } from '../ui/ErrorBoundary.tsx'
+import { PageCrash } from './CrashNotice.tsx'
 import { UserMenu } from './UserMenu.tsx'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
@@ -20,6 +22,7 @@ export function useLibrarySync() {
 
 export function Layout() {
   useLibrarySync()
+  const { pathname } = useLocation()
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -46,7 +49,9 @@ export function Layout() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-6 pb-40">
-        <Outlet />
+        <ErrorBoundary resetKey={pathname} fallback={(retry) => <PageCrash retry={retry} />}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
       <TransportBar />
       <ResumeToast />

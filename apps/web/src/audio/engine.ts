@@ -106,7 +106,9 @@ class Engine {
     const faded = usePlayer.getState().faded
     if (!faded) return
     await this.playScene(faded.scene)
-    if (faded.cardId) this.music?.playCard(faded.cardId, 1)
+    if (!faded.cardId) return
+    this.music?.playCard(faded.cardId, 1)
+    if (faded.at) this.music?.seek(faded.at)
   }
 
   dismissFaded() {
@@ -124,7 +126,7 @@ class Engine {
     this.playback = null
     const { scene, music, combat } = usePlayer.getState()
     usePlayer.setState({
-      faded: scene ? { scene, cardId: combat ? null : music.cardId } : null,
+      faded: scene ? { scene, cardId: combat ? null : music.cardId, reason: 'fadeOut' } : null,
       sceneId: null,
       scene: null,
       combat: false,
