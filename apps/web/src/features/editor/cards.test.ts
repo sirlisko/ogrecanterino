@@ -1,6 +1,13 @@
 import { emptySceneData, type Sound } from '@ogre/shared'
 import { describe, expect, it } from 'vitest'
-import { cardForSound, insertCard, moveCard, removeCard, sectionOfCard } from './cards.ts'
+import {
+  cardForSound,
+  insertCard,
+  moveCard,
+  relinkCard,
+  removeCard,
+  sectionOfCard,
+} from './cards.ts'
 
 const sound = (category: Sound['category']): Sound => ({
   id: `s-${category}`,
@@ -45,5 +52,20 @@ describe('card list edits', () => {
     expect(removeCard(data, 'music', 'a').music.map((c) => c.id)).toEqual(['b'])
     expect(sectionOfCard(data, 'b')).toBe('music')
     expect(sectionOfCard(data, 'zzz')).toBeNull()
+  })
+})
+
+describe('relinkCard', () => {
+  it('points a missing card at a new sound and forgets the old reference', () => {
+    const card = { ...cardForSound(sound('music'), 'music', 'c'), soundId: null, missingRef: 'old' }
+    const relinked = { ...card, label: 'Tavern theme', ...relinkCard(sound('ambience')) }
+    expect(JSON.parse(JSON.stringify(relinked))).toEqual({
+      id: 'c',
+      label: 'Tavern theme',
+      soundId: 's-ambience',
+      volume: 80,
+      enabled: true,
+      mode: 'loop',
+    })
   })
 })

@@ -1,6 +1,18 @@
-import type { Card, SceneData, SceneSection, Sound } from '@ogre/shared'
+import type { Card, SceneData, SceneSection, Sound, SoundCategory } from '@ogre/shared'
 
 const DEFAULT_INTERVAL: [number, number] = [30_000, 90_000]
+
+/** The library category a section's sounds usually come from, to start a picker in. */
+export const SECTION_CATEGORY: Record<SceneSection, SoundCategory> = {
+  music: 'music',
+  ambiences: 'ambience',
+  effects: 'effect',
+}
+
+/** Points a card at another sound, keeping the GM's label and settings. */
+export function relinkCard(sound: Sound): Partial<Card> {
+  return { soundId: sound.id, missingRef: undefined }
+}
 
 export function cardForSound(
   sound: Sound,

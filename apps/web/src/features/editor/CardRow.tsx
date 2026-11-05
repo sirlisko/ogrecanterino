@@ -1,11 +1,14 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Card, SceneSection } from '@ogre/shared'
+import { useState } from 'react'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
 import { Icon } from '../../ui/Icon.tsx'
+import { SoundPicker } from '../library/SoundPicker.tsx'
+import { relinkCard, SECTION_CATEGORY } from './cards.ts'
 
 const SECONDS = (ms: number) => Math.round(ms / 1000)
 
@@ -24,6 +27,7 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
   const status = useSoundStatus()(card.soundId)
   const previewing = usePlayer((s) => !!card.soundId && s.previewId === card.soundId)
   const missing = status === 'missing'
+  const [replacing, setReplacing] = useState(false)
   const interval = card.intervalMs ?? [30_000, 90_000]
   const times = card.times ?? [1, 1]
 
@@ -56,7 +60,15 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           aria-label="Label"
           className="min-w-0 flex-1 rounded bg-transparent px-1.5 py-1 hover:bg-peat-900 focus:bg-peat-900"
         />
-        {missing && <span className="text-sm text-danger">missing</span>}
+        {missing && (
+          <button
+            type="button"
+            onClick={() => setReplacing(true)}
+            className="shrink-0 rounded-md px-2 py-1 text-sm text-danger ring-1 ring-danger/40 hover:bg-danger/15"
+          >
+            Missing, replace
+          </button>
+        )}
         <Fader
           value={card.volume}
           label={`${card.label} volume`}
@@ -88,6 +100,14 @@ export function CardRow({ card, section, color, onChange, onRemove }: Props) {
           <Icon name="close" />
         </button>
       </div>
+      {replacing && (
+        <SoundPicker
+          title={`Replace the sound for ${card.label}`}
+          category={SECTION_CATEGORY[section]}
+          onPick={(sound) => onChange(relinkCard(sound))}
+          onClose={() => setReplacing(false)}
+        />
+      )}
       {section === 'effects' && (
         <label className="mt-2 flex items-center gap-2 pl-8 text-sm text-ink-muted">
           <input
