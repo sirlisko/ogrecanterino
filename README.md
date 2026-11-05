@@ -156,5 +156,5 @@ The import only needs to run once: redeploys keep `/data`. Turn on **Auto Deploy
 ## Credits and licensing
 
 The bundled sounds come from many artists, and many are under Creative Commons licences that require attribution.
-The **Credits** page lists every artist from the library's `By` column. Keep the app behind the Discord login
+The **Credits** page, linked from the footer of every page, lists every artist from the library's `By` column. Keep the app behind the Discord login
 and don't make the audio publicly downloadable.

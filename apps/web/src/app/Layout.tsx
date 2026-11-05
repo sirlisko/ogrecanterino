@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
-import { ResumeToast } from '../features/player/ResumeToast.tsx'
 import { TransportBar } from '../features/player/TransportBar.tsx'
 import { HotkeyLayer } from '../hotkeys/HotkeyLayer.tsx'
 import { ErrorBoundary } from '../ui/ErrorBoundary.tsx'
@@ -25,7 +24,8 @@ export function Layout() {
   const { pathname } = useLocation()
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    // Clip, not hide: full-bleed banners reach 100vw (which counts the scrollbar) without breaking sticky.
+    <div className="flex min-h-dvh flex-col overflow-x-clip">
       <header className="sticky top-0 z-30 border-b border-peat-700 bg-peat-900/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2.5">
           <NavLink to="/" className="mr-3 flex items-center gap-2 font-display text-xl font-bold">
@@ -39,9 +39,6 @@ export function Layout() {
             <NavLink to="/library" className={navClass}>
               Library
             </NavLink>
-            <NavLink to="/credits" className={navClass}>
-              Credits
-            </NavLink>
           </nav>
           <div className="ml-auto">
             <UserMenu />
@@ -52,9 +49,14 @@ export function Layout() {
         <ErrorBoundary resetKey={pathname} fallback={(retry) => <PageCrash retry={retry} />}>
           <Outlet />
         </ErrorBoundary>
+        <footer className="mt-16 border-t border-peat-800 pt-4 text-sm text-peat-400">
+          Music and sounds by many artists.{' '}
+          <Link to="/credits" className="underline hover:text-ink">
+            See the credits
+          </Link>
+        </footer>
       </main>
       <TransportBar />
-      <ResumeToast />
       <HotkeyLayer />
     </div>
   )

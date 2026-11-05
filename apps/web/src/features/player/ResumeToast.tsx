@@ -5,7 +5,8 @@ import { Icon } from '../../ui/Icon.tsx'
 
 const SHOW_MS = 8000
 
-export function ResumeToast() {
+/** `aboveBar`: rendered inside the transport bar, so it clears the bar and its pads at any height. */
+export function ResumeToast({ aboveBar }: { aboveBar?: boolean }) {
   const faded = usePlayer((s) => s.faded)
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export function ResumeToast() {
   return (
     <div
       role="status"
-      className="fixed inset-x-0 bottom-20 z-40 mx-auto flex w-fit max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl bg-peat-700 py-2 pr-2 pl-4 shadow-2xl ring-1 ring-peat-600"
+      className={`${aboveBar ? 'absolute bottom-full mb-3' : 'fixed bottom-6'} inset-x-0 z-40 mx-auto flex w-fit max-w-[calc(100vw-2rem)] items-center gap-3 rounded-xl bg-peat-700 py-2 pr-2 pl-4 shadow-2xl ring-1 ring-peat-600`}
     >
       <span className="truncate">
         {faded.reason === 'reload'

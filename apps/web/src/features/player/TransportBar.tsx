@@ -10,6 +10,7 @@ import { DiscordControl } from '../discord/DiscordControl.tsx'
 import { PadsStrip } from '../pads/PadsStrip.tsx'
 import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
 import { MixerPopover } from './MixerPopover.tsx'
+import { ResumeToast } from './ResumeToast.tsx'
 
 export function TransportBar() {
   const scene = usePlayer((s) => s.scene)
@@ -27,6 +28,7 @@ export function TransportBar() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-peat-700 bg-peat-950/95 backdrop-blur">
+      <ResumeToast aboveBar />
       {padsVisible && <PadsStrip />}
       <div
         className="h-0.5 bg-brass transition-[width] duration-500"
@@ -110,7 +112,7 @@ export function TransportBar() {
               title="Unmute this device (M)"
               className="rounded-lg bg-danger/15 px-3 py-2 font-medium text-danger hover:bg-danger/25"
             >
-              Muted here
+              Unmute this device
             </button>
           )}
           <button

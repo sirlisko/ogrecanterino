@@ -38,7 +38,7 @@ export function PlayerPage() {
   return (
     <>
       <header
-        className="-mx-4 -mt-6 mb-6 bg-cover bg-center px-4 pt-14 pb-5"
+        className="-mt-6 mb-6 mx-[calc(50%-50vw)] bg-cover bg-center pt-14 pb-5"
         style={{
           backgroundImage: `linear-gradient(to bottom, transparent, var(--color-peat-900)), ${
             scene.bannerPath
@@ -47,7 +47,7 @@ export function PlayerPage() {
           }`,
         }}
       >
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end gap-4 px-4">
           <div className="min-w-0">
             <h1 className="font-display text-4xl leading-tight font-bold text-balance sm:text-5xl">
               {scene.name}
@@ -58,7 +58,7 @@ export function PlayerPage() {
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
             {active ? (
-              <Button onClick={() => void engine.stopScene()}>Fade out scene</Button>
+              <Button onClick={() => void engine.stopScene()}>Fade out</Button>
             ) : (
               <Button variant="primary" onClick={() => void engine.playScene(scene)}>
                 Start scene
@@ -92,7 +92,13 @@ export function PlayerPage() {
         </div>
       </header>
 
-      {!active && (
+      {/* Both states keep the same slot, so starting the scene doesn't shift the lanes under the cursor. */}
+      {active ? (
+        <p className="mb-4 flex items-center gap-2 rounded-lg bg-brass/10 px-3 py-2 text-ink ring-1 ring-brass/40">
+          <span aria-hidden className="h-2 w-2 shrink-0 animate-breathe rounded-full bg-brass" />
+          Playing for the table. Tracks and effects you click here are heard by everyone.
+        </p>
+      ) : (
         <p className="mb-4 rounded-lg bg-peat-800 px-3 py-2 text-ink-muted ring-1 ring-peat-700">
           Not playing. Tracks and effects you click play on this device only, so you can prepare
           without interrupting the table.

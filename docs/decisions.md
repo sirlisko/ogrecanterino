@@ -41,6 +41,14 @@ would delete the scene out from under the page being reloaded.
 proxy that routes on health would otherwise take the whole app offline during a Discord outage, so
 monitors that care about the bot should check the `discord` field instead.
 
+### Starting another scene from a card takes two clicks
+
+While a scene is live, the start button on a scene card or in "Recently played" first turns into
+"Start scene?" for three seconds, and only a second click replaces the live scene. The button sits
+where you'd click to open the scene, so browsing mid-session could crossfade the table by
+accident. With nothing playing it starts straight away, and the `[`/`]` hotkeys and table mode's
+Next button are deliberate enough to skip the question.
+
 ## 2026-10-30: UX review
 
 ### Collections, not folders
@@ -119,8 +127,8 @@ Sounds too short or quiet to measure play unchanged.
 ### Quick pads live in the transport bar
 
 Pads moved from the bottom of the player page into a **Pads** tray, so they're reachable on every
-page. You assign, rename and clear them there; empty pads open a sound picker. The library's "Pin
-to pad" select remains as a shortcut.
+page. You assign, rename and clear them there; empty pads open a sound picker. The library's
+"Assign to pad" select remains as a shortcut.
 
 ### Table mode is a separate route
 
