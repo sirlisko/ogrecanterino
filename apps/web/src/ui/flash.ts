@@ -1,8 +1,8 @@
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+import { prefersReducedMotion } from './motion.ts'
 
 /** Confirms a pad press visually; works for repeated presses without remounting. */
 export function flash(el: Element | null, color = 'var(--color-arcane)') {
-  if (!el || reducedMotion()) return
+  if (!el || prefersReducedMotion()) return
   el.animate(
     [
       {

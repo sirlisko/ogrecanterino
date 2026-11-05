@@ -13,6 +13,7 @@ import { PadsStrip } from '../pads/PadsStrip.tsx'
 import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
 import { MixerPopover } from './MixerPopover.tsx'
 import { ResumeToast } from './ResumeToast.tsx'
+import { StageEdge } from './StageEdge.tsx'
 
 export function TransportBar() {
   const scene = usePlayer((s) => s.scene)
@@ -22,7 +23,6 @@ export function TransportBar() {
   const ducked = usePlayer((s) => s.ducked || s.effectDucking)
   const ambience = usePlayer((s) => s.ambience)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
-  const progress = music.duration ? (music.current / music.duration) * 100 : 0
   const sounding = (scene?.data.ambiences ?? []).filter((c) => ambience[c.id]?.sounding)
   const setlist = useSetlist()
   const goTo = useGoToScene()
@@ -34,11 +34,8 @@ export function TransportBar() {
         <ResumeToast />
         <DeleteToast />
       </ToastStack>
+      <StageEdge />
       {padsVisible && <PadsStrip />}
-      <div
-        className="h-0.5 bg-brass transition-[width] duration-500"
-        style={{ width: `${progress}%` }}
-      />
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
         <div className="min-w-0 flex-1">
           {scene ? (
