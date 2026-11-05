@@ -27,9 +27,12 @@ export function TablePads() {
                 void engine.firePad(pad.soundId)
                 flash(refs.current.get(pad.slot) ?? null, 'var(--color-ink)')
               }}
-              className="flex min-h-24 items-end rounded-xl bg-peat-800 p-3 text-left text-lg ring-1 ring-peat-700 hover:bg-peat-700"
+              className="relative flex min-h-24 items-end rounded-xl bg-peat-800 p-3 text-left text-lg ring-1 ring-peat-700 hover:bg-peat-700"
             >
-              {pad.label}
+              <kbd className="absolute top-2 right-2 grid h-6 min-w-6 place-items-center rounded border-b-2 border-peat-950 bg-peat-600 px-1 font-sans text-xs text-ink tabular">
+                ⇧{pad.slot}
+              </kbd>
+              <span className="pr-8 leading-tight">{pad.label}</span>
             </button>
           ))}
       </div>
