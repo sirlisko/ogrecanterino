@@ -9,6 +9,7 @@ import { ToastStack } from '../../ui/Toast.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DeleteToast } from '../scenes/DeleteToast.tsx'
 import { DiscordControl } from '../discord/DiscordControl.tsx'
+import { useDiscordStream } from '../discord/useDiscordStream.ts'
 import { PadsStrip } from '../pads/PadsStrip.tsx'
 import { togglePads, usePadsVisible } from '../pads/padsVisible.ts'
 import { MixerPopover } from './MixerPopover.tsx'
@@ -23,6 +24,7 @@ export function TransportBar() {
   const noMusic = !scene?.data.music.length
   const combat = usePlayer((s) => s.combat)
   const monitor = usePlayer((s) => s.monitor)
+  const liveOnDiscord = useDiscordStream().status === 'streaming'
   const ducked = usePlayer((s) => s.ducked || s.effectDucking)
   const ambience = usePlayer((s) => s.ambience)
   const track = scene?.data.music.find((c) => c.id === music.cardId)
@@ -124,9 +126,17 @@ export function TransportBar() {
               type="button"
               onClick={() => engine.setMonitor(true)}
               title="Unmute this device (M)"
-              className="rounded-lg bg-danger/15 px-3 py-2 font-medium whitespace-nowrap text-danger hover:bg-danger/25"
+              aria-label="Unmute this device"
+              // Being muted is expected while the table listens in Discord, so it isn't a warning then.
+              className={`rounded-lg px-3 py-2 whitespace-nowrap ${liveOnDiscord ? 'text-ink-muted ring-1 ring-peat-600 hover:text-ink' : 'bg-danger/15 font-medium text-danger hover:bg-danger/25'}`}
             >
-              Unmute this device
+              {liveOnDiscord ? (
+                <>
+                  Muted here<span className="hidden sm:inline">, live on Discord</span>
+                </>
+              ) : (
+                'Unmute this device'
+              )}
             </button>
           )}
           <button

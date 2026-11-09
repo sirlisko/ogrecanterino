@@ -1,6 +1,7 @@
 import { engine } from '../../audio/engine.ts'
 import { usePlayer, type Volumes } from '../../audio/store.ts'
 import { Fader } from '../../ui/Fader.tsx'
+import { useDiscordStream } from '../discord/useDiscordStream.ts'
 
 const CHANNELS: { key: keyof Volumes; label: string; color: string }[] = [
   { key: 'master', label: 'Master', color: 'var(--color-ink)' },
@@ -16,6 +17,7 @@ const CHANNELS: { key: keyof Volumes; label: string; color: string }[] = [
 export function TableMixer({ compact }: { compact?: boolean }) {
   const volumes = usePlayer((s) => s.volumes)
   const monitor = usePlayer((s) => s.monitor)
+  const liveOnDiscord = useDiscordStream().status === 'streaming'
 
   return (
     <section
@@ -55,9 +57,13 @@ export function TableMixer({ compact }: { compact?: boolean }) {
         type="button"
         aria-pressed={!monitor}
         onClick={() => engine.setMonitor(!monitor)}
-        className={`${compact ? 'min-h-11' : 'min-h-14 text-lg'} w-full rounded-xl px-5 ring-1 ${monitor ? 'text-ink-muted ring-peat-600 hover:text-ink' : 'bg-danger/15 font-medium text-danger ring-danger/40'}`}
+        className={`${compact ? 'min-h-11' : 'min-h-14 text-lg'} w-full rounded-xl px-5 ring-1 ${monitor || liveOnDiscord ? 'text-ink-muted ring-peat-600 hover:text-ink' : 'bg-danger/15 font-medium text-danger ring-danger/40'}`}
       >
-        {monitor ? 'Mute this device' : 'Unmute this device'}
+        {monitor
+          ? 'Mute this device'
+          : liveOnDiscord
+            ? 'Muted here, live on Discord'
+            : 'Unmute this device'}
       </button>
     </section>
   )
