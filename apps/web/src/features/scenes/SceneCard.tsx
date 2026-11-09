@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
+import { hasNoSounds, NO_SOUNDS_HINT } from '../editor/blankScene.ts'
 import { SceneArt } from './art/SceneArt.tsx'
 import { useSceneGlow } from './art/useSceneGlow.ts'
 import { SceneCounts } from './SceneCounts.tsx'
@@ -14,6 +15,7 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const confirm = useConfirmStart(scene.id)
   const glow = useSceneGlow(playing)
+  const empty = hasNoSounds(scene)
 
   const start = () =>
     confirm.attempt(() => {
@@ -50,17 +52,21 @@ export function SceneCard({ scene, canEdit }: { scene: Scene; canEdit: boolean }
       <button
         type="button"
         onClick={start}
+        disabled={empty}
+        title={empty ? NO_SOUNDS_HINT : undefined}
         aria-label={
-          playing
-            ? `${scene.name} is playing`
-            : confirm.armed
-              ? `Click again to replace the playing scene with ${scene.name}`
-              : `Start scene: ${scene.name}`
+          empty
+            ? `${scene.name} has no sounds yet`
+            : playing
+              ? `${scene.name} is playing`
+              : confirm.armed
+                ? `Click again to replace the playing scene with ${scene.name}`
+                : `Start scene: ${scene.name}`
         }
         className={`absolute top-2 left-2 z-10 flex h-9 min-w-9 items-center justify-center gap-2 rounded-full shadow-lg transition ${
           playing || confirm.armed
             ? 'bg-brass text-peat-950'
-            : 'bg-peat-950/70 text-ink hover:bg-brass hover:text-peat-950'
+            : 'bg-peat-950/70 text-ink enabled:hover:bg-brass enabled:hover:text-peat-950 disabled:text-ink-muted disabled:opacity-60'
         } ${confirm.armed ? 'px-3.5 font-medium' : ''}`}
       >
         {playing ? (

@@ -6,6 +6,7 @@ import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
 import { combatSceneIdFor } from '../collections/setlist.ts'
+import { hasNoSounds, NO_SOUNDS_HINT } from '../editor/blankScene.ts'
 import { useActiveCollectionData } from '../collections/useSetlist.ts'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
 import { useSceneGlow } from '../scenes/art/useSceneGlow.ts'
@@ -63,7 +64,12 @@ export function PlayerPage() {
             {active ? (
               <Button onClick={() => void engine.stopScene()}>Fade out</Button>
             ) : (
-              <Button variant="primary" onClick={() => void engine.playScene(scene)}>
+              <Button
+                variant="primary"
+                disabled={hasNoSounds(scene)}
+                title={hasNoSounds(scene) ? NO_SOUNDS_HINT : undefined}
+                onClick={() => void engine.playScene(scene)}
+              >
                 Start scene
               </Button>
             )}
