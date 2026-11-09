@@ -1,6 +1,6 @@
 import type { Scene } from '@ogre/shared'
 import { Link } from 'react-router'
-import type { SaveStatus } from '../player/useLiveScene.ts'
+import type { SaveStatus } from '../player/useSceneAutosave.ts'
 import { artForTags, SCENE_ART_TITLES } from '../scenes/art/kinds.ts'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
 import { hasNoSounds, NO_SOUNDS_HINT } from './blankScene.ts'

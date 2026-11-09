@@ -1,13 +1,10 @@
 import type { Card, Scene, SceneData, SceneSection } from '@ogre/shared'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMe } from '../../api/me.ts'
-import { useSaveScene, useScene } from '../../api/scenes.ts'
+import { useScene } from '../../api/scenes.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
-
-const SAVE_DELAY_MS = 800
-
-export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
+import { knownVersion, rememberVersion, useSceneAutosave } from './useSceneAutosave.ts'
 
 /**
  * Local working copy of a scene. Changes apply to the audio immediately and, for scenes
@@ -16,60 +13,61 @@ export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
 export function useLiveScene(id: string | undefined) {
   const query = useScene(id)
   const me = useMe().data
-  const save = useSaveScene()
   const [scene, setScene] = useState<Scene | null>(null)
-  const [queued, setQueued] = useState(false)
   const latest = useRef<Scene | null>(null)
-  const timer = useRef<number | null>(null)
-  const mutate = useRef(save.mutate)
-  mutate.current = save.mutate
+  const autosave = useSceneAutosave(latest)
+  const { flush, changed, settle, isDirty } = autosave
 
   const canEdit = !!scene && !!me && (me.role === 'admin' || scene.ownerId === me.id)
 
+  const replace = useCallback((next: Scene) => {
+    latest.current = next
+    setScene(next)
+  }, [])
+
   useEffect(() => {
     if (!query.data) return
+    settle()
     // If this scene is already playing, keep the playing copy so unsaved tweaks survive navigation.
     const playing = usePlayer.getState().scene
-    const initial = playing?.id === query.data.id ? playing : query.data
-    latest.current = initial
-    setScene(initial)
+    if (playing?.id === query.data.id) {
+      if (!knownVersion(playing.id)) rememberVersion(playing.id, playing.updatedAt)
+      replace(playing)
+    } else {
+      rememberVersion(query.data.id, query.data.updatedAt)
+      replace(query.data)
+    }
   }, [query.data?.id])
+
+  // A cached copy opened untouched takes the newer version when the refetch lands, rather than
+  // conflicting with it on the first save. Not the playing scene: only the GM changes what's heard.
+  useEffect(() => {
+    const fresh = query.data
+    if (!fresh || latest.current?.id !== fresh.id || isDirty()) return
+    if (usePlayer.getState().sceneId === fresh.id || knownVersion(fresh.id) === fresh.updatedAt)
+      return
+    rememberVersion(fresh.id, fresh.updatedAt)
+    replace(fresh)
+  }, [query.data?.updatedAt])
 
   // Server-side fields (the banner) change outside this hook; pick them up without losing edits.
   useEffect(() => {
     const bannerPath = query.data?.bannerPath
     if (bannerPath === undefined || !latest.current || latest.current.bannerPath === bannerPath)
       return
-    latest.current = { ...latest.current, bannerPath }
-    setScene(latest.current)
+    replace({ ...latest.current, bannerPath })
   }, [query.data?.bannerPath])
-
-  const flush = useCallback(() => {
-    if (timer.current !== null) window.clearTimeout(timer.current)
-    timer.current = null
-    setQueued(false)
-    const s = latest.current
-    if (!s || !s.name.trim()) return
-    const { name, tags, visibility, combatSceneId, data } = s
-    mutate.current({ id: s.id, input: { name, tags, visibility, combatSceneId, data } })
-  }, [])
-
-  useEffect(() => () => void (timer.current !== null && flush()), [flush])
 
   const update = useCallback(
     (fn: (s: Scene) => Scene) => {
       const current = latest.current
       if (!current) return
       const next = fn(current)
-      latest.current = next
-      setScene(next)
+      replace(next)
       engine.updateScene(next)
-      if (!canEdit) return
-      if (timer.current !== null) window.clearTimeout(timer.current)
-      timer.current = window.setTimeout(flush, SAVE_DELAY_MS)
-      setQueued(true)
+      changed(canEdit)
     },
-    [canEdit, flush],
+    [canEdit, changed, replace],
   )
 
   const updateData = useCallback(
@@ -86,26 +84,27 @@ export function useLiveScene(id: string | undefined) {
     [updateData],
   )
 
-  const status: SaveStatus = queued
-    ? 'pending'
-    : save.isPending
-      ? 'saving'
-      : save.isError
-        ? 'error'
-        : save.isSuccess
-          ? 'saved'
-          : 'idle'
+  const loadNewer = async () => {
+    const { data } = await query.refetch()
+    if (!data) return
+    settle()
+    rememberVersion(data.id, data.updatedAt)
+    replace(data)
+    engine.updateScene(data)
+  }
 
   return {
     scene,
     canEdit,
     isPending: query.isPending,
     error: query.error,
-    saveStatus: status,
-    saveError: save.error,
+    saveStatus: autosave.status,
+    saveError: autosave.error,
     update,
     updateData,
     updateCard,
     flush,
+    keepMine: () => flush(true),
+    loadNewer,
   }
 }

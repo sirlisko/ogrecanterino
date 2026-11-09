@@ -75,6 +75,10 @@ export const sceneInput = z.object({
 })
 export type SceneInput = z.infer<typeof sceneInput>
 
+/** `expectedUpdatedAt`: refuse the save if the scene has changed since that version was read. */
+export const sceneUpdate = sceneInput.extend({ expectedUpdatedAt: z.string().optional() })
+export type SceneUpdate = z.input<typeof sceneUpdate>
+
 export const scene = sceneInput.extend({
   id: z.string(),
   ownerId: z.string(),

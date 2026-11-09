@@ -147,6 +147,26 @@ describe('scenes', () => {
     expect(del.statusCode).toBe(204)
   })
 
+  it('refuses a save based on a version that has since changed', async () => {
+    const body = { name: 'Harbour', data: emptySceneData() }
+    const put = (id: string, payload: object) =>
+      app.inject({ method: 'PUT', url: `/api/scenes/${id}`, headers: { cookie }, payload })
+    const { id, updatedAt } = (
+      await app.inject({ method: 'POST', url: '/api/scenes', headers: { cookie }, payload: body })
+    ).json()
+
+    await new Promise((r) => setTimeout(r, 2))
+    const newer = await put(id, { ...body, name: 'Harbour (dusk)', expectedUpdatedAt: updatedAt })
+    expect(newer.statusCode).toBe(200)
+
+    const stale = await put(id, { ...body, name: 'Harbour', expectedUpdatedAt: updatedAt })
+    expect(stale.statusCode).toBe(409)
+    expect((await get(`/api/scenes/${id}`)).json().name).toBe('Harbour (dusk)')
+
+    const overwrite = await put(id, { ...body, name: 'Harbour (mine)' })
+    expect(overwrite.json().name).toBe('Harbour (mine)')
+  })
+
   it('uploads and removes a banner', async () => {
     const created = await app.inject({
       method: 'POST',

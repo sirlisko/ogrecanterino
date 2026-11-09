@@ -1,4 +1,4 @@
-import type { Scene, SceneInput } from '@ogre/shared'
+import type { Scene, SceneUpdate } from '@ogre/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, json } from './client.ts'
 import { keys } from './keys.ts'
@@ -18,7 +18,7 @@ export const useScene = (id: string | undefined) =>
 export function useSaveScene() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, input }: { id?: string; input: SceneInput }) =>
+    mutationFn: ({ id, input }: { id?: string; input: SceneUpdate }) =>
       id
         ? api<Scene>(`/api/scenes/${id}`, json('PUT', input))
         : api<Scene>('/api/scenes', json('POST', input)),

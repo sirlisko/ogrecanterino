@@ -14,11 +14,13 @@ import { AmbienceLane } from './AmbienceLane.tsx'
 import { EffectsLane } from './EffectsLane.tsx'
 import { LaneTabs } from './LaneTabs.tsx'
 import { MusicLane } from './MusicLane.tsx'
+import { SaveConflict } from './SaveConflict.tsx'
 import { useLiveScene } from './useLiveScene.ts'
 
 export function PlayerPage() {
   const { id } = useParams()
-  const { scene, canEdit, isPending, error, updateData, updateCard } = useLiveScene(id)
+  const live = useLiveScene(id)
+  const { scene, canEdit, isPending, error, updateData, updateCard } = live
   const active = usePlayer((s) => s.sceneId === id)
   const combat = usePlayer((s) => s.combat)
   const collection = useActiveCollectionData()
@@ -101,6 +103,7 @@ export function PlayerPage() {
         </div>
       </header>
 
+      <SaveConflict live={live} className="mb-4" />
       {/* Both states keep the same slot, so starting the scene doesn't shift the lanes under the cursor. */}
       {active ? (
         <p className="mb-4 flex items-center gap-2 rounded-lg bg-brass/10 px-3 py-2 text-ink ring-1 ring-brass/40">

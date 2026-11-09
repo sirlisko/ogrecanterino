@@ -4,7 +4,7 @@ import { copyFile, mkdir, rm } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import fastifyStatic from '@fastify/static'
-import { type Scene, sceneInput } from '@ogre/shared'
+import { type Scene, sceneInput, sceneUpdate } from '@ogre/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
@@ -87,7 +87,9 @@ export async function sceneRoutes(
 
   app.put<Params>('/api/scenes/:id', async (req) => {
     const row = editable(req, req.params.id)
-    const input = parseBody(sceneInput, req.body)
+    const { expectedUpdatedAt, ...input } = parseBody(sceneUpdate, req.body)
+    if (expectedUpdatedAt && expectedUpdatedAt !== row.updatedAt)
+      throw httpError(409, 'This scene was changed somewhere else')
     const updated = db
       .update(scenes)
       .set({ ...input, updatedAt: new Date().toISOString() })
