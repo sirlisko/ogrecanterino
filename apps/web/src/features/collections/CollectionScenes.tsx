@@ -11,6 +11,9 @@ import { stepStatus } from './setlist.ts'
 import { SetlistStep } from './SetlistStep.tsx'
 import { useSetlist } from './useSetlist.ts'
 
+/** Shorter setlists fit on one screen, where a search box is only in the way. */
+const SEARCH_FROM_SCENES = 8
+
 export function CollectionScenes({
   collection,
   scenes,
@@ -31,17 +34,18 @@ export function CollectionScenes({
   const nextId = useSetlist().next?.id ?? null
   const played = new Set(useSessionPlays((s) => s.ids))
   const combat = collection.combatSceneId ? byId.get(collection.combatSceneId) : undefined
+  const searchable = ordered.length >= SEARCH_FROM_SCENES
   // Numbered by their place in the collection, so searching doesn't renumber them.
   const steps = ordered
     .map((scene, i) => ({ scene, position: i + 1 }))
-    .filter(({ scene }) => matchesQuery(scene, query))
+    .filter(({ scene }) => !searchable || matchesQuery(scene, query))
 
   return (
     <>
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2">
         <p className="min-w-0 text-ink-muted">
           {collection.visibility === 'private'
-            ? 'Only you'
+            ? 'Private collection'
             : mine
               ? 'Shared with the group'
               : `Shared by ${collection.ownerName}`}
@@ -50,8 +54,12 @@ export function CollectionScenes({
             ` ${unavailable} scene${unavailable === 1 ? ' is' : 's are'} no longer shared with you.`}
         </p>
         <div className="ml-auto flex items-center gap-2">
-          <SceneSearch value={query} onChange={setQuery} />
-          {canEdit && <Button onClick={() => setEditing(true)}>Edit collection</Button>}
+          {searchable && <SceneSearch value={query} onChange={setQuery} />}
+          {canEdit && (
+            <Button className="whitespace-nowrap" onClick={() => setEditing(true)}>
+              Edit collection
+            </Button>
+          )}
         </div>
       </div>
       {ordered.length === 0 ? (
