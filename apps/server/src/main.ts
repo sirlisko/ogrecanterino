@@ -8,6 +8,8 @@ import { VoiceSessions } from './discord/voiceSessions.ts'
 
 const sessionSecret = config.SESSION_SECRET ?? randomBytes(32).toString('hex')
 if (!config.SESSION_SECRET) console.warn('SESSION_SECRET not set: sessions will reset on restart')
+if (config.DISCORD_CLIENT_ID && !config.ALLOWED_GUILD_IDS.length)
+  console.warn('ALLOWED_GUILD_IDS is empty: any Discord account can log in')
 
 const db = openDb(config.dbPath)
 

@@ -5,6 +5,8 @@ export const UNTITLED = 'Untitled scene'
 /** Long enough that no one is still looking at it in another tab. */
 const SWEEP_AFTER_MS = 60 * 60_000
 
+export const NO_SOUNDS_HINT = 'Add a sound to the scene first'
+
 export const hasNoSounds = (s: Scene) =>
   sceneSections.every((section) => s.data[section].length === 0)
 

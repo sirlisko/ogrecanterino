@@ -63,11 +63,38 @@ describe('sounds', () => {
     expect((await get('/api/sounds')).json()).toEqual([expect.objectContaining({ title: 'Rain' })])
   })
 
+  it('leaves the fields a partial update does not mention', async () => {
+    const created = db
+      .insert(sounds)
+      .values({
+        uploadedBy: (await get('/api/me')).json().id,
+        title: 'Wind',
+        artist: 'Someone',
+        tags: ['Weather'],
+        filename: 'wind_ab12cd34ef.wav',
+        mime: 'audio/wav',
+        size: 1000,
+        category: 'ambience',
+      })
+      .returning()
+      .get()
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/api/sounds/${created.id}`,
+      headers: { cookie },
+      payload: { title: 'Gale' },
+    })
+    expect(res.json()).toMatchObject({ title: 'Gale', artist: 'Someone', tags: ['Weather'] })
+    db.delete(sounds).where(eq(sounds.id, created.id)).run()
+  })
+
   it('serves audio with range requests and immutable caching', async () => {
     const res = await get('/audio/rain_ab12cd34ef.wav', { range: 'bytes=0-99' })
     expect(res.statusCode).toBe(206)
     expect(res.rawPayload.length).toBe(100)
     expect(res.headers['cache-control']).toContain('immutable')
+    expect(res.headers['cache-control']).toContain('private')
+    expect((await get('/audio/rain_ab12cd34ef.wav')).headers['cache-control']).toContain('private')
   })
 })
 
@@ -120,6 +147,26 @@ describe('scenes', () => {
     expect(del.statusCode).toBe(204)
   })
 
+  it('refuses a save based on a version that has since changed', async () => {
+    const body = { name: 'Harbour', data: emptySceneData() }
+    const put = (id: string, payload: object) =>
+      app.inject({ method: 'PUT', url: `/api/scenes/${id}`, headers: { cookie }, payload })
+    const { id, updatedAt } = (
+      await app.inject({ method: 'POST', url: '/api/scenes', headers: { cookie }, payload: body })
+    ).json()
+
+    await new Promise((r) => setTimeout(r, 2))
+    const newer = await put(id, { ...body, name: 'Harbour (dusk)', expectedUpdatedAt: updatedAt })
+    expect(newer.statusCode).toBe(200)
+
+    const stale = await put(id, { ...body, name: 'Harbour', expectedUpdatedAt: updatedAt })
+    expect(stale.statusCode).toBe(409)
+    expect((await get(`/api/scenes/${id}`)).json().name).toBe('Harbour (dusk)')
+
+    const overwrite = await put(id, { ...body, name: 'Harbour (mine)' })
+    expect(overwrite.json().name).toBe('Harbour (mine)')
+  })
+
   it('uploads and removes a banner', async () => {
     const created = await app.inject({
       method: 'POST',
@@ -146,6 +193,15 @@ describe('scenes', () => {
     const { bannerPath } = upload.json()
     expect(existsSync(join(dir, 'banners', bannerPath))).toBe(true)
 
+    const copy = await app.inject({
+      method: 'POST',
+      url: `/api/scenes/${id}/duplicate`,
+      headers: { cookie },
+    })
+    const copied = copy.json().bannerPath
+    expect(copied).not.toBe(bannerPath)
+    expect(existsSync(join(dir, 'banners', copied))).toBe(true)
+
     const removed = await app.inject({
       method: 'DELETE',
       url: `/api/scenes/${id}/banner`,
@@ -153,6 +209,7 @@ describe('scenes', () => {
     })
     expect(removed.json().bannerPath).toBeNull()
     expect(existsSync(join(dir, 'banners', bannerPath))).toBe(false)
+    expect(existsSync(join(dir, 'banners', copied))).toBe(true)
   })
 
   it('validates scene bodies', async () => {

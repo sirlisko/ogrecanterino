@@ -2,6 +2,7 @@ import { DndContext } from '@dnd-kit/core'
 import { emptySceneData, type SceneData, sceneSections } from '@ogre/shared'
 import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router'
+import { SaveConflict } from '../player/SaveConflict.tsx'
 import { useLiveScene } from '../player/useLiveScene.ts'
 import { cardForSound, insertCard, removeCard, updateCard } from './cards.ts'
 import { EditorHeader } from './EditorHeader.tsx'
@@ -56,6 +57,7 @@ export function EditorPage() {
         picking={picking}
         onTogglePicture={() => setPicking((p) => !p)}
       />
+      <SaveConflict live={live} className="mb-6" />
       {picking && (
         <PicturePicker
           scene={draft}

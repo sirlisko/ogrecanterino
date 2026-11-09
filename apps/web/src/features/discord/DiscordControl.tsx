@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useDiscordStatus } from '../../api/discord.ts'
 import { canStreamToDiscord } from '../../audio/discordOut.ts'
 import { Popover } from '../../ui/Popover.tsx'
@@ -14,8 +15,10 @@ const LABELS: Record<StreamStatus, { full: string; short: string }> = {
 
 /** `below`: for a trigger at the top of the screen (table mode) instead of in the transport bar. */
 export function DiscordControl({ below }: { below?: boolean }) {
-  const status = useDiscordStatus().data
+  const { data: status, refetch } = useDiscordStatus()
   const stream = useDiscordStream()
+  // The bot can leave without this page asking (a kick, a lost connection), so the panel re-checks.
+  useEffect(() => void refetch(), [stream.status, refetch])
   if (!status?.configured) return null
 
   const label = LABELS[stream.status]

@@ -6,6 +6,7 @@ import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
 import { Dialog, fieldClass } from '../../ui/Dialog.tsx'
 import { useActiveCollectionData } from '../collections/useSetlist.ts'
+import { hasNoSounds } from '../editor/blankScene.ts'
 import { matchesQuery } from '../scenes/SceneSearch.tsx'
 
 /** Starts any scene from table mode, with the active collection's scenes first and in order. */
@@ -54,17 +55,18 @@ export function ScenePicker({ onClose }: { onClose: () => void }) {
             <ul className="grid gap-2 sm:grid-cols-2">
               {group.scenes.map((s) => {
                 const playing = s.id === playingId
+                const empty = hasNoSounds(s)
                 return (
                   <li key={s.id}>
                     <button
                       type="button"
-                      disabled={playing}
+                      disabled={playing || empty}
                       onClick={() => start(s)}
-                      className={`flex min-h-16 w-full flex-col justify-center rounded-xl px-4 py-2 text-left ring-1 ${playing ? 'bg-brass/12 ring-brass/40' : 'bg-peat-900 ring-peat-700 hover:bg-peat-700'}`}
+                      className={`flex min-h-16 w-full flex-col justify-center rounded-xl px-4 py-2 text-left ring-1 disabled:cursor-default ${playing ? 'bg-brass/12 ring-brass/40' : empty ? 'bg-peat-900 opacity-60 ring-peat-700' : 'bg-peat-900 ring-peat-700 hover:bg-peat-700'}`}
                     >
                       <span className="text-lg leading-tight">{s.name}</span>
                       <span className="truncate text-sm text-ink-muted">
-                        {playing ? 'Playing now' : s.tags.join(', ')}
+                        {playing ? 'Playing now' : empty ? 'No sounds yet' : s.tags.join(', ')}
                       </span>
                     </button>
                   </li>

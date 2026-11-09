@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
+import { hasNoSounds, NO_SOUNDS_HINT } from '../editor/blankScene.ts'
 import { SceneArt } from './art/SceneArt.tsx'
 import { SceneCounts } from './SceneCounts.tsx'
 import { SceneMenu } from './SceneMenu.tsx'
@@ -13,6 +14,7 @@ export function SceneRow({ scene, canEdit }: { scene: Scene; canEdit: boolean })
   const navigate = useNavigate()
   const playing = usePlayer((s) => s.sceneId === scene.id)
   const confirm = useConfirmStart(scene.id)
+  const empty = hasNoSounds(scene)
   const notes = [
     scene.tags.join(', '),
     playing && 'Live now',
@@ -31,17 +33,21 @@ export function SceneRow({ scene, canEdit }: { scene: Scene; canEdit: boolean })
             navigate(`/scenes/${scene.id}`)
           })
         }
+        disabled={empty}
+        title={empty ? NO_SOUNDS_HINT : undefined}
         aria-label={
-          playing
-            ? `${scene.name} is playing`
-            : confirm.armed
-              ? `Click again to replace the playing scene with ${scene.name}`
-              : `Start scene: ${scene.name}`
+          empty
+            ? `${scene.name} has no sounds yet`
+            : playing
+              ? `${scene.name} is playing`
+              : confirm.armed
+                ? `Click again to replace the playing scene with ${scene.name}`
+                : `Start scene: ${scene.name}`
         }
         className={`relative z-10 flex h-9 min-w-9 items-center justify-center gap-2 rounded-full transition ${
           playing || confirm.armed
             ? 'bg-brass text-peat-950'
-            : 'bg-peat-700 text-ink hover:bg-brass hover:text-peat-950'
+            : 'bg-peat-700 text-ink enabled:hover:bg-brass enabled:hover:text-peat-950 disabled:text-ink-muted disabled:opacity-60'
         } ${confirm.armed ? 'px-3.5 font-medium' : ''}`}
       >
         {playing ? (

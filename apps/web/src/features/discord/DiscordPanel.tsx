@@ -17,6 +17,11 @@ export function DiscordPanel({ status, stream }: { status: DiscordStatus; stream
   const connect = useConnectVoice()
   const disconnect = useDisconnectVoice()
   const monitor = usePlayer((s) => s.monitor)
+  const dropped = stream.status === 'error' && (
+    <p className="text-sm text-danger">
+      {stream.message ?? 'The stream dropped. Send audio again.'}
+    </p>
+  )
 
   if (!status.ready)
     return (
@@ -43,11 +48,7 @@ export function DiscordPanel({ status, stream }: { status: DiscordStatus; stream
             Send audio to Discord
           </Button>
         )}
-        {stream.status === 'error' && (
-          <p className="text-sm text-danger">
-            {stream.message ?? 'The stream dropped. Send audio again.'}
-          </p>
-        )}
+        {dropped}
         {live && monitor && (
           <button
             type="button"
@@ -74,6 +75,7 @@ export function DiscordPanel({ status, stream }: { status: DiscordStatus; stream
   const list = channels.data ?? []
   return (
     <div className="flex flex-col gap-2">
+      {dropped}
       <p className="text-sm text-ink-muted">Pick a voice channel for the bot to join.</p>
       {channels.isPending && <p className="text-sm text-ink-muted">Loading channels…</p>}
       {channels.data && list.length === 0 && (

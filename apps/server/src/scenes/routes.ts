@@ -1,10 +1,10 @@
 import { randomBytes } from 'node:crypto'
 import { createWriteStream } from 'node:fs'
-import { mkdir, rm } from 'node:fs/promises'
+import { copyFile, mkdir, rm } from 'node:fs/promises'
 import { extname, join } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import fastifyStatic from '@fastify/static'
-import { sceneInput } from '@ogre/shared'
+import { type Scene, sceneInput, sceneUpdate } from '@ogre/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
@@ -12,6 +12,7 @@ import type { Db } from '../db/client.ts'
 import { scenes } from '../db/schema.ts'
 import { authed, canEdit, httpError } from '../http/auth.ts'
 import { parseBody } from '../http/body.ts'
+import { privateImmutableFiles } from '../http/privateFiles.ts'
 import { importBardicScenes } from './importBardic.ts'
 import { getVisibleScene, listScenes, ownerName, toScene } from './repo.ts'
 
@@ -25,6 +26,9 @@ const importBody = z.union([
 
 type Params = { Params: { id: string } }
 
+const bannerName = (sceneId: string, ext: string) =>
+  `${sceneId}_${randomBytes(4).toString('hex')}${ext}`
+
 export async function sceneRoutes(
   app: FastifyInstance,
   { db, bannerDir }: { db: Db; bannerDir: string },
@@ -34,8 +38,7 @@ export async function sceneRoutes(
     root: bannerDir,
     prefix: '/banners/',
     decorateReply: false,
-    immutable: true,
-    maxAge: '365d',
+    ...privateImmutableFiles,
   })
 
   const editable = (req: Parameters<typeof authed>[0], id: string) => {
@@ -54,6 +57,22 @@ export async function sceneRoutes(
     return toScene(row, ownerName(db, ownerId))
   }
 
+  const setBanner = (id: string, bannerPath: string | null) => {
+    const updated = db.update(scenes).set({ bannerPath }).where(eq(scenes.id, id)).returning().get()
+    return toScene(updated, ownerName(db, updated.ownerId))
+  }
+
+  // A copy gets its own file, because deleting a scene deletes its banner.
+  const copyBanner = async (copy: Scene, source: string) => {
+    const filename = bannerName(copy.id, extname(source))
+    try {
+      await copyFile(join(bannerDir, source), join(bannerDir, filename))
+    } catch {
+      return copy
+    }
+    return setBanner(copy.id, filename)
+  }
+
   app.get('/api/scenes', async (req) => listScenes(db, authed(req)))
 
   app.get<Params>('/api/scenes/:id', async (req) => {
@@ -68,7 +87,9 @@ export async function sceneRoutes(
 
   app.put<Params>('/api/scenes/:id', async (req) => {
     const row = editable(req, req.params.id)
-    const input = parseBody(sceneInput, req.body)
+    const { expectedUpdatedAt, ...input } = parseBody(sceneUpdate, req.body)
+    if (expectedUpdatedAt && expectedUpdatedAt !== row.updatedAt)
+      throw httpError(409, 'This scene was changed somewhere else')
     const updated = db
       .update(scenes)
       .set({ ...input, updatedAt: new Date().toISOString() })
@@ -87,7 +108,7 @@ export async function sceneRoutes(
 
   app.post<Params>('/api/scenes/:id/duplicate', async (req, reply) => {
     const user = authed(req)
-    const { name, tags, combatSceneId, data } = getVisibleScene(db, user, req.params.id)
+    const { name, tags, combatSceneId, data, bannerPath } = getVisibleScene(db, user, req.params.id)
     const copy = insert(user.id, {
       name: `${name} (copy)`,
       tags,
@@ -95,7 +116,7 @@ export async function sceneRoutes(
       data,
       visibility: 'private',
     })
-    return reply.code(201).send(copy)
+    return reply.code(201).send(bannerPath ? await copyBanner(copy, bannerPath) : copy)
   })
 
   app.get<Params>('/api/scenes/:id/export', async (req, reply) => {
@@ -126,31 +147,19 @@ export async function sceneRoutes(
     const ext = extname(file?.filename ?? '').toLowerCase()
     if (!file || !BANNER_EXTS.has(ext))
       throw httpError(415, 'Banner must be a jpg, png, webp or avif image')
-    const filename = `${row.id}_${randomBytes(4).toString('hex')}${ext}`
+    const filename = bannerName(row.id, ext)
     await pipeline(file.file, createWriteStream(join(bannerDir, filename)))
     if (file.file.truncated) {
       await rm(join(bannerDir, filename))
       throw httpError(413, 'Image too large')
     }
     if (row.bannerPath) await rm(join(bannerDir, row.bannerPath), { force: true })
-    const updated = db
-      .update(scenes)
-      .set({ bannerPath: filename })
-      .where(eq(scenes.id, row.id))
-      .returning()
-      .get()
-    return toScene(updated, ownerName(db, updated.ownerId))
+    return setBanner(row.id, filename)
   })
 
   app.delete<Params>('/api/scenes/:id/banner', async (req) => {
     const row = editable(req, req.params.id)
     if (row.bannerPath) await rm(join(bannerDir, row.bannerPath), { force: true })
-    const updated = db
-      .update(scenes)
-      .set({ bannerPath: null })
-      .where(eq(scenes.id, row.id))
-      .returning()
-      .get()
-    return toScene(updated, ownerName(db, updated.ownerId))
+    return setBanner(row.id, null)
   })
 }

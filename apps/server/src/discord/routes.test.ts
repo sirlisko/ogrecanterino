@@ -6,7 +6,7 @@ import { buildApp } from '../app.ts'
 import { openDb } from '../db/client.ts'
 import type { DiscordBot } from './bot.ts'
 import { discordRoutes } from './routes.ts'
-import type { VoiceSessions } from './voiceSessions.ts'
+import type { CloseSocket, VoiceSessions } from './voiceSessions.ts'
 
 async function setup(sessions: VoiceSessions) {
   const bot = { isReady: true, inviteUrl: null } as unknown as DiscordBot
@@ -56,12 +56,12 @@ describe('discord stream route', () => {
     await app.close()
   })
 
-  it('closes the socket with a reason when another tab takes the stream over', async () => {
-    let evict: (() => void) | null = null
+  it('closes the socket with the code and reason the voice session gives', async () => {
+    let closeSocket: CloseSocket | null = null
     const sessions = {
       forUser: () => null,
-      openStream: (_: string, onEvict: () => void) => {
-        evict = onEvict
+      openStream: (_: string, close: CloseSocket) => {
+        closeSocket = close
         return { write: () => undefined, close: () => undefined }
       },
     } as unknown as VoiceSessions
@@ -71,7 +71,7 @@ describe('discord stream route', () => {
     const closed = new Promise<[number, string]>((r) =>
       ws.on('close', (code, reason) => r([code, reason.toString()])),
     )
-    evict!()
+    closeSocket!(4000, 'Streaming moved to another tab or device')
 
     expect(await closed).toEqual([4000, 'Streaming moved to another tab or device'])
     await app.close()

@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { engine } from '../../audio/engine.ts'
 import { Button } from '../../ui/Button.tsx'
 import { Icon } from '../../ui/Icon.tsx'
+import { hasNoSounds, NO_SOUNDS_HINT } from '../editor/blankScene.ts'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
 import { SceneCounts } from '../scenes/SceneCounts.tsx'
 import { useConfirmStart } from '../scenes/useConfirmStart.ts'
@@ -34,6 +35,9 @@ export function SetlistStep({
   const hints = useSettings((s) => s.keyHints)
   const start = () => void engine.playScene(scene)
   const played = status === 'played'
+  const startable = hasNoSounds(scene)
+    ? { disabled: true, title: NO_SOUNDS_HINT }
+    : { disabled: false }
 
   return (
     <li
@@ -92,7 +96,7 @@ export function SetlistStep({
               )}
             </span>
             {/* As deliberate as pressing ], so it skips the second click. */}
-            <Button variant="primary" onClick={start}>
+            <Button variant="primary" onClick={start} {...startable}>
               Start scene
             </Button>
           </>
@@ -103,6 +107,7 @@ export function SetlistStep({
             <Button
               variant={confirm.armed ? 'primary' : 'quiet'}
               onClick={() => confirm.attempt(start)}
+              {...startable}
               aria-label={
                 confirm.armed
                   ? `Click again to replace the playing scene with ${scene.name}`

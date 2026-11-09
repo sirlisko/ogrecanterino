@@ -19,6 +19,7 @@ export class DiscordBot {
       this.ready = true
       console.info(`Discord bot logged in as ${c.user.tag} in ${c.guilds.cache.size} server(s)`)
     })
+    this.client.on(Events.Error, (error) => console.error('Discord client error:', error))
   }
 
   async login(token: string) {

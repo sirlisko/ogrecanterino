@@ -7,6 +7,7 @@ import { ErrorBoundary } from '../../ui/ErrorBoundary.tsx'
 import { PageCrash } from '../../app/CrashNotice.tsx'
 import { EFFECT_KEYS, EffectPad } from '../player/EffectsLane.tsx'
 import { ResumeToast } from '../player/ResumeToast.tsx'
+import { SaveConflict } from '../player/SaveConflict.tsx'
 import { useLiveScene } from '../player/useLiveScene.ts'
 import { ScenePicker } from './ScenePicker.tsx'
 import { TableAmbience } from './TableAmbience.tsx'
@@ -29,6 +30,7 @@ export function TablePage() {
     <div className="flex min-h-dvh flex-col">
       <TableHeader onPickScene={() => setPicking(true)} />
       <TableStrip scene={scene} />
+      <SaveConflict live={live} className="m-4 mb-0 sm:mx-5" />
       <ErrorBoundary resetKey={scene?.id} fallback={(retry) => <PageCrash retry={retry} />}>
         {scene ? (
           <main className="flex flex-1 flex-wrap items-start gap-5 p-4 sm:p-5">

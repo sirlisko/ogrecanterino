@@ -1,4 +1,4 @@
-import { PassThrough } from 'node:stream'
+import { PassThrough, pipeline } from 'node:stream'
 import {
   AudioPlayerStatus,
   createAudioPlayer,
@@ -25,6 +25,25 @@ const ABANDONED_LEAVE_MS = 30_000
 // Connected but silent this long (never started, or stopped and forgotten): free the bot for other GMs.
 const IDLE_LEAVE_MS = 60 * 60_000
 
+/** Close codes on the browser's stream socket; `reconnect.ts` in the web app acts on them. */
+export const STREAM_CLOSE = {
+  refused: 1008,
+  takenOver: 4000,
+  noVoiceSession: 4001,
+  botRemoved: 4002,
+} as const
+
+export type CloseSocket = (code: number, reason: string) => void
+
+type LeaveReason = Parameters<CloseSocket>
+
+/** The browser can rejoin the channel by itself. */
+const VOICE_LOST: LeaveReason = [STREAM_CLOSE.noVoiceSession, 'Lost the voice connection']
+const BOT_REMOVED: LeaveReason = [
+  STREAM_CLOSE.botRemoved,
+  'The bot was removed from the voice channel',
+]
+
 interface VoiceSession {
   guildId: string
   channelId: string
@@ -33,8 +52,8 @@ interface VoiceSession {
   connection: VoiceConnection
   player: AudioPlayer
   input: PassThrough | null
-  /** Tells the browser feeding `input` that another tab or device has taken over. */
-  evict: (() => void) | null
+  /** Closes the socket of the browser feeding `input`, telling it why. */
+  closeSocket: CloseSocket | null
   leaveTimer: NodeJS.Timeout | null
 }
 
@@ -54,7 +73,7 @@ export class VoiceSessions {
     bot.client.on(Events.VoiceStateUpdate, (_, state) => {
       if (state.id !== bot.client.user?.id || state.channelId) return
       const s = this.sessions.get(state.guild.id)
-      if (s) this.cleanup(s.guildId, s.connection)
+      if (s) this.cleanup(s.guildId, s.connection, BOT_REMOVED)
     })
   }
 
@@ -88,6 +107,8 @@ export class VoiceSessions {
       adapterCreator: guild.voiceAdapterCreator,
       selfDeaf: true,
     })
+    // Joining the same server again returns the connection already being watched.
+    if (existing?.connection !== connection) this.watch(guildId, connection)
     try {
       await entersState(connection, VoiceConnectionStatus.Ready, 20_000)
     } catch {
@@ -97,20 +118,8 @@ export class VoiceSessions {
         'Could not join the voice channel. Check the bot has Connect and Speak permissions.',
       )
     }
-    const player =
-      existing?.player ??
-      createAudioPlayer({
-        // A live stream briefly runs dry between chunks; play silence rather than stopping.
-        behaviors: { noSubscriber: NoSubscriberBehavior.Play, maxMissedFrames: Infinity },
-      })
+    const player = existing?.player ?? this.createPlayer()
     connection.subscribe(player)
-    connection.on(VoiceConnectionStatus.Disconnected, () => {
-      // Recover from channel moves; give up if the bot was kicked.
-      Promise.race([
-        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
-        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
-      ]).catch(() => this.cleanup(guildId, connection))
-    })
     const session: VoiceSession = {
       guildId,
       channelId,
@@ -119,7 +128,7 @@ export class VoiceSessions {
       connection,
       player,
       input: existing?.input ?? null,
-      evict: existing?.evict ?? null,
+      closeSocket: existing?.closeSocket ?? null,
       leaveTimer: null,
     }
     this.sessions.set(guildId, session)
@@ -130,34 +139,38 @@ export class VoiceSessions {
 
   disconnect(userId: string) {
     for (const s of this.sessions.values())
-      if (s.ownerId === userId) this.cleanup(s.guildId, s.connection)
+      if (s.ownerId === userId) this.cleanup(s.guildId, s.connection, BOT_REMOVED)
   }
 
   /** Starts a fresh WebM/Opus stream from the browser; returns a writer for incoming chunks. */
-  openStream(userId: string, evict: () => void) {
+  openStream(userId: string, closeSocket: CloseSocket) {
     const session = [...this.sessions.values()].find((s) => s.ownerId === userId)
     if (!session) throw httpError(409, 'Connect to a voice channel first')
-    session.evict?.()
-    session.evict = evict
+    session.closeSocket?.(STREAM_CLOSE.takenOver, 'Streaming moved to another tab or device')
+    session.closeSocket = closeSocket
     session.input?.end()
     if (session.leaveTimer) clearTimeout(session.leaveTimer)
     session.leaveTimer = null
     const input = new PassThrough()
     session.input = input
+    const packets = createLiveBuffer(MAX_BUFFERED_FRAMES)
     // The browser already sends Opus: demux the WebM and re-pack it into 20 ms packets, no re-encoding.
-    const packets = input
-      .pipe(new prism.opus.WebmDemuxer())
-      .pipe(createOpusRepacketizer())
-      .pipe(createLiveBuffer(MAX_BUFFERED_FRAMES))
+    pipeline(input, new prism.opus.WebmDemuxer(), createOpusRepacketizer(), packets, (error) => {
+      if (!error || session.input !== input) return
+      console.error('Discord stream failed:', error)
+      session.closeSocket?.(STREAM_CLOSE.refused, 'Could not read the audio. Send it again.')
+    })
     session.player.play(createAudioResource(packets, { inputType: StreamType.Opus }))
     return {
-      write: (chunk: Buffer) => input.write(chunk),
+      write: (chunk: Buffer) => {
+        if (session.input === input) input.write(chunk)
+      },
       /** `abandoned`: the browser went away without stopping, so leave the channel unless it returns. */
       close: (abandoned: boolean) => {
         input.end()
         if (session.input !== input) return
         session.input = null
-        session.evict = null
+        session.closeSocket = null
         if (session.player.state.status !== AudioPlayerStatus.Idle) session.player.stop()
         this.scheduleLeave(session, abandoned ? ABANDONED_LEAVE_MS : IDLE_LEAVE_MS)
       },
@@ -168,16 +181,45 @@ export class VoiceSessions {
     for (const s of this.sessions.values()) this.cleanup(s.guildId, s.connection)
   }
 
+  // Both emit `error`; with nothing listening, Node would take the whole process down.
+  private createPlayer() {
+    const player = createAudioPlayer({
+      // A live stream briefly runs dry between chunks; play silence rather than stopping.
+      behaviors: { noSubscriber: NoSubscriberBehavior.Play, maxMissedFrames: Infinity },
+    })
+    player.on('error', (error) => console.error('Discord voice player error:', error))
+    return player
+  }
+
+  private watch(guildId: string, connection: VoiceConnection) {
+    connection.on('error', (error) => console.error('Discord voice connection error:', error))
+    connection.on(VoiceConnectionStatus.Disconnected, () => {
+      // Recover from channel moves; give up if the bot was kicked.
+      Promise.race([
+        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
+        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
+      ]).catch(() => this.cleanup(guildId, connection))
+    })
+  }
+
   private scheduleLeave(session: VoiceSession, ms: number) {
     if (session.leaveTimer) clearTimeout(session.leaveTimer)
     session.leaveTimer = setTimeout(() => this.cleanup(session.guildId, session.connection), ms)
   }
 
-  private cleanup(guildId: string, connection: VoiceConnection) {
+  private cleanup(
+    guildId: string,
+    connection: VoiceConnection,
+    [code, reason]: LeaveReason = VOICE_LOST,
+  ) {
     const s = this.sessions.get(guildId)
     if (s?.connection !== connection) return
     if (s.leaveTimer) clearTimeout(s.leaveTimer)
     s.input?.end()
+    s.input = null
+    // Left open, the browser would keep sending into nothing and still show the GM as live.
+    s.closeSocket?.(code, reason)
+    s.closeSocket = null
     s.player.stop()
     if (connection.state.status !== VoiceConnectionStatus.Destroyed) connection.destroy()
     this.sessions.delete(guildId)

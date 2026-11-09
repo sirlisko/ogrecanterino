@@ -7,7 +7,6 @@
     "build": "pnpm -r build",
     "test": "vitest run",
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint .",
     "format": "prettier --write ."
   },
   "packageManager": "pnpm@12.11.2",

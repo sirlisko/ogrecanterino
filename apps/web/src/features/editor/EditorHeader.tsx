@@ -1,9 +1,9 @@
 import type { Scene } from '@ogre/shared'
 import { Link } from 'react-router'
-import type { SaveStatus } from '../player/useLiveScene.ts'
+import type { SaveStatus } from '../player/useSceneAutosave.ts'
 import { artForTags, SCENE_ART_TITLES } from '../scenes/art/kinds.ts'
 import { SceneArt } from '../scenes/art/SceneArt.tsx'
-import { hasNoSounds } from './blankScene.ts'
+import { hasNoSounds, NO_SOUNDS_HINT } from './blankScene.ts'
 import { SaveIndicator } from './SaveIndicator.tsx'
 
 function pictureLabel(scene: Scene) {
@@ -62,7 +62,7 @@ export function EditorHeader({
             <button
               type="button"
               disabled
-              title="Add a sound to the scene first"
+              title={NO_SOUNDS_HINT}
               className="rounded-lg bg-peat-950/80 px-4 py-2 text-ink-muted ring-1 ring-peat-600 disabled:opacity-60"
             >
               Open player

@@ -3,6 +3,8 @@ import { rampTo, toGain } from './volume.ts'
 /** One playing sound with its own gain, regardless of whether it's buffered or streamed. */
 export interface Voice {
   readonly gain: GainNode
+  /** True when it ended because the sound couldn't be played, not because it finished. */
+  readonly failed: boolean
   setVolume(volume: number, seconds?: number): void
   stop(fadeSeconds?: number): Promise<void>
   onEnded(cb: () => void): void
@@ -24,6 +26,7 @@ abstract class BaseVoice implements Voice {
   protected readonly input: GainNode
   protected endedCbs: (() => void)[] = []
   protected stopped = false
+  failed = false
 
   constructor(
     protected ctx: AudioContext,
@@ -109,8 +112,13 @@ export class ElementVoice extends BaseVoice {
     this.node = ctx.createMediaElementSource(this.el)
     this.node.connect(this.input)
     this.el.onended = () => this.ended()
-    this.el.onerror = () => this.ended()
-    void this.el.play().catch(() => this.ended())
+    this.el.onerror = () => this.fail()
+    void this.el.play().catch(() => this.fail())
+  }
+
+  private fail() {
+    this.failed = true
+    this.ended()
   }
 
   get element() {
@@ -139,7 +147,7 @@ export class ElementVoice extends BaseVoice {
   }
 
   resume() {
-    void this.el.play().catch(() => this.ended())
+    void this.el.play().catch(() => this.fail())
   }
 
   protected dispose() {

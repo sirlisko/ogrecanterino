@@ -59,7 +59,7 @@ isn't in the library are kept and marked _missing_.
 5. Put your server's ID in `ALLOWED_GUILD_IDS` (only its members can log in) and your own user ID in `ADMIN_DISCORD_IDS`.
 
 During a session, open **Discord** in the bottom bar, pick a voice channel, and the bot joins and starts playing
-your mix. If you're also in the channel, untick "Play through this device" so you don't hear it twice. One
+your mix. If you're also in the channel, turn on **Mute this device** so you don't hear it twice. One
 bot can be in one channel per Discord server, so two GMs in the same server can't stream at the same time.
 
 Streaming works in Chrome, Edge and Firefox.
