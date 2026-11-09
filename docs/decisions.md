@@ -3,6 +3,35 @@
 Why the app works the way it does. Newest first. Each entry says what was decided, why, and what
 it rules out, so a later change can tell whether the reason still holds.
 
+## 2026-11-09: Problems during a session
+
+### A save says which version it started from
+
+Every autosave sends the `updatedAt` it was based on, and the server answers 409 if the scene has
+moved on since. Before, whichever tab saved last won silently, so a tablet at the table could undo
+an edit made on a laptop. The GM now gets a notice with "Load the newer version" and "Keep mine",
+which saves without the check. Saves go out one at a time, because a second one sent before the
+first returns would be based on a version already replaced.
+
+A copy nobody has touched takes the newer version when a background refetch brings one. The playing
+scene doesn't, because only the GM should change what the table hears.
+
+### Sounds that won't load back off
+
+A track that fails to load used to skip straight to the next, so with the server unreachable the
+deck made about 550 requests a second and showed nothing. It now waits 1, 2, 4, 8, then every 15
+seconds between attempts, moving to the next track each time so one broken file doesn't stop the
+music, and the transport bar says so until a track is really playing. After a long outage the music
+comes back on whichever track it had reached. An interval ambience skips the firing that failed and
+stays on its schedule; a loop retries with the same delays.
+
+### The bot leaving closes the stream socket
+
+The browser only learns about the voice session through its socket, so a session that ends must
+close it, or the GM keeps seeing "Live on Discord" with nobody hearing it. A lost connection closes
+with 4001 and the browser rejoins. A kick or a deliberate disconnect closes with 4002 and it doesn't,
+since climbing back into a channel the bot was removed from would ignore the kick.
+
 ## 2026-11-05: Redesign
 
 ### A scene's picture: upload, chosen illustration, or its tags
@@ -138,7 +167,7 @@ category and relinks the card. The label and settings stay, since the GM may hav
 ### The app stays one bundle
 
 Splitting the editor and library into lazy chunks would save about 40 KB of the 184 KB (gzip),
-once, as the bundle is cached for a year. But a redeploy removes old chunks, so a tab left open
+once, as the hashed bundle is only downloaded again when a deploy changes it. But a redeploy removes old chunks, so a tab left open
 through a deploy would fail to open those pages mid-session. Revisit if the bundle grows a lot.
 
 ## 2026-10-30: UX review
@@ -266,9 +295,6 @@ does nothing more.
   so the rows have labelled buttons instead.
 - **Hardware media keys (Media Session API):** short tracks play from decoded buffers, not media
   elements, so the keys would only sometimes work. An unreliable control is worse than none.
-- **Playlist resilience:** when a track fails to load (server gone, flaky network) the music deck
-  skips straight to the next track, so an outage races through the whole playlist. Worth a retry or
-  stop-after-N-failures rule if it bites at the table.
 
 ## 2026-10-30: Initial build
 

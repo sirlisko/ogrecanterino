@@ -60,4 +60,7 @@ Anything the GM auditions must go through `engine.preview`/`togglePreview`, neve
   discarding a blank scene) must survive an immediate remount; see `useDiscardIfBlank`.
 - `vite-plugin-react` can't fast-refresh a module that exports both components and other values; it
   falls back to a full reload. That's harmless but worth knowing.
+- **An unhandled `error` event kills the server.** Node throws if an `EventEmitter` emits `error`
+  with no listener, so anything in the voice path needs one: connections, players, and streams
+  (join them with `pipeline`, because `.pipe()` doesn't forward errors).
 - Playwright screenshots land in `.playwright-mcp/`, which is git-ignored.
