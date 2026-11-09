@@ -47,24 +47,38 @@ export function PlayerPage() {
 
   return (
     <>
-      <header className="relative -mt-6 mb-6 mx-[calc(50%-50vw)] pt-20 pb-5">
+      {/* The same height playing or not, so starting a scene doesn't shift the lanes under the cursor. */}
+      <header className="relative -mt-6 mb-4 mx-[calc(50%-50vw)] py-3 sm:py-4">
         <SceneArt scene={scene} wide {...glow} className="absolute inset-0" />
         <div
           aria-hidden
-          className="absolute inset-0 bg-linear-to-b from-transparent from-30% to-peat-900"
+          className="absolute inset-0 bg-linear-to-r from-peat-900/90 via-peat-900/50 to-peat-900/10"
         />
-        <div className="relative mx-auto flex max-w-7xl flex-wrap items-end gap-4 px-4">
-          <div className="min-w-0">
-            <h1 className="font-display text-4xl leading-tight font-bold text-balance sm:text-5xl">
+        <div className="relative mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-2 px-4">
+          <div className="min-w-0 flex-[1_1_16rem]">
+            <h1 className="truncate font-display text-2xl leading-tight font-bold sm:text-3xl">
               {scene.name}
             </h1>
-            {scene.tags.length > 0 && (
-              <p className="mt-1 text-ink-muted">{scene.tags.join(', ')}</p>
-            )}
+            <p
+              className={`mt-0.5 flex items-center gap-2 text-[15px] ${active ? 'text-ink' : 'text-ink-muted'}`}
+            >
+              <span
+                aria-hidden
+                className={`h-2 w-2 shrink-0 rounded-full ${active ? 'animate-breathe bg-brass' : 'bg-peat-400'}`}
+              />
+              <span className="truncate">
+                {active
+                  ? 'Playing for the table. Clicks are heard by everyone.'
+                  : 'Not playing. Clicks play on this device only.'}
+              </span>
+            </p>
           </div>
-          <div className="ml-auto flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {active ? (
-              <Button onClick={() => void engine.stopScene()}>Fade out</Button>
+              // From a tablet up, the transport bar has its own Fade out.
+              <Button className="sm:hidden" onClick={() => void engine.stopScene()}>
+                Fade out
+              </Button>
             ) : (
               <Button
                 variant="primary"
@@ -104,18 +118,6 @@ export function PlayerPage() {
       </header>
 
       <SaveConflict live={live} className="mb-4" />
-      {/* Both states keep the same slot, so starting the scene doesn't shift the lanes under the cursor. */}
-      {active ? (
-        <p className="mb-4 flex items-center gap-2 rounded-lg bg-brass/10 px-3 py-2 text-ink ring-1 ring-brass/40">
-          <span aria-hidden className="h-2 w-2 shrink-0 animate-breathe rounded-full bg-brass" />
-          Playing for the table. Tracks and effects you click here are heard by everyone.
-        </p>
-      ) : (
-        <p className="mb-4 rounded-lg bg-peat-800 px-3 py-2 text-ink-muted ring-1 ring-peat-700">
-          Not playing. Tracks and effects you click play on this device only, so you can prepare
-          without interrupting the table.
-        </p>
-      )}
       {!canEdit && (
         <p className="mb-4 text-sm text-peat-400">
           Tweaks to a shared scene aren't saved. Duplicate it to keep your own version.
