@@ -17,7 +17,8 @@ const env = z
     HOST: z.string().default('0.0.0.0'),
     PUBLIC_URL: z.string().url().default('http://localhost:5173'),
     DATA_DIR: z.string().default('../../data'),
-    SESSION_SECRET: z.string().min(32).optional(),
+    // `.env.example` leaves it blank, which means "not set" rather than "too short".
+    SESSION_SECRET: z.preprocess((v) => v || undefined, z.string().min(32).optional()),
     DISCORD_CLIENT_ID: z.string().optional(),
     DISCORD_CLIENT_SECRET: z.string().optional(),
     DISCORD_BOT_TOKEN: z.string().optional(),
