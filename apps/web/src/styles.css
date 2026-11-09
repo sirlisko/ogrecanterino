@@ -127,3 +127,50 @@ input[type='range'].fader-vertical {
   writing-mode: vertical-lr;
   direction: rtl;
 }
+
+/*
+ * On touch screens the track stays thin but the input grows to a finger's width: padding widens
+ * what can be touched, and the background is clipped so it doesn't paint the padding. The negative
+ * margin keeps rows as tall as they were.
+ */
+@media (pointer: coarse) {
+  input[type='range'].fader {
+    @apply -my-2 h-11 py-[19px];
+    background-clip: content-box;
+  }
+
+  input[type='range'].fader::-webkit-slider-thumb {
+    @apply h-6 w-6;
+  }
+
+  input[type='range'].fader::-moz-range-thumb {
+    @apply h-6 w-6;
+  }
+
+  input[type='range'].fader-lg {
+    @apply my-0 py-4;
+  }
+
+  input[type='range'].fader-lg::-webkit-slider-thumb {
+    @apply h-8 w-8;
+  }
+
+  input[type='range'].fader-lg::-moz-range-thumb {
+    @apply h-8 w-8;
+  }
+
+  input[type='range'].fader-vertical {
+    @apply my-0 h-60 w-11 px-4 py-0;
+  }
+
+  /* For buttons too small to touch that have nowhere to grow: an invisible, larger target. */
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    inset: -0.4rem;
+  }
+}

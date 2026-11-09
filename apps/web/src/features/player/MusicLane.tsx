@@ -84,7 +84,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                       ? `${previewing ? 'Stop' : 'Pause'} ${card.label}`
                       : `${active ? 'Play' : 'Preview'} ${card.label}`
                   }
-                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm disabled:opacity-40 ${
+                  className={`touch-target grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm disabled:opacity-40 ${
                     current || previewing
                       ? 'bg-brass text-peat-950'
                       : 'bg-peat-700 hover:bg-brass hover:text-peat-950'

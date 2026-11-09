@@ -36,7 +36,7 @@ export function AmbienceLane({
               key={card.id}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-peat-800"
             >
-              <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+              <label className="touch-target relative inline-flex shrink-0 cursor-pointer items-center">
                 <input
                   type="checkbox"
                   className="peer sr-only"
@@ -74,7 +74,7 @@ export function AmbienceLane({
                 <button
                   type="button"
                   onClick={() => engine.triggerAmbience(card.id)}
-                  className="shrink-0 rounded-md px-2 py-1 text-sm text-lichen hover:bg-peat-700"
+                  className="touch-target shrink-0 rounded-md px-2 py-1 text-sm text-lichen hover:bg-peat-700"
                   aria-label={`Play ${card.label} now`}
                 >
                   Now
