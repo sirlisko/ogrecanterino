@@ -30,9 +30,19 @@ export const STREAM_CLOSE = {
   refused: 1008,
   takenOver: 4000,
   noVoiceSession: 4001,
+  botRemoved: 4002,
 } as const
 
 export type CloseSocket = (code: number, reason: string) => void
+
+type LeaveReason = Parameters<CloseSocket>
+
+/** The browser can rejoin the channel by itself. */
+const VOICE_LOST: LeaveReason = [STREAM_CLOSE.noVoiceSession, 'Lost the voice connection']
+const BOT_REMOVED: LeaveReason = [
+  STREAM_CLOSE.botRemoved,
+  'The bot was removed from the voice channel',
+]
 
 interface VoiceSession {
   guildId: string
@@ -63,7 +73,7 @@ export class VoiceSessions {
     bot.client.on(Events.VoiceStateUpdate, (_, state) => {
       if (state.id !== bot.client.user?.id || state.channelId) return
       const s = this.sessions.get(state.guild.id)
-      if (s) this.cleanup(s.guildId, s.connection)
+      if (s) this.cleanup(s.guildId, s.connection, BOT_REMOVED)
     })
   }
 
@@ -129,7 +139,7 @@ export class VoiceSessions {
 
   disconnect(userId: string) {
     for (const s of this.sessions.values())
-      if (s.ownerId === userId) this.cleanup(s.guildId, s.connection)
+      if (s.ownerId === userId) this.cleanup(s.guildId, s.connection, BOT_REMOVED)
   }
 
   /** Starts a fresh WebM/Opus stream from the browser; returns a writer for incoming chunks. */
@@ -197,11 +207,19 @@ export class VoiceSessions {
     session.leaveTimer = setTimeout(() => this.cleanup(session.guildId, session.connection), ms)
   }
 
-  private cleanup(guildId: string, connection: VoiceConnection) {
+  private cleanup(
+    guildId: string,
+    connection: VoiceConnection,
+    [code, reason]: LeaveReason = VOICE_LOST,
+  ) {
     const s = this.sessions.get(guildId)
     if (s?.connection !== connection) return
     if (s.leaveTimer) clearTimeout(s.leaveTimer)
     s.input?.end()
+    s.input = null
+    // Left open, the browser would keep sending into nothing and still show the GM as live.
+    s.closeSocket?.(code, reason)
+    s.closeSocket = null
     s.player.stop()
     if (connection.state.status !== VoiceConnectionStatus.Destroyed) connection.destroy()
     this.sessions.delete(guildId)

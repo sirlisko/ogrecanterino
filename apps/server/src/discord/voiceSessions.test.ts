@@ -22,6 +22,7 @@ const voice = vi.hoisted(() => ({
   connection: null as unknown,
   player: null as unknown,
   played: null as unknown,
+  recovers: true,
 }))
 
 vi.mock('@discordjs/voice', () => ({
@@ -37,7 +38,8 @@ vi.mock('@discordjs/voice', () => ({
   },
   joinVoiceChannel: () => voice.connection,
   createAudioPlayer: () => voice.player,
-  entersState: () => Promise.resolve(),
+  entersState: (_: unknown, status: string) =>
+    status === 'ready' || voice.recovers ? Promise.resolve() : Promise.reject(new Error('timeout')),
   createAudioResource: (stream: Readable) => {
     voice.played = stream
     stream.resume()
@@ -57,7 +59,7 @@ function setup() {
     voiceAdapterCreator: () => ({}),
   }
   const bot = { client, guild: () => guild } as unknown as DiscordBot
-  return new VoiceSessions(bot)
+  return Object.assign(new VoiceSessions(bot), { client })
 }
 
 describe('VoiceSessions', () => {
@@ -69,6 +71,7 @@ describe('VoiceSessions', () => {
     player = new FakePlayer()
     voice.connection = connection
     voice.player = player
+    voice.recovers = true
   })
 
   it('survives errors from the voice connection and the player', async () => {
@@ -97,5 +100,34 @@ describe('VoiceSessions', () => {
     sessions.openStream(USER, first)
     sessions.openStream(USER, vi.fn())
     expect(first).toHaveBeenCalledWith(4000, 'Streaming moved to another tab or device')
+  })
+
+  it('tells the browser when the bot is kicked, so it stops showing the GM as live', async () => {
+    const sessions = setup()
+    await sessions.connect(USER, GUILD, 'channel')
+    const closeSocket = vi.fn()
+    sessions.openStream(USER, closeSocket)
+
+    sessions.client.emit(
+      'voiceStateUpdate',
+      {},
+      { id: 'bot', channelId: null, guild: { id: GUILD } },
+    )
+
+    expect(closeSocket).toHaveBeenCalledWith(4002, expect.stringContaining('removed'))
+    expect(sessions.forUser(USER)).toBeNull()
+  })
+
+  it('asks the browser to rejoin when the voice connection is lost for good', async () => {
+    const sessions = setup()
+    await sessions.connect(USER, GUILD, 'channel')
+    const closeSocket = vi.fn()
+    sessions.openStream(USER, closeSocket)
+
+    voice.recovers = false
+    connection.emit('disconnected')
+    await tick()
+
+    expect(closeSocket).toHaveBeenCalledWith(4001, 'Lost the voice connection')
   })
 })

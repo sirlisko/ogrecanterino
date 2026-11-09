@@ -1,9 +1,10 @@
-/** Close codes on the stream socket; 4000 and 4001 come from the server's Discord routes. */
+/** Close codes on the stream socket; the 4000s come from the server's voice sessions. */
 export const CLOSE = {
   stopped: 1000,
   refused: 1008,
   takenOver: 4000,
   noVoiceSession: 4001,
+  botRemoved: 4002,
 } as const
 
 const DELAYS_MS = [1000, 2000, 4000, 8000, 15_000]
@@ -23,7 +24,7 @@ export function afterClose(
   elapsedMs: number,
 ): CloseOutcome {
   if (code === CLOSE.stopped) return { action: 'stop' }
-  if (code === CLOSE.takenOver || code === CLOSE.refused)
+  if (code === CLOSE.takenOver || code === CLOSE.refused || code === CLOSE.botRemoved)
     return { action: 'fail', message: reason || null }
   if (elapsedMs >= GIVE_UP_AFTER_MS)
     return { action: 'fail', message: 'Lost the connection to Discord.' }

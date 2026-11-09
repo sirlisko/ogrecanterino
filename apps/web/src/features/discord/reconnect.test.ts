@@ -14,6 +14,13 @@ describe('afterClose', () => {
     expect(afterClose(CLOSE.refused, '', 0, 0)).toEqual({ action: 'fail', message: null })
   })
 
+  it('does not climb back into a channel the bot was removed from', () => {
+    expect(afterClose(CLOSE.botRemoved, 'The bot was removed', 0, 0)).toEqual({
+      action: 'fail',
+      message: 'The bot was removed',
+    })
+  })
+
   it('retries dropped connections with a growing delay', () => {
     const delays = [0, 1, 2, 3, 4, 9].map((attempt) => {
       const outcome = afterClose(1006, '', attempt, 0)
