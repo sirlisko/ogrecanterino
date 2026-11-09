@@ -5,7 +5,7 @@ import { usePlayer } from '../../audio/store.ts'
 import { toggleHotkeyHelp } from '../../hotkeys/helpStore.ts'
 import { formatTime } from '../../ui/format.ts'
 import { Icon } from '../../ui/Icon.tsx'
-import { spacedLabel } from '../../ui/label.ts'
+import { InlineLabel } from '../../ui/CardLabel.tsx'
 import { ToastStack } from '../../ui/Toast.tsx'
 import { useGoToScene, useSetlist } from '../collections/useSetlist.ts'
 import { DeleteToast } from '../scenes/DeleteToast.tsx'
@@ -59,11 +59,13 @@ export function TransportBar() {
                 </Link>
                 <p className="flex items-center gap-2 text-sm text-ink-muted tabular">
                   <span className="truncate">
-                    {combat
-                      ? 'Combat music'
-                      : track
-                        ? spacedLabel(track.label)
-                        : 'No music playing'}
+                    {combat ? (
+                      'Combat music'
+                    ) : track ? (
+                      <InlineLabel label={track.label} />
+                    ) : (
+                      'No music playing'
+                    )}
                     {music.duration > 0 &&
                       ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
                   </span>

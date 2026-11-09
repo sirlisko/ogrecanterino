@@ -2,7 +2,7 @@ import type { Scene } from '@ogre/shared'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Icon } from '../../ui/Icon.tsx'
-import { spacedLabel } from '../../ui/label.ts'
+import { InlineLabel } from '../../ui/CardLabel.tsx'
 import { SeekBar } from '../../ui/SeekBar.tsx'
 
 const side =
@@ -47,7 +47,13 @@ export function TableControls({ scene }: { scene: Scene }) {
       </div>
       <div className="min-w-48 flex-1">
         <p className="truncate text-xl">
-          {combat ? 'Combat music' : track ? spacedLabel(track.label) : 'No music playing'}
+          {combat ? (
+            'Combat music'
+          ) : track ? (
+            <InlineLabel label={track.label} />
+          ) : (
+            'No music playing'
+          )}
         </p>
         {music.failing && <p className="text-danger">Can't load the music, retrying</p>}
         {music.duration > 0 && (

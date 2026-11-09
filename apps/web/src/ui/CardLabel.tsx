@@ -14,3 +14,18 @@ export function CardLabel({ label, truncate }: { label: string; truncate?: boole
     </span>
   )
 }
+
+/** The same for running text, such as a label followed by a time. */
+export function InlineLabel({ label }: { label: string }) {
+  const { emoji, text } = splitLabel(label)
+  return (
+    <>
+      {emoji && (
+        <span aria-hidden className="mr-1.5">
+          {emoji}
+        </span>
+      )}
+      {text}
+    </>
+  )
+}
