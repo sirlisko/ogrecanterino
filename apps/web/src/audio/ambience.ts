@@ -1,5 +1,5 @@
 import type { Card } from '@ogre/shared'
-import { randomInRange, randomIntInRange } from './schedule.ts'
+import { randomInRange, randomIntInRange, retryDelayMs } from './schedule.ts'
 import { createVoice, type SoundLookup, type VoiceFactory } from './sources.ts'
 import type { Voice } from './voice.ts'
 
@@ -49,7 +49,7 @@ class AmbienceTrack {
     if (!this.card.enabled || this.running) return
     this.running = true
     if (this.card.mode === 'interval') this.scheduleNext()
-    else void this.playOnce(true, LOOP_FADE_IN)
+    else void this.playLoop()
   }
 
   /** Fires an interval sound immediately and restarts its countdown. */
@@ -80,22 +80,38 @@ class AmbienceTrack {
     if (this.running) this.scheduleNext()
   }
 
-  private async playOnce(loop: boolean, fadeIn: number) {
+  /** A loop only ends early if it couldn't be played, so keep trying until it can. */
+  private async playLoop(failures = 0) {
+    const played = await this.playOnce(true, LOOP_FADE_IN)
+    if (played || !this.running) return
+    this.timer = window.setTimeout(() => void this.playLoop(failures + 1), retryDelayMs(failures))
+  }
+
+  /** Resolves when the sound ends: false if it couldn't be loaded or played. */
+  private async playOnce(loop: boolean, fadeIn: number): Promise<boolean> {
     const sound = this.card.soundId ? this.lookup(this.card.soundId) : undefined
-    if (!sound) return
-    const voice = await createVoice(this.factory, sound, this.output, {
-      volume: this.card.volume,
-      loop,
-      fadeIn,
-    })
-    if (!this.running) return void voice.stop()
+    if (!sound) return true
+    let voice: Voice
+    try {
+      voice = await createVoice(this.factory, sound, this.output, {
+        volume: this.card.volume,
+        loop,
+        fadeIn,
+      })
+    } catch {
+      return false
+    }
+    if (!this.running) {
+      void voice.stop()
+      return true
+    }
     this.voices.add(voice)
     this.onChange()
-    await new Promise<void>((resolve) =>
+    return new Promise<boolean>((resolve) =>
       voice.onEnded(() => {
         this.voices.delete(voice)
         this.onChange()
-        resolve()
+        resolve(!voice.failed)
       }),
     )
   }
