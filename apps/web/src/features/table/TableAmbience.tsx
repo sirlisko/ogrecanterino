@@ -3,7 +3,7 @@ import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { formatRange } from '../../ui/format.ts'
-import { useNow } from '../../ui/useNow.ts'
+import { AmbienceStatus } from '../player/AmbienceStatus.tsx'
 
 /** Ambience layers as big on/off tiles; an interval layer can also be fired now. */
 export function TableAmbience({
@@ -16,7 +16,6 @@ export function TableAmbience({
   const state = usePlayer((s) => s.ambience)
   const soundStatus = useSoundStatus()
   const cards = scene.data.ambiences
-  const now = useNow(cards.some((c) => c.mode === 'interval'))
   if (!cards.length) return null
 
   return (
@@ -28,7 +27,6 @@ export function TableAmbience({
           const on = card.enabled && ready
           const s = state[card.id]
           const interval = card.mode === 'interval' && card.intervalMs
-          const nextIn = s?.nextAt ? Math.max(0, Math.ceil((s.nextAt - now) / 1000)) : null
           return (
             <li
               key={card.id}
@@ -42,21 +40,16 @@ export function TableAmbience({
                 className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-4 py-3 text-left disabled:opacity-40"
               >
                 <span className="flex items-center gap-2 text-lg">
-                  <span
-                    aria-hidden
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${s?.sounding ? 'animate-breathe bg-lichen' : on ? 'bg-lichen/50' : 'bg-peat-600'}`}
-                  />
+                  <AmbienceStatus state={s} idle={on ? 'bg-lichen/50' : 'bg-peat-600'} />
                   <span className="truncate">{card.label}</span>
                 </span>
-                <span className="text-sm text-ink-muted tabular">
+                <span className="truncate text-sm text-ink-muted tabular">
                   {!ready
                     ? 'Missing sound'
                     : !on
                       ? 'Off'
                       : interval
-                        ? nextIn !== null
-                          ? `Next in ${nextIn} s, every ${formatRange(interval)}`
-                          : `Every ${formatRange(interval)}`
+                        ? `Every ${formatRange(interval)}`
                         : 'On, looping'}
                 </span>
               </button>

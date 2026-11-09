@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatRange, formatTime } from './format.ts'
+import { formatNext, formatRange, formatTime } from './format.ts'
 
 describe('formatTime', () => {
   it('formats minutes and seconds', () => {
@@ -21,5 +21,12 @@ describe('formatRange', () => {
 
   it('collapses equal ends', () => {
     expect(formatRange([30_000, 30_000])).toBe('30 s')
+  })
+})
+
+describe('formatNext', () => {
+  it('gives the countdown while waiting, and only the range otherwise', () => {
+    expect(formatNext([15_000, 60_000], 28_000, 400)).toBe('Next in 28 s, every 15 s–1 min')
+    expect(formatNext([15_000, 60_000], null, 0)).toBe('Every 15 s–1 min')
   })
 })

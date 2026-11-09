@@ -86,8 +86,22 @@
   }
 }
 
+@keyframes wait-ring {
+  from {
+    stroke-dashoffset: var(--ring-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-wait-ring {
+  animation: wait-ring linear forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-breathe,
+  .animate-wait-ring,
   .login-beam {
     animation: none;
   }
