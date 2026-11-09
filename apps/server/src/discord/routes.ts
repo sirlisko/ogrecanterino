@@ -3,11 +3,7 @@ import { z } from 'zod'
 import { authed } from '../http/auth.ts'
 import { parseBody } from '../http/body.ts'
 import type { DiscordBot } from './bot.ts'
-import type { VoiceSessions } from './voiceSessions.ts'
-
-const STREAM_TAKEN_OVER = 4000
-/** The bot isn't in a channel for this GM (e.g. after a restart); the browser can rejoin and retry. */
-const NO_VOICE_SESSION = 4001
+import { STREAM_CLOSE, type VoiceSessions } from './voiceSessions.ts'
 
 const connectBody = z.object({ guildId: z.string(), channelId: z.string() })
 
@@ -41,13 +37,12 @@ export function discordRoutes(bot: DiscordBot | null, sessions: VoiceSessions | 
     app.get('/api/discord/stream', { websocket: true }, (socket, req) => {
       let stream: ReturnType<VoiceSessions['openStream']>
       try {
-        stream = sessions.openStream(authed(req).id, () =>
-          socket.close(STREAM_TAKEN_OVER, 'Streaming moved to another tab or device'),
-        )
+        stream = sessions.openStream(authed(req).id, (code, reason) => socket.close(code, reason))
       } catch (e) {
+        // The bot isn't in a channel for this GM (e.g. after a restart); the browser can rejoin and retry.
         const noSession = (e as { statusCode?: number }).statusCode === 409
         socket.close(
-          noSession ? NO_VOICE_SESSION : 1008,
+          noSession ? STREAM_CLOSE.noVoiceSession : STREAM_CLOSE.refused,
           e instanceof Error ? e.message : 'Not allowed',
         )
         return
