@@ -3,6 +3,33 @@
 Why the app works the way it does. Newest first. Each entry says what was decided, why, and what
 it rules out, so a later change can tell whether the reason still holds.
 
+## 2026-11-09: Interface pass
+
+### The scene page gives its height to the controls
+
+The picture became a slim band holding the name and the live state, because on a laptop half the
+screen went on the header and effects fell below the fold. Tags stay on the cards. The band is the
+same height playing or not, so starting a scene doesn't move the lanes under the cursor. Fade out
+left the header from tablet width up, where the transport bar has its own; a phone's transport bar
+doesn't have room, so it stays there.
+
+### Being muted isn't a warning while the table listens in Discord
+
+"Unmute this device" is red because usually a mute is a mistake. While the stream is live it's the
+normal way to run a session, so it reads "Muted here, live on Discord" with no alarm. It goes red
+again if the stream drops, when nobody can hear anything.
+
+### Waiting ambience shows progress, not a countdown
+
+A ticking "Next in 28 s" made interval rows taller than loops and kept catching the eye. A ring now
+fills until the next firing, driven by CSS so nothing re-renders while it runs, and the exact time
+is on hover.
+
+### Touch targets grow on touch screens only
+
+Under `pointer: coarse` faders are 44 px across with the same thin track, and small buttons get an
+invisible larger target (`.touch-target`). Desktop keeps its density.
+
 ## 2026-11-09: Problems during a session
 
 ### A save says which version it started from
@@ -83,7 +110,7 @@ of the transport bar made way for the edge; the bar still shows the time.
 
 ### Settings belong to the device
 
-Settings (in the header) are this device's preferences and live in `localStorage`, like the pads row
+Settings (in the account menu) are this device's preferences and live in `localStorage`, like the pads row
 and the scenes layout: a GM may want a quiet laptop at home and a touch-friendly tablet at the
 table. Only the choices a GM changed are saved, so a setting they never touched follows its
 default when that default changes.
@@ -260,7 +287,10 @@ hears".
 
 Updated 2026-11-05 (redesign): the live scene's picture runs behind the header and lights up
 with the sound; Back, Next, Hold to talk, Combat and Fade out sit in one strip under it; the mixer
-is four upright faders in a column beside the pads, like a desk, and drops under them on a phone.
+is four upright faders in a column beside the pads, like a desk.
+
+Updated 2026-11-09: narrower than `lg`, which includes every portrait tablet, the faders become a
+compact row under the transport, because below the pads meant scrolling to change the volume.
 
 Updated 2026-11-05: a tablet is often the only screen at the table, so table mode now has the
 mixer volumes, "Mute this device", ambience switches (with "Now" for interval layers), the Discord

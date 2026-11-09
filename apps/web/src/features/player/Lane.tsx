@@ -50,7 +50,7 @@ export function IconButton({
       aria-pressed={active}
       disabled={disabled}
       onClick={onClick}
-      className={`grid h-9 w-9 place-items-center rounded-full transition-colors disabled:opacity-40 ${
+      className={`touch-target grid h-9 w-9 place-items-center rounded-full transition-colors disabled:opacity-40 ${
         active ? 'bg-ink text-peat-900' : 'text-ink-muted hover:bg-peat-700 hover:text-ink'
       }`}
     >

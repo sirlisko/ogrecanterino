@@ -36,6 +36,9 @@ export function TablePage() {
           <main className="flex flex-1 flex-wrap items-start gap-5 p-4 sm:p-5">
             <div className="flex min-w-0 flex-[1_1_34rem] flex-col gap-5">
               <TableControls scene={scene} />
+              <div className="lg:hidden">
+                <TableMixer compact />
+              </div>
               <TableMusic scene={scene} />
               <section aria-label="Effects">
                 <h2 className="mb-3 font-display text-2xl font-bold text-arcane">Effects</h2>
@@ -57,8 +60,7 @@ export function TablePage() {
               )}
               <TablePads />
             </div>
-            {/* The mixer sits beside the pads on a tablet, and under them on a phone. */}
-            <div className="min-w-[17rem] flex-[0_1_22rem] lg:sticky lg:top-4">
+            <div className="hidden min-w-[17rem] flex-[0_1_22rem] lg:sticky lg:top-4 lg:block">
               <TableMixer />
             </div>
           </main>

@@ -2,6 +2,7 @@ import type { Card, Scene } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { CardLabel } from '../../ui/CardLabel.tsx'
 import { Icon } from '../../ui/Icon.tsx'
 
 export function TableMusic({ scene }: { scene: Scene }) {
@@ -42,7 +43,9 @@ export function TableMusic({ scene }: { scene: Scene }) {
                       name={current && music.playing ? 'pause' : 'play'}
                       className={`h-4 w-4 shrink-0 ${current ? 'text-brass' : 'text-ink-muted'}`}
                     />
-                    <span className="min-w-0 flex-1 truncate">{card.label}</span>
+                    <span className="min-w-0 flex-1">
+                      <CardLabel label={card.label} truncate />
+                    </span>
                   </button>
                 </li>
               )

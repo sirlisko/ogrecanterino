@@ -3,6 +3,7 @@ import { useRef } from 'react'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { CardLabel } from '../../ui/CardLabel.tsx'
 import { flash } from '../../ui/flash.ts'
 import { useSettings } from '../settings/settings.ts'
 import { EmptyLane, Lane } from './Lane.tsx'
@@ -79,7 +80,9 @@ export function EffectPad({
           {hotkey}
         </kbd>
       )}
-      <span className="pr-6 leading-tight">{card.label}</span>
+      <span className="pr-6 leading-tight">
+        <CardLabel label={card.label} />
+      </span>
       {missing && <span className="text-sm text-danger">missing</span>}
       {stoppable && <span className="text-sm text-arcane">Playing, press to stop</span>}
       {long && startedAt !== undefined && durationMs && (

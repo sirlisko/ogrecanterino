@@ -2,6 +2,7 @@ import type { Card, Scene, SceneSettings } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine, previewLevel } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { CardLabel } from '../../ui/CardLabel.tsx'
 import { Fader } from '../../ui/Fader.tsx'
 import { Icon } from '../../ui/Icon.tsx'
 import { SeekBar } from '../../ui/SeekBar.tsx'
@@ -84,7 +85,7 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                       ? `${previewing ? 'Stop' : 'Pause'} ${card.label}`
                       : `${active ? 'Play' : 'Preview'} ${card.label}`
                   }
-                  className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm disabled:opacity-40 ${
+                  className={`touch-target grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm disabled:opacity-40 ${
                     current || previewing
                       ? 'bg-brass text-peat-950'
                       : 'bg-peat-700 hover:bg-brass hover:text-peat-950'
@@ -96,10 +97,10 @@ export function MusicLane({ scene, active, onCard, onSettings }: Props) {
                   />
                 </button>
                 <span
-                  className={`min-w-0 flex-1 truncate ${card.enabled ? '' : 'text-peat-400 line-through'}`}
+                  className={`flex min-w-0 flex-1 items-baseline ${card.enabled ? '' : 'text-peat-400 line-through'}`}
                 >
-                  {card.label}
-                  {missing && <span className="ml-2 text-sm text-danger">missing</span>}
+                  <CardLabel label={card.label} truncate />
+                  {missing && <span className="ml-2 shrink-0 text-sm text-danger">missing</span>}
                 </span>
                 <Fader
                   value={card.volume}

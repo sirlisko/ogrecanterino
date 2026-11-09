@@ -27,6 +27,9 @@ Use the same name for an action everywhere it appears: button, tooltip, shortcut
 - **Collection**, **Quick pads**, **Table mode**.
 - Sentence case, plain verbs, no all-caps labels. Errors say what happened and what to do next.
 
+Card labels can start with emoji and no space, as imported ones do. Show them with `CardLabel`, or
+`InlineLabel` in running text, rather than printing the string.
+
 ## Keyboard
 
 - Digits and brackets are matched by `KeyboardEvent.code` (physical key), so they work on any

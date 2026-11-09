@@ -2,9 +2,10 @@ import type { Card, Scene } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { CardLabel } from '../../ui/CardLabel.tsx'
 import { Fader } from '../../ui/Fader.tsx'
-import { formatRange } from '../../ui/format.ts'
-import { useNow } from '../../ui/useNow.ts'
+import { formatNext, formatRange } from '../../ui/format.ts'
+import { AmbienceStatus } from './AmbienceStatus.tsx'
 import { EmptyLane, Lane } from './Lane.tsx'
 
 export function AmbienceLane({
@@ -19,7 +20,6 @@ export function AmbienceLane({
   const state = usePlayer((s) => s.ambience)
   const cards = scene.data.ambiences
   const soundStatus = useSoundStatus()
-  const now = useNow(active && cards.some((c) => c.mode === 'interval'))
 
   return (
     <Lane title="Ambience" color="var(--color-lichen)">
@@ -30,13 +30,17 @@ export function AmbienceLane({
           const status = soundStatus(card.soundId)
           const missing = status === 'missing'
           const interval = card.mode === 'interval' && card.intervalMs
-          const nextIn = s?.nextAt ? Math.max(0, Math.ceil((s.nextAt - now) / 1000)) : null
           return (
             <li
               key={card.id}
-              className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-peat-800"
+              className="flex min-h-11 items-center gap-2 rounded-lg px-2 py-1 hover:bg-peat-800"
+              // Worked out on hover, so nothing has to tick while the scene plays.
+              onPointerEnter={(e) => {
+                if (interval)
+                  e.currentTarget.title = formatNext(interval, s?.nextAt ?? null, Date.now())
+              }}
             >
-              <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+              <label className="touch-target relative inline-flex shrink-0 cursor-pointer items-center">
                 <input
                   type="checkbox"
                   className="peer sr-only"
@@ -48,33 +52,19 @@ export function AmbienceLane({
                 <span className="absolute left-0.5 h-4 w-4 rounded-full bg-ink transition-transform peer-checked:translate-x-4" />
                 <span className="sr-only">Enable {card.label}</span>
               </label>
+              <AmbienceStatus state={s} />
               <span
-                aria-hidden
-                className={`h-2 w-2 shrink-0 rounded-full ${s?.sounding ? 'animate-breathe bg-lichen' : 'bg-transparent'}`}
-              />
-              <span className="min-w-0 flex-1">
-                <span
-                  className={`block truncate ${card.enabled && !missing ? '' : 'text-peat-400'}`}
-                >
-                  {card.label}
-                </span>
-                {missing ? (
-                  <span className="text-sm text-danger">missing</span>
-                ) : (
-                  interval && (
-                    <span className="block truncate text-sm text-ink-muted tabular">
-                      {nextIn !== null && card.enabled
-                        ? `Next in ${nextIn} s, every ${formatRange(interval)}`
-                        : `Every ${formatRange(interval)}`}
-                    </span>
-                  )
-                )}
+                className={`flex min-w-0 flex-1 items-baseline ${card.enabled && !missing ? '' : 'text-peat-400'}`}
+              >
+                <CardLabel label={card.label} truncate />
+                {interval && <span className="sr-only">, every {formatRange(interval)}</span>}
+                {missing && <span className="ml-2 shrink-0 text-sm text-danger">missing</span>}
               </span>
               {interval && active && card.enabled && status === 'ready' && (
                 <button
                   type="button"
                   onClick={() => engine.triggerAmbience(card.id)}
-                  className="shrink-0 rounded-md px-2 py-1 text-sm text-lichen hover:bg-peat-700"
+                  className="touch-target shrink-0 rounded-md px-2 py-1 text-sm text-lichen hover:bg-peat-700"
                   aria-label={`Play ${card.label} now`}
                 >
                   Now

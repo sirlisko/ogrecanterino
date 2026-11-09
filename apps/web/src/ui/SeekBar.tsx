@@ -52,7 +52,7 @@ export function SeekBar({
         aria-valuemax={Math.round(duration)}
         aria-valuenow={Math.round(value)}
         aria-valuetext={formatTime(value)}
-        className="group relative h-6 flex-1 cursor-pointer touch-none rounded-full focus-visible:outline-2 focus-visible:outline-brass"
+        className="group relative h-6 flex-1 cursor-pointer touch-none rounded-full focus-visible:outline-2 focus-visible:outline-brass pointer-coarse:-my-2.5 pointer-coarse:h-11"
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId)
           setDragging(at(e))

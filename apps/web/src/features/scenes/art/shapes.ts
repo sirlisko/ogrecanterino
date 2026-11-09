@@ -16,21 +16,49 @@ export function stars(rand: Random, width: number, count: number, maxY: number) 
   return d
 }
 
-/** A row of overlapping triangles along `base`. */
+/** A row of overlapping triangles along `base`, from `from` to `to`. */
 export function pines(
   rand: Random,
   width: number,
   base: number,
   [minH, maxH]: [number, number],
   step: number,
+  from = 0,
+  to = width,
 ) {
-  let d = `M0 80 V${base}`
-  let x = -step / 2
-  while (x < width) {
+  let d = `M${n(from)} 80 V${base}`
+  let x = from - step / 2
+  while (x < to) {
     const w = step * (0.7 + rand() * 0.6)
     const h = minH + rand() * (maxH - minH)
     d += ` L${n(x)} ${base} L${n(x + w / 2)} ${n(base - h)} L${n(x + w)} ${base}`
     x += w * 0.75
+  }
+  return `${d} L${n(to)} ${base} V80 Z`
+}
+
+/** A row of round treetops above solid ground. Drawn the same way round as `circle`, so overlaps stay filled. */
+export function canopy(rand: Random, width: number, base: number, [minR, maxR]: [number, number]) {
+  let d = `M0 80 H${width} V${base} H0 Z`
+  let x = -maxR / 2
+  while (x < width + maxR) {
+    const r = minR + rand() * (maxR - minR)
+    d += circle(x, base - r * 0.4, r)
+    x += r * (1.1 + rand() * 0.5)
+  }
+  return d
+}
+
+/** Flat-topped desert rocks. */
+export function mesas(rand: Random, width: number, base: number, count: number) {
+  const w = width / count
+  let d = `M0 80 V${base}`
+  for (let i = 0; i < count; i++) {
+    const left = w * i + w * (0.05 + rand() * 0.2)
+    const right = w * (i + 1) - w * (0.05 + rand() * 0.2)
+    const top = base - (14 + rand() * 22)
+    const slope = 5 + rand() * 5
+    d += ` L${n(left)} ${base} L${n(left + slope)} ${n(top)} L${n(right - slope)} ${n(top)} L${n(right)} ${base}`
   }
   return `${d} L${width} ${base} V80 Z`
 }

@@ -6,7 +6,7 @@
   --color-peat-800: #242f2a;
   --color-peat-700: #2f3b35;
   --color-peat-600: #3d4b44;
-  --color-peat-400: #6f8077;
+  --color-peat-400: #8a9b92;
   --color-ink: #ece5d0;
   --color-ink-muted: #b3ad9b;
   --color-brass: #d7a84a;
@@ -86,8 +86,22 @@
   }
 }
 
+@keyframes wait-ring {
+  from {
+    stroke-dashoffset: var(--ring-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-wait-ring {
+  animation: wait-ring linear forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-breathe,
+  .animate-wait-ring,
   .login-beam {
     animation: none;
   }
@@ -126,4 +140,52 @@ input[type='range'].fader-vertical {
   @apply h-60 w-3;
   writing-mode: vertical-lr;
   direction: rtl;
+}
+
+/*
+ * On touch screens the input grows to a finger's width while the track stays thin, drawn as a
+ * centred strip of its background. The negative margin keeps rows as tall as they were.
+ */
+@media (pointer: coarse) {
+  input[type='range'].fader {
+    @apply -my-2 h-11 rounded-none;
+    background: linear-gradient(var(--color-peat-600) 0 0) center / 100% 0.375rem no-repeat;
+  }
+
+  input[type='range'].fader::-webkit-slider-thumb {
+    @apply h-6 w-6;
+  }
+
+  input[type='range'].fader::-moz-range-thumb {
+    @apply h-6 w-6;
+  }
+
+  input[type='range'].fader-lg {
+    @apply my-0;
+    background-size: 100% 0.75rem;
+  }
+
+  input[type='range'].fader-lg::-webkit-slider-thumb {
+    @apply h-8 w-8;
+  }
+
+  input[type='range'].fader-lg::-moz-range-thumb {
+    @apply h-8 w-8;
+  }
+
+  input[type='range'].fader-vertical {
+    @apply h-60 w-11;
+    background-size: 0.75rem 100%;
+  }
+
+  /* For buttons too small to touch that have nowhere to grow: an invisible, larger target. */
+  .touch-target {
+    position: relative;
+  }
+
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    inset: -0.4rem;
+  }
 }

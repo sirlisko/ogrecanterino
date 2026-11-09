@@ -8,10 +8,23 @@ import {
 } from 'react'
 import { Icon } from './Icon.tsx'
 
-export function Menu({ label, children }: { label: string; children: ReactNode }) {
+const DOTS_BUTTON =
+  'grid h-9 w-9 place-items-center rounded-full bg-peat-950/70 text-lg text-ink hover:bg-peat-700'
+
+export function Menu({
+  label,
+  trigger = <Icon name="more" className="h-5 w-5" />,
+  triggerClassName = DOTS_BUTTON,
+  children,
+}: {
+  label: string
+  trigger?: ReactNode
+  triggerClassName?: string
+  children: ReactNode
+}) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const trigger = useRef<HTMLButtonElement>(null)
+  const button = useRef<HTMLButtonElement>(null)
   const menu = useRef<HTMLDivElement>(null)
   const id = useId()
 
@@ -28,7 +41,7 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
         // Keep Escape from also reaching the global "fade out" hotkey.
         e.stopPropagation()
         setOpen(false)
-        if (e instanceof KeyboardEvent) trigger.current?.focus()
+        if (e instanceof KeyboardEvent) button.current?.focus()
       }
     }
     document.addEventListener('pointerdown', close)
@@ -42,7 +55,7 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
   return (
     <div ref={ref} className="relative" onClick={() => setOpen(false)}>
       <button
-        ref={trigger}
+        ref={button}
         type="button"
         aria-label={label}
         aria-haspopup="menu"
@@ -52,9 +65,9 @@ export function Menu({ label, children }: { label: string; children: ReactNode }
           e.stopPropagation()
           setOpen((o) => !o)
         }}
-        className="grid h-9 w-9 place-items-center rounded-full bg-peat-950/70 text-lg text-ink hover:bg-peat-700"
+        className={triggerClassName}
       >
-        <Icon name="more" className="h-5 w-5" />
+        {trigger}
       </button>
       {open && (
         <div

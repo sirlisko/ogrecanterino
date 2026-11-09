@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCollections } from '../../api/collections.ts'
 import { setActiveCollection, useActiveCollection } from './activeCollection.ts'
 import { CollectionDialog } from './CollectionDialog.tsx'
 
 const tab = (active: boolean) =>
-  `-mb-px border-b-[3px] pt-1.5 pb-2 text-left font-display text-xl font-bold transition-colors ${
+  `shrink-0 border-b-[3px] pt-1.5 pb-2 text-left font-display text-xl font-bold whitespace-nowrap transition-colors focus-visible:-outline-offset-2 ${
     active ? 'border-brass text-ink' : 'border-transparent text-ink-muted hover:text-ink'
   }`
 
@@ -13,38 +13,45 @@ export function CollectionBar() {
   const collections = useCollections().data ?? []
   const active = useActiveCollection((s) => s.id)
   const [creating, setCreating] = useState(false)
+  const activeTab = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    activeTab.current?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [active])
 
   return (
-    <nav
-      aria-label="Collections"
-      className="mt-5 flex flex-wrap items-end gap-x-7 gap-y-1 border-b border-peat-700"
-    >
-      <button
-        type="button"
-        aria-pressed={!active}
-        onClick={() => setActiveCollection(null)}
-        className={tab(!active)}
-      >
-        All scenes
-      </button>
-      {collections.map((c) => (
+    <nav aria-label="Collections" className="mt-5 flex items-end gap-x-5 border-b border-peat-700">
+      {/* Scrolls sideways on a phone rather than wrapping. Sits over the rule, so a tab's underline replaces it. */}
+      <div className="-mb-px flex min-w-0 flex-1 items-end gap-x-7 overflow-x-auto [scrollbar-width:none]">
         <button
-          key={c.id}
+          ref={active ? undefined : activeTab}
           type="button"
-          aria-pressed={active === c.id}
-          onClick={() => setActiveCollection(c.id)}
-          className={tab(active === c.id)}
+          aria-pressed={!active}
+          onClick={() => setActiveCollection(null)}
+          className={tab(!active)}
         >
-          {c.name}{' '}
-          <span className="font-sans text-[15px] font-normal text-ink-muted lining-nums">
-            {c.sceneIds.length}
-          </span>
+          All scenes
         </button>
-      ))}
+        {collections.map((c) => (
+          <button
+            key={c.id}
+            ref={active === c.id ? activeTab : undefined}
+            type="button"
+            aria-pressed={active === c.id}
+            onClick={() => setActiveCollection(c.id)}
+            className={tab(active === c.id)}
+          >
+            {c.name}{' '}
+            <span className="font-sans text-[15px] font-normal text-ink-muted lining-nums">
+              {c.sceneIds.length}
+            </span>
+          </button>
+        ))}
+      </div>
       <button
         type="button"
         onClick={() => setCreating(true)}
-        className="ml-auto pb-2.5 text-[15px] text-ink-muted hover:text-ink"
+        className="shrink-0 pb-2.5 text-[15px] whitespace-nowrap text-ink-muted hover:text-ink"
       >
         New collection
       </button>

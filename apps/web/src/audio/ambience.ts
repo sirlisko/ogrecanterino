@@ -7,6 +7,8 @@ export interface AmbienceCardState {
   sounding: boolean
   /** Epoch ms of the next interval trigger, when waiting. */
   nextAt: number | null
+  /** How long the current wait lasts in total, so it can be drawn as progress. */
+  waitMs: number
 }
 
 const LOOP_FADE_IN = 2
@@ -16,6 +18,7 @@ class AmbienceTrack {
   private voices = new Set<Voice>()
   private timer: number | null = null
   private nextAt: number | null = null
+  private waitMs = 0
   private running = false
 
   constructor(
@@ -27,7 +30,7 @@ class AmbienceTrack {
   ) {}
 
   get state(): AmbienceCardState {
-    return { sounding: this.voices.size > 0, nextAt: this.nextAt }
+    return { sounding: this.voices.size > 0, nextAt: this.nextAt, waitMs: this.waitMs }
   }
 
   get id() {
@@ -69,6 +72,7 @@ class AmbienceTrack {
     const [min, max] = this.card.intervalMs ?? [30_000, 60_000]
     const delay = randomInRange([min, max])
     this.nextAt = Date.now() + delay
+    this.waitMs = delay
     this.timer = window.setTimeout(() => void this.playBurst(), delay)
     this.onChange()
   }
