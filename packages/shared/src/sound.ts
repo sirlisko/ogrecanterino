@@ -18,13 +18,22 @@ export const sound = z.object({
 })
 export type Sound = z.infer<typeof sound>
 
-export const soundUpload = z.object({
+const soundFields = {
   title: z.string().trim().min(1).max(200),
-  artist: z.string().trim().max(200).default(''),
-  tags: z.array(z.string().trim().min(1)).max(20).default([]),
+  artist: z.string().trim().max(200),
+  tags: z.array(z.string().trim().min(1)).max(20),
   category: soundCategory,
+}
+
+export const soundUpload = z.object({
+  ...soundFields,
+  artist: soundFields.artist.default(''),
+  tags: soundFields.tags.default([]),
 })
 export type SoundUpload = z.infer<typeof soundUpload>
+
+/** Built without `soundUpload`'s defaults: zod applies them to absent optional keys, wiping fields. */
+export const soundPatch = z.object(soundFields).partial()
 
 export interface SoundUsage {
   /** Names of scenes the caller can see that use the sound. */

@@ -63,6 +63,31 @@ describe('sounds', () => {
     expect((await get('/api/sounds')).json()).toEqual([expect.objectContaining({ title: 'Rain' })])
   })
 
+  it('leaves the fields a partial update does not mention', async () => {
+    const created = db
+      .insert(sounds)
+      .values({
+        uploadedBy: (await get('/api/me')).json().id,
+        title: 'Wind',
+        artist: 'Someone',
+        tags: ['Weather'],
+        filename: 'wind_ab12cd34ef.wav',
+        mime: 'audio/wav',
+        size: 1000,
+        category: 'ambience',
+      })
+      .returning()
+      .get()
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/api/sounds/${created.id}`,
+      headers: { cookie },
+      payload: { title: 'Gale' },
+    })
+    expect(res.json()).toMatchObject({ title: 'Gale', artist: 'Someone', tags: ['Weather'] })
+    db.delete(sounds).where(eq(sounds.id, created.id)).run()
+  })
+
   it('serves audio with range requests and immutable caching', async () => {
     const res = await get('/audio/rain_ab12cd34ef.wav', { range: 'bytes=0-99' })
     expect(res.statusCode).toBe(206)

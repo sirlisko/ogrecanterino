@@ -1,7 +1,7 @@
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import fastifyStatic from '@fastify/static'
-import { soundUpload } from '@ogre/shared'
+import { soundPatch, soundUpload } from '@ogre/shared'
 import { asc, eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import type { Db } from '../db/client.ts'
@@ -12,8 +12,6 @@ import { measureGainDb } from '../library/media.ts'
 import { toSound } from './repo.ts'
 import { storeAudioUpload } from './upload.ts'
 import { soundUsage } from './usage.ts'
-
-const soundPatch = soundUpload.partial()
 
 function fieldValue(field: unknown): string | undefined {
   const f = Array.isArray(field) ? field[0] : field
