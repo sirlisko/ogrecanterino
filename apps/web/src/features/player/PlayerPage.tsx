@@ -101,14 +101,14 @@ export function PlayerPage() {
             )}
             <Link
               to="/table"
-              className="rounded-lg px-4 py-2 text-ink-muted ring-1 ring-peat-600 hover:text-ink"
+              className="rounded-lg bg-peat-800 px-4 py-2 text-ink ring-1 ring-peat-600 hover:bg-peat-700"
             >
               Table mode
             </Link>
             {canEdit && (
               <Link
                 to={`/scenes/${scene.id}/edit`}
-                className="rounded-lg px-4 py-2 text-ink-muted ring-1 ring-peat-600 hover:text-ink"
+                className="rounded-lg bg-peat-800 px-4 py-2 text-ink ring-1 ring-peat-600 hover:bg-peat-700"
               >
                 Edit
               </Link>
