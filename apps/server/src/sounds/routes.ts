@@ -8,6 +8,7 @@ import type { Db } from '../db/client.ts'
 import { sounds } from '../db/schema.ts'
 import { authed, canEdit, httpError } from '../http/auth.ts'
 import { parseBody } from '../http/body.ts'
+import { privateImmutableFiles } from '../http/privateFiles.ts'
 import { measureGainDb } from '../library/media.ts'
 import { toSound } from './repo.ts'
 import { storeAudioUpload } from './upload.ts'
@@ -29,8 +30,7 @@ export async function soundRoutes(
     prefix: '/audio/',
     decorateReply: false,
     // Stored filenames are unique per upload, so the content behind a URL never changes.
-    immutable: true,
-    maxAge: '365d',
+    ...privateImmutableFiles,
   })
 
   app.get('/api/sounds', async () =>

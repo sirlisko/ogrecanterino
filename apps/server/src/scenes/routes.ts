@@ -12,6 +12,7 @@ import type { Db } from '../db/client.ts'
 import { scenes } from '../db/schema.ts'
 import { authed, canEdit, httpError } from '../http/auth.ts'
 import { parseBody } from '../http/body.ts'
+import { privateImmutableFiles } from '../http/privateFiles.ts'
 import { importBardicScenes } from './importBardic.ts'
 import { getVisibleScene, listScenes, ownerName, toScene } from './repo.ts'
 
@@ -34,8 +35,7 @@ export async function sceneRoutes(
     root: bannerDir,
     prefix: '/banners/',
     decorateReply: false,
-    immutable: true,
-    maxAge: '365d',
+    ...privateImmutableFiles,
   })
 
   const editable = (req: Parameters<typeof authed>[0], id: string) => {

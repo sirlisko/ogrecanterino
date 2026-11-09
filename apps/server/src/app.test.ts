@@ -93,6 +93,8 @@ describe('sounds', () => {
     expect(res.statusCode).toBe(206)
     expect(res.rawPayload.length).toBe(100)
     expect(res.headers['cache-control']).toContain('immutable')
+    expect(res.headers['cache-control']).toContain('private')
+    expect((await get('/audio/rain_ab12cd34ef.wav')).headers['cache-control']).toContain('private')
   })
 })
 
