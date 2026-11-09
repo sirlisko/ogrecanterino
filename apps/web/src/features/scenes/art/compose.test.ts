@@ -17,6 +17,28 @@ describe('drawScene', () => {
     }
   })
 
+  const seeds = Array.from({ length: 60 }, (_, i) => seededRandom(hashText(`scene-${i}`)))
+
+  it.each(sceneArtKinds)('keeps the %s sun or moon out of the card corners', (kind) => {
+    for (let i = 0; i < 60; i++) {
+      const { orb } = drawScene(kind, seededRandom(hashText(`scene-${i}`)), 320)
+      const match = /M(-?[\d.]+) -?[\d.]+ a([\d.]+)/.exec(orb)
+      if (!match) continue
+      const centre = Number(match[1]) + Number(match[2])
+      expect(centre).toBeGreaterThanOrEqual(64)
+      expect(centre).toBeLessThanOrEqual(256)
+    }
+  })
+
+  it('draws forests and deserts in more than one style', () => {
+    const forests = seeds.map((rand) => drawScene('forest', rand, 320).near)
+    expect(forests.some((d) => d.includes(' a'))).toBe(true)
+    expect(forests.some((d) => !d.includes(' a'))).toBe(true)
+    const deserts = seeds.map((rand) => drawScene('desert', rand, 320).far)
+    expect(deserts.some((d) => d.includes('Q'))).toBe(true)
+    expect(deserts.some((d) => !d.includes('Q'))).toBe(true)
+  })
+
   it('draws the same scene the same way, and different scenes differently', () => {
     const a = () => drawScene('forest', seededRandom(hashText('scene-a')), 320)
     const b = drawScene('forest', seededRandom(hashText('scene-b')), 320)

@@ -1,7 +1,7 @@
 import type { SceneArt } from '@ogre/shared'
 import { arcade, castle, cave, pikes, roofs, temple, tower } from './buildings.ts'
 import type { Random } from './random.ts'
-import { circle, hills, peaks, pines, stars, waves } from './shapes.ts'
+import { canopy, circle, hills, mesas, peaks, pines, stars, waves } from './shapes.ts'
 
 interface Palette {
   top: string
@@ -55,6 +55,52 @@ const LICHEN = 'var(--color-lichen)'
 const ARCANE = 'var(--color-arcane)'
 const DANGER = 'var(--color-danger)'
 
+/** Keeps a sun or moon out of the top corners, where a card's buttons sit. */
+function orbX(rand: Random, width: number, radius: number) {
+  const margin = width * 0.2 + radius
+  return margin + rand() * (width - 2 * margin)
+}
+
+const pick = (rand: Random, styles: number) => Math.floor(rand() * styles)
+
+/** Forests are the most common picture, so one scene's shouldn't pass for another's. */
+function woods(rand: Random, W: number): Pick<Drawing, 'far' | 'near'> {
+  switch (pick(rand, 4)) {
+    case 0: {
+      const left = W * (0.2 + rand() * 0.15)
+      const right = W * (0.65 + rand() * 0.15)
+      return {
+        far: pines(rand, W, 62, [6, 18], 10),
+        near:
+          hills(rand, W, 78, 3, 3) +
+          pines(rand, W, 80, [18, 40], 15, 0, left) +
+          ' ' +
+          pines(rand, W, 80, [18, 40], 15, right, W),
+      }
+    }
+    case 1:
+      return { far: hills(rand, W, 66, 8, 3), near: pines(rand, W, 80, [40, 66], 34) }
+    case 2:
+      return { far: canopy(rand, W, 66, [7, 13]), near: canopy(rand, W, 82, [12, 22]) }
+    default:
+      return { far: pines(rand, W, 62, [8, 22], 10), near: pines(rand, W, 80, [14, 34], 15) }
+  }
+}
+
+function dunes(rand: Random, W: number): Pick<Drawing, 'far' | 'near'> {
+  switch (pick(rand, 3)) {
+    case 0:
+      return {
+        far: mesas(rand, W, 66, Math.max(2, Math.round(W / 120))),
+        near: hills(rand, W, 78, 6, 2),
+      }
+    case 1:
+      return { far: hills(rand, W, 72, 28, 2), near: hills(rand, W, 78, 8, 3) }
+    default:
+      return { far: hills(rand, W, 64, 14, 3), near: hills(rand, W, 76, 10, 2) }
+  }
+}
+
 export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing {
   const out: Drawing = {
     stars: '',
@@ -80,27 +126,28 @@ export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing 
       out.lights = town.lights
       if (kind === 'night') {
         out.stars = stars(rand, W, Math.round(W / 12), 40)
-        out.orb = circle(W * 0.82, 18, 7)
+        out.orb = circle(orbX(rand, W, 7), 18, 7)
       }
       break
     }
     case 'forest':
     case 'horror':
-    case 'camp':
-      out.far = pines(rand, W, 62, [8, 22], 10)
-      out.near = kind === 'camp' ? hills(rand, W, 78, 4, 3) : pines(rand, W, 80, [14, 34], 15)
-      if (kind !== 'forest') out.stars = stars(rand, W, Math.round(W / 14), 36)
+      Object.assign(out, woods(rand, W))
       if (kind === 'horror') {
-        out.orb = circle(W * 0.22, 20, 9)
+        out.stars = stars(rand, W, Math.round(W / 14), 36)
+        out.orb = circle(orbX(rand, W, 9), 20, 9)
         out.orbFill = '#c9b8d8'
         out.orbOpacity = 0.55
       }
-      if (kind === 'camp') {
-        out.orb = circle(W / 2, 74, 18)
-        out.orbFill = BRASS
-        out.orbOpacity = 0.28
-        out.lights = `M${W / 2 - 6} 76 L${W / 2} 63 L${W / 2 + 6} 76 Z`
-      }
+      break
+    case 'camp':
+      out.far = pines(rand, W, 62, [8, 22], 10)
+      out.near = hills(rand, W, 78, 4, 3)
+      out.stars = stars(rand, W, Math.round(W / 14), 36)
+      out.orb = circle(W / 2, 74, 18)
+      out.orbFill = BRASS
+      out.orbOpacity = 0.28
+      out.lights = `M${W / 2 - 6} 76 L${W / 2} 63 L${W / 2 + 6} 76 Z`
       break
     case 'mountain': {
       const ridge = peaks(rand, W, 66, 46, Math.max(3, Math.round(W / 80)))
@@ -109,13 +156,14 @@ export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing 
       out.near = pines(rand, W, 80, [6, 16], 9)
       break
     }
-    case 'desert':
-      out.orb = circle(W * 0.74, 40, 15)
+    case 'desert': {
+      const r = 10 + rand() * 9
+      out.orb = circle(orbX(rand, W, r), 40, r)
       out.orbFill = BRASS
       out.orbOpacity = 0.45
-      out.far = hills(rand, W, 64, 14, 3)
-      out.near = hills(rand, W, 76, 10, 2)
+      Object.assign(out, dunes(rand, W))
       break
+    }
     case 'sea':
     case 'storm': {
       const storm = kind === 'storm'
@@ -128,7 +176,7 @@ export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing 
         out.lights = `M${bx} 4 L${bx - 8} 26 H${bx - 1} L${bx - 8} 46 L${bx + 8} 20 H${bx + 1} L${bx + 7} 4 Z`
         out.lightsFill = INK
       } else {
-        out.orb = circle(W * 0.22, 26, 10)
+        out.orb = circle(orbX(rand, W, 10), 26, 10)
         out.orbOpacity = 0.35
       }
       break
@@ -151,7 +199,7 @@ export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing 
       out.lightsFill = LICHEN
       break
     case 'castle': {
-      out.orb = circle(W * 0.3, 52, 12)
+      out.orb = circle(orbX(rand, W, 12), 52, 12)
       out.orbFill = BRASS
       out.orbOpacity = 0.3
       out.far = hills(rand, W, 64, 10, 3)
@@ -169,7 +217,7 @@ export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing 
       break
     case 'tower': {
       out.stars = stars(rand, W, Math.round(W / 10), 50)
-      out.orb = circle(W * 0.81, 16, 6)
+      out.orb = circle(orbX(rand, W, 6), 16, 6)
       out.far = hills(rand, W, 68, 8, 4)
       const t = tower(W)
       out.near = t.d
@@ -178,7 +226,7 @@ export function drawScene(kind: SceneArt, rand: Random, width: number): Drawing 
       break
     }
     case 'battle': {
-      out.orb = circle(W * 0.75, 50, 18)
+      out.orb = circle(orbX(rand, W, 18), 50, 18)
       out.orbFill = DANGER
       out.orbOpacity = 0.3
       out.far = peaks(rand, W, 64, 30, Math.max(4, Math.round(W / 64))).d
