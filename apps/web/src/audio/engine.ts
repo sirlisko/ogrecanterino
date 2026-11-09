@@ -36,6 +36,8 @@ class Engine {
   private playback: ScenePlayback | null = null
   private pads: EffectBoard | null = null
   private previewVoice: Voice | null = null
+  /** Bumped by every new preview or stop, so a sound still loading can tell it's been replaced. */
+  private previewRequest = 0
   private effectVoices = new Map<string, { voices: Set<Voice>; startedAt: number }>()
   private duckingVoices = new Set<Voice>()
   private fadeOutSeconds = 1.5
@@ -201,14 +203,16 @@ class Engine {
 
   /** Plays one sound at a time on this device only; resolves when it finishes or is replaced. */
   async preview(soundId: string, level?: PreviewLevel): Promise<void> {
+    const request = ++this.previewRequest
     const mixer = await this.unlock()
     await this.previewVoice?.stop(0.15)
     const sound = this.lookup(soundId)
-    if (!sound) return
+    if (!sound || request !== this.previewRequest) return
     usePlayer.setState({ previewId: soundId })
     const output = level ? mixer.previewBuses[level.bus] : mixer.preview
     const volume = level?.volume ?? LIBRARY_PREVIEW_VOLUME
     const voice = await createVoice(this.factory(), sound, output, { volume })
+    if (request !== this.previewRequest) return void voice.stop()
     this.previewVoice = voice
     await new Promise<void>((resolve) => voice.onEnded(resolve))
     if (this.previewVoice === voice) {
@@ -237,6 +241,7 @@ class Engine {
   }
 
   stopPreview() {
+    this.previewRequest++
     void this.previewVoice?.stop(0.15)
     this.previewVoice = null
     usePlayer.setState({ previewId: null })
