@@ -2,6 +2,7 @@ import type { Card, Scene } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { CardLabel } from '../../ui/CardLabel.tsx'
 import { formatRange } from '../../ui/format.ts'
 import { AmbienceStatus } from '../player/AmbienceStatus.tsx'
 
@@ -41,7 +42,9 @@ export function TableAmbience({
               >
                 <span className="flex items-center gap-2 text-lg">
                   <AmbienceStatus state={s} idle={on ? 'bg-lichen/50' : 'bg-peat-600'} />
-                  <span className="truncate">{card.label}</span>
+                  <span className="min-w-0 flex-1">
+                    <CardLabel label={card.label} truncate />
+                  </span>
                 </span>
                 <span className="truncate text-sm text-ink-muted tabular">
                   {!ready

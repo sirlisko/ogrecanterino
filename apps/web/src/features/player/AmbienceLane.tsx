@@ -2,6 +2,7 @@ import type { Card, Scene } from '@ogre/shared'
 import { useSoundStatus } from '../../api/sounds.ts'
 import { engine } from '../../audio/engine.ts'
 import { usePlayer } from '../../audio/store.ts'
+import { CardLabel } from '../../ui/CardLabel.tsx'
 import { Fader } from '../../ui/Fader.tsx'
 import { formatNext, formatRange } from '../../ui/format.ts'
 import { AmbienceStatus } from './AmbienceStatus.tsx'
@@ -53,11 +54,11 @@ export function AmbienceLane({
               </label>
               <AmbienceStatus state={s} />
               <span
-                className={`min-w-0 flex-1 truncate ${card.enabled && !missing ? '' : 'text-peat-400'}`}
+                className={`flex min-w-0 flex-1 items-baseline ${card.enabled && !missing ? '' : 'text-peat-400'}`}
               >
-                {card.label}
+                <CardLabel label={card.label} truncate />
                 {interval && <span className="sr-only">, every {formatRange(interval)}</span>}
-                {missing && <span className="ml-2 text-sm text-danger">missing</span>}
+                {missing && <span className="ml-2 shrink-0 text-sm text-danger">missing</span>}
               </span>
               {interval && active && card.enabled && status === 'ready' && (
                 <button
