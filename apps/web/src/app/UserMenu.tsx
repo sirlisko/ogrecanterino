@@ -4,6 +4,7 @@ import { api } from '../api/client.ts'
 import { useMe } from '../api/me.ts'
 import { keys } from '../api/keys.ts'
 import { SettingsDialog } from '../features/settings/SettingsDialog.tsx'
+import { Menu, MenuItem } from '../ui/Menu.tsx'
 
 export function UserMenu() {
   const me = useMe().data
@@ -17,26 +18,28 @@ export function UserMenu() {
   }
 
   return (
-    <div className="flex items-center gap-3 text-[15px]">
-      {me.avatarUrl ? (
-        <img src={me.avatarUrl} alt="" className="h-7 w-7 rounded-full" />
-      ) : (
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-peat-700 text-sm">
-          {me.name[0]}
-        </span>
-      )}
-      <span className="hidden text-ink-muted md:inline">{me.name}</span>
-      <button
-        type="button"
-        onClick={() => setSettings(true)}
-        className="text-ink-muted hover:text-ink"
+    <>
+      {/* Behind a menu so Log out can't be hit by accident mid-session. */}
+      <Menu
+        label="Account"
+        triggerClassName="flex min-h-11 items-center gap-2 rounded-lg px-1.5 text-[15px] text-ink-muted hover:text-ink"
+        trigger={
+          <>
+            {me.avatarUrl ? (
+              <img src={me.avatarUrl} alt="" className="h-7 w-7 rounded-full" />
+            ) : (
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-peat-700 text-sm">
+                {me.name[0]}
+              </span>
+            )}
+            <span className="hidden md:inline">{me.name}</span>
+          </>
+        }
       >
-        Settings
-      </button>
-      <button type="button" onClick={logout} className="text-ink-muted hover:text-ink">
-        Log out
-      </button>
+        <MenuItem onSelect={() => setSettings(true)}>Settings</MenuItem>
+        <MenuItem onSelect={() => void logout()}>Log out</MenuItem>
+      </Menu>
       {settings && <SettingsDialog onClose={() => setSettings(false)} />}
-    </div>
+    </>
   )
 }
