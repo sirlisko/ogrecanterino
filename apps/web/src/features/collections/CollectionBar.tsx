@@ -4,7 +4,7 @@ import { setActiveCollection, useActiveCollection } from './activeCollection.ts'
 import { CollectionDialog } from './CollectionDialog.tsx'
 
 const tab = (active: boolean) =>
-  `shrink-0 border-b-[3px] pt-1.5 pb-2 text-left font-display text-xl font-bold whitespace-nowrap transition-colors ${
+  `shrink-0 border-b-[3px] pt-1.5 pb-2 text-left font-display text-xl font-bold whitespace-nowrap transition-colors focus-visible:-outline-offset-2 ${
     active ? 'border-brass text-ink' : 'border-transparent text-ink-muted hover:text-ink'
   }`
 
