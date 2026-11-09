@@ -141,7 +141,7 @@ class Engine {
       scene: null,
       combat: false,
       ambience: {},
-      music: { playing: false, cardId: null, current: 0, duration: 0 },
+      music: { playing: false, cardId: null, current: 0, duration: 0, failing: false },
     })
     this.pads?.stopAll(fadeSeconds)
     await playback?.stop(fadeSeconds)

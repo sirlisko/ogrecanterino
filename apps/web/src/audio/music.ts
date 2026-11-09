@@ -1,5 +1,5 @@
 import type { Card } from '@ogre/shared'
-import { nextTrackIndex, previousTrackIndex, type PlaylistMode } from './schedule.ts'
+import { nextTrackIndex, previousTrackIndex, retryDelayMs, type PlaylistMode } from './schedule.ts'
 import { soundUrl, type SoundLookup, type VoiceFactory } from './sources.ts'
 import { ElementVoice } from './voice.ts'
 
@@ -8,6 +8,8 @@ export interface MusicState {
   cardId: string | null
   current: number
   duration: number
+  /** Tracks can't be loaded right now; the deck keeps trying. */
+  failing: boolean
 }
 
 const TICK_MS = 500
@@ -31,6 +33,9 @@ export class MusicDeck {
   private advancing = false
   private lastCurrent = -1
   private stalledTicks = 0
+  /** Tracks that failed in a row since one last played. */
+  private failures = 0
+  private retryTimer: number | null = null
 
   constructor(
     private factory: VoiceFactory,
@@ -65,6 +70,7 @@ export class MusicDeck {
       cardId: this.cards[this.index]?.id ?? null,
       current: pos?.current ?? 0,
       duration: pos?.duration ?? 0,
+      failing: this.failures > 0,
     }
   }
 
@@ -113,6 +119,8 @@ export class MusicDeck {
 
   async stop(fadeSeconds = 0) {
     this.stopTicker()
+    this.clearRetry()
+    this.failures = 0
     const voice = this.voice
     this.voice = null
     this.emit()
@@ -123,6 +131,7 @@ export class MusicDeck {
     const card = this.cards[i]
     const sound = card?.soundId ? this.lookup(card.soundId) : undefined
     if (!card || !sound) return
+    this.clearRetry()
     const previous = this.voice
     const fade = previous ? fadeSeconds : Math.min(fadeSeconds, 1)
     this.index = i
@@ -135,7 +144,9 @@ export class MusicDeck {
       loop: this.loops,
     })
     voice.onEnded(() => {
-      if (this.voice === voice) this.advance()
+      if (this.voice !== voice) return
+      if (voice.failed) this.retryAfterFailure()
+      else this.advance()
     })
     this.voice = voice
     this.startTicker()
@@ -150,12 +161,32 @@ export class MusicDeck {
     else this.playIndex(next)
   }
 
+  /** A failed load must not skip straight on: with the server gone, that spins through the list. */
+  private retryAfterFailure() {
+    this.voice = null
+    const delay = retryDelayMs(this.failures++)
+    this.retryTimer = window.setTimeout(() => {
+      this.retryTimer = null
+      const next = nextTrackIndex(this.index, this.cards.length, this.opts.mode)
+      this.playIndex(this.loops ? this.index : next)
+    }, delay)
+    this.emit()
+  }
+
+  private clearRetry() {
+    if (this.retryTimer !== null) window.clearTimeout(this.retryTimer)
+    this.retryTimer = null
+  }
+
   private startTicker() {
     if (this.ticker !== null) return
     this.ticker = window.setInterval(() => {
       const voice = this.voice
       const pos = voice?.position()
-      if (voice && pos && !voice.paused && pos.duration > 0) this.watch(voice, pos)
+      if (voice && pos && !voice.paused && pos.duration > 0) {
+        if (pos.current > 0) this.failures = 0
+        this.watch(voice, pos)
+      }
       this.emit()
     }, TICK_MS)
   }

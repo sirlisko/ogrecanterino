@@ -48,6 +48,7 @@ export function TableControls({ scene }: { scene: Scene }) {
         <p className="truncate text-xl">
           {combat ? 'Combat music' : (track?.label ?? 'No music playing')}
         </p>
+        {music.failing && <p className="text-danger">Can't load the music, retrying</p>}
         {music.duration > 0 && (
           <SeekBar
             current={music.current}

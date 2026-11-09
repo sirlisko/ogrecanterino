@@ -60,6 +60,9 @@ export function TransportBar() {
                     {music.duration > 0 &&
                       ` ${formatTime(music.current)} / ${formatTime(music.duration)}`}
                   </span>
+                  {music.failing && (
+                    <span className="shrink-0 text-danger">Can't load the music, retrying</span>
+                  )}
                   {ducked && <span className="shrink-0 text-brass">Music lowered</span>}
                   {sounding.length > 0 && (
                     <span

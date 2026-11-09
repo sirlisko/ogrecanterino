@@ -10,6 +10,11 @@ export function randomIntInRange([min, max]: Range, rng: Rng = Math.random): num
   return Math.min(hi, min + Math.floor(rng() * (hi - min + 1)))
 }
 
+/** How long to wait before trying a sound again: 1, 2, 4, 8, then every 15 seconds. */
+export function retryDelayMs(failures: number): number {
+  return Math.min(1000 * 2 ** failures, 15_000)
+}
+
 export type PlaylistMode = 'sequential' | 'shuffle' | 'repeat-one'
 
 /** Picks the track after `current`; shuffle never repeats the same track back to back. */

@@ -61,7 +61,7 @@ export const usePlayer = create<PlayerState>(() => ({
   sceneId: null,
   scene: null,
   combat: false,
-  music: { playing: false, cardId: null, current: 0, duration: 0 },
+  music: { playing: false, cardId: null, current: 0, duration: 0, failing: false },
   ambience: {},
   volumes: loadVolumes(),
   monitor: true,

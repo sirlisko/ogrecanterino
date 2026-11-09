@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { nextTrackIndex, previousTrackIndex, randomInRange, randomIntInRange } from './schedule.ts'
+import {
+  nextTrackIndex,
+  previousTrackIndex,
+  randomInRange,
+  randomIntInRange,
+  retryDelayMs,
+} from './schedule.ts'
 
 const fixed = (v: number) => () => v
 
@@ -20,6 +26,12 @@ describe('random ranges', () => {
   it('covers the whole integer range over many draws', () => {
     const seen = new Set(Array.from({ length: 500 }, () => randomIntInRange([1, 3])))
     expect([...seen].sort()).toEqual([1, 2, 3])
+  })
+})
+
+describe('retryDelayMs', () => {
+  it('backs off and then holds steady', () => {
+    expect([0, 1, 2, 3, 4, 9].map(retryDelayMs)).toEqual([1000, 2000, 4000, 8000, 15_000, 15_000])
   })
 })
 
