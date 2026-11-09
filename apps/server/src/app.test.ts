@@ -173,6 +173,15 @@ describe('scenes', () => {
     const { bannerPath } = upload.json()
     expect(existsSync(join(dir, 'banners', bannerPath))).toBe(true)
 
+    const copy = await app.inject({
+      method: 'POST',
+      url: `/api/scenes/${id}/duplicate`,
+      headers: { cookie },
+    })
+    const copied = copy.json().bannerPath
+    expect(copied).not.toBe(bannerPath)
+    expect(existsSync(join(dir, 'banners', copied))).toBe(true)
+
     const removed = await app.inject({
       method: 'DELETE',
       url: `/api/scenes/${id}/banner`,
@@ -180,6 +189,7 @@ describe('scenes', () => {
     })
     expect(removed.json().bannerPath).toBeNull()
     expect(existsSync(join(dir, 'banners', bannerPath))).toBe(false)
+    expect(existsSync(join(dir, 'banners', copied))).toBe(true)
   })
 
   it('validates scene bodies', async () => {
