@@ -5,6 +5,7 @@ import { CreditsPage } from '../features/credits/CreditsPage.tsx'
 import { EditorPage } from '../features/editor/EditorPage.tsx'
 import { LibraryPage } from '../features/library/LibraryPage.tsx'
 import { LoginPage } from '../features/login/LoginPage.tsx'
+import { OfflineSync } from '../features/offline/OfflineSync.tsx'
 import { PlayerPage } from '../features/player/PlayerPage.tsx'
 import { useOfferLastSession } from '../features/player/useLastSession.ts'
 import { ScenesPage } from '../features/scenes/ScenesPage.tsx'
@@ -30,17 +31,20 @@ export function App() {
     )
   }
   return (
-    <Routes>
-      <Route path="table" element={<TablePage />} />
-      <Route element={<Layout />}>
-        <Route index element={<ScenesPage />} />
-        <Route path="scenes/:id" element={<PlayerPage />} />
-        <Route path="scenes/:id/edit" element={<EditorPage />} />
-        <Route path="library" element={<LibraryPage />} />
-        <Route path="credits" element={<CreditsPage />} />
-        <Route path="login" element={<Navigate to="/" replace />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
+    <>
+      <OfflineSync />
+      <Routes>
+        <Route path="table" element={<TablePage />} />
+        <Route element={<Layout />}>
+          <Route index element={<ScenesPage />} />
+          <Route path="scenes/:id" element={<PlayerPage />} />
+          <Route path="scenes/:id/edit" element={<EditorPage />} />
+          <Route path="library" element={<LibraryPage />} />
+          <Route path="credits" element={<CreditsPage />} />
+          <Route path="login" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </>
   )
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatNext, formatRange, formatTime } from './format.ts'
+import { formatBytes, formatNext, formatRange, formatTime } from './format.ts'
 
 describe('formatTime', () => {
   it('formats minutes and seconds', () => {
@@ -28,5 +28,14 @@ describe('formatNext', () => {
   it('gives the countdown while waiting, and only the range otherwise', () => {
     expect(formatNext([15_000, 60_000], 28_000, 400)).toBe('Next in 28 s, every 15 s–1 min')
     expect(formatNext([15_000, 60_000], null, 0)).toBe('Every 15 s–1 min')
+  })
+})
+
+describe('formatBytes', () => {
+  it('picks a unit a person reads at a glance', () => {
+    expect(formatBytes(0)).toBe('1 KB')
+    expect(formatBytes(820_000)).toBe('820 KB')
+    expect(formatBytes(409_600_000)).toBe('410 MB')
+    expect(formatBytes(2_340_000_000)).toBe('2.3 GB')
   })
 })

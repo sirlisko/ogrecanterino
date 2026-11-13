@@ -21,8 +21,9 @@ export function useMe() {
 export const useFavourites = () =>
   useQuery({ queryKey: keys.favourites, queryFn: () => api<string[]>('/api/me/favourites') })
 
-export const usePads = () =>
-  useQuery({ queryKey: keys.pads, queryFn: () => api<Pad[]>('/api/me/pads') })
+export const padsQuery = { queryKey: keys.pads, queryFn: () => api<Pad[]>('/api/me/pads') }
+
+export const usePads = () => useQuery(padsQuery)
 
 export const useRecent = () =>
   useQuery({ queryKey: keys.recent, queryFn: () => api<string[]>('/api/me/recent') })
