@@ -7,6 +7,7 @@ import { Button } from '../../ui/Button.tsx'
 import { Dialog, fieldClass } from '../../ui/Dialog.tsx'
 import { useActiveCollectionData } from '../collections/useSetlist.ts'
 import { hasNoSounds } from '../editor/blankScene.ts'
+import { NotOnDevice } from '../offline/NotOnDevice.tsx'
 import { matchesQuery } from '../scenes/SceneSearch.tsx'
 
 /** Starts any scene from table mode, with the active collection's scenes first and in order. */
@@ -68,6 +69,7 @@ export function ScenePicker({ onClose }: { onClose: () => void }) {
                       <span className="truncate text-sm text-ink-muted">
                         {playing ? 'Playing now' : empty ? 'No sounds yet' : s.tags.join(', ')}
                       </span>
+                      <NotOnDevice sceneId={s.id} className="text-sm" />
                     </button>
                   </li>
                 )
