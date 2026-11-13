@@ -25,6 +25,7 @@ Use the same name for an action everywhere it appears: button, tooltip, shortcut
 - **Preview**: plays on this device only.
 - **Mute this device**: the monitor toggle. Not "play through this device".
 - **Collection**, **Quick pads**, **Table mode**.
+- **Available offline**: keeps a collection's files on this device.
 - Sentence case, plain verbs, no all-caps labels. Errors say what happened and what to do next.
 
 Card labels can start with emoji and no space, as imported ones do. Show them with `CardLabel`, or
@@ -67,3 +68,7 @@ Anything the GM auditions must go through `engine.preview`/`togglePreview`, neve
   with no listener, so anything in the voice path needs one: connections, players, and streams
   (join them with `pipeline`, because `.pipe()` doesn't forward errors).
 - Playwright screenshots land in `.playwright-mcp/`, which is git-ignored.
+- **The service worker only exists in a production build.** Test offline against `pnpm build` served
+  by the API server (`WEB_DIST`), and restart it after rebuilding. Played files also sit in the
+  browser's HTTP cache, so a download can succeed with the server's files gone; clear that cache to
+  test a failed download.

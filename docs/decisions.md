@@ -3,6 +3,33 @@
 Why the app works the way it does. Newest first. Each entry says what was decided, why, and what
 it rules out, so a later change can tell whether the reason still holds.
 
+## 2026-11-13: Available offline
+
+### A collection can be kept on the device
+
+"Available offline" on a collection downloads every file its scenes can play into the browser's
+Cache Storage: each card's sound, switched-off cards included because the GM can turn them on
+mid-session, uploaded pictures, the combat scenes the collection reaches, and the quick pads, which
+table mode shows whatever is playing. A service worker answers `/audio/*` and `/banners/*` from
+there first, so the audio engine doesn't know where a file came from.
+
+The browser's HTTP cache already keeps played files for a year, but it only holds what has been
+played and the browser empties it when it likes. A kept collection is downloaded up front and asks
+for persistent storage, so the session doesn't depend on the network.
+
+Downloads follow the collection while it's kept: edits that add sounds are fetched after a short
+pause, files no kept collection needs are deleted, and turning it off removes them. The plan is
+only worked out once the library, scenes, collections and pads have all loaded, because a partial
+list would make needed files look unused and get them deleted. Logging out removes every download,
+since they're files behind the login.
+
+### The service worker slices byte ranges itself
+
+Media elements ask for audio in byte ranges, and Safari won't play a range request answered with
+the whole file. Cached files are answered with a 206 slice (`sw/range.ts`). The worker is built as
+its own classic script by the `serviceWorker.ts` Vite plugin, so it exists only in production
+builds.
+
 ## 2026-11-09: Interface pass
 
 ### The scene page gives its height to the controls
@@ -300,11 +327,12 @@ quick pads show; assigning happens in the transport bar.
 
 ### Where state lives
 
-| State                                              | Where                       | Why                                    |
-| -------------------------------------------------- | --------------------------- | -------------------------------------- |
-| Scenes, collections, sounds, pads, favourites      | Server                      | Shared, or must survive device changes |
-| Volumes, active collection, recently played scenes | `localStorage`              | Per-device conveniences; safe to lose  |
-| What's playing, previewing, ducked, muted          | Zustand store (`usePlayer`) | Live audio state                       |
+| State                                              | Where                         | Why                                                         |
+| -------------------------------------------------- | ----------------------------- | ----------------------------------------------------------- |
+| Scenes, collections, sounds, pads, favourites      | Server                        | Shared, or must survive device changes                      |
+| Volumes, active collection, recently played scenes | `localStorage`                | Per-device conveniences; safe to lose                       |
+| Collections kept offline and their files           | `localStorage`, Cache Storage | Per device; files download again if the browser clears them |
+| What's playing, previewing, ducked, muted          | Zustand store (`usePlayer`)   | Live audio state                                            |
 
 ### No icon dependency
 

@@ -90,6 +90,9 @@ streamed leaves after an hour of silence, even if the tab is closed in the meant
   `localStorage`. The full table is in decisions.md, "Where state lives".
 - **Features:** `src/features/<area>` holds pages and their components; `src/ui` holds shared
   primitives with no app knowledge.
+- **Offline:** `features/offline` works out which files the collections kept on this device need
+  and downloads them into the `ogre-offline-files` cache. The service worker (`sw/sw.ts`, built to
+  `dist/sw.js`) answers `/audio/*` and `/banners/*` from that cache when it holds a copy.
 
 ### Audio engine
 
