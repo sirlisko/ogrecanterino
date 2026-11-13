@@ -5,6 +5,7 @@ import { HotkeyLayer } from '../../hotkeys/HotkeyLayer.tsx'
 import { Button } from '../../ui/Button.tsx'
 import { ErrorBoundary } from '../../ui/ErrorBoundary.tsx'
 import { PageCrash } from '../../app/CrashNotice.tsx'
+import { OfflineBanner } from '../offline/OfflineBanner.tsx'
 import { EFFECT_KEYS, EffectPad } from '../player/EffectsLane.tsx'
 import { ResumeToast } from '../player/ResumeToast.tsx'
 import { SaveConflict } from '../player/SaveConflict.tsx'
@@ -28,6 +29,7 @@ export function TablePage() {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <OfflineBanner />
       <TableHeader onPickScene={() => setPicking(true)} />
       <TableStrip scene={scene} />
       <SaveConflict live={live} className="m-4 mb-0 sm:mx-5" />

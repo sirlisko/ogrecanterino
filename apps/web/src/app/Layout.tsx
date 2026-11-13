@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { useSounds } from '../api/sounds.ts'
 import { engine } from '../audio/engine.ts'
+import { OfflineBanner } from '../features/offline/OfflineBanner.tsx'
 import { TransportBar } from '../features/player/TransportBar.tsx'
 import { HotkeyLayer } from '../hotkeys/HotkeyLayer.tsx'
 import { ErrorBoundary } from '../ui/ErrorBoundary.tsx'
@@ -45,6 +46,7 @@ export function Layout() {
           </div>
         </div>
       </header>
+      <OfflineBanner />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-6 pb-40">
         <ErrorBoundary resetKey={pathname} fallback={(retry) => <PageCrash retry={retry} />}>
           <Outlet />
