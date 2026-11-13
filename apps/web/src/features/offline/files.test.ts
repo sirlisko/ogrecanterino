@@ -1,6 +1,6 @@
 import { type Card, type Collection, emptySceneData, type Scene, type Sound } from '@ogre/shared'
 import { describe, expect, it } from 'vitest'
-import { collectionScenes, offlinePlan, sceneFiles } from './files.ts'
+import { collectionScenes, keptScenes, offlinePlan, offlineReads, sceneFiles } from './files.ts'
 
 const card = (soundId: string | null, enabled = true): Card => ({
   id: `card-${soundId}`,
@@ -98,5 +98,24 @@ describe('offlinePlan', () => {
     )
     expect(plan.get('one')).toEqual(['/audio/s1%20file.mp3', '/audio/pad%20file.mp3'])
     expect(plan.get('two')).toEqual(['/audio/pad%20file.mp3'])
+  })
+})
+
+describe('keptScenes', () => {
+  it('lists a scene shared by two collections once', () => {
+    const scenes = [scene('a'), scene('b'), scene('c')]
+    const kept = keptScenes(
+      [collection({ id: 'one', sceneIds: ['a', 'b'] }), collection({ id: 'two', sceneIds: ['b'] })],
+      scenes,
+    )
+    expect(kept.map((s) => s.id)).toEqual(['a', 'b'])
+  })
+})
+
+describe('offlineReads', () => {
+  it('versions each scene by its last change and the lists not at all', () => {
+    const reads = offlineReads([scene('a', { updatedAt: '2026-11-13T10:00:00Z' })])
+    expect(reads).toContainEqual({ url: '/api/scenes/a', version: '2026-11-13T10:00:00Z' })
+    expect(reads).toContainEqual({ url: '/api/me', version: '' })
   })
 })

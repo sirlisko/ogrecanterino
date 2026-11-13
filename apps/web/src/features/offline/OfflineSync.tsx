@@ -4,8 +4,8 @@ import { collectionsQuery } from '../../api/collections.ts'
 import { padsQuery } from '../../api/me.ts'
 import { scenesQuery } from '../../api/scenes.ts'
 import { soundsQuery } from '../../api/sounds.ts'
-import { offlinePlan } from './files.ts'
-import { setKeptOffline, useOffline } from './store.ts'
+import { keptScenes, offlinePlan, offlineReads } from './files.ts'
+import { setKeptOffline, setKeptScenes, useOffline } from './store.ts'
 import { syncOffline } from './sync.ts'
 import { useOnline } from './useOnline.ts'
 
@@ -23,13 +23,18 @@ export function OfflineSync() {
   const online = useOnline()
 
   useEffect(() => {
-    if (!enabled) return syncOffline(new Map())
+    if (!enabled) {
+      setKeptScenes(new Set())
+      return syncOffline(new Map())
+    }
     // A partial library would look like files nobody needs and get them deleted.
     if (!collections || !scenes || !sounds || !pads) return
     const kept = collections.filter((c) => ids.includes(c.id))
     if (kept.length < ids.length) return setKeptOffline(kept.map((c) => c.id))
+    const reachable = keptScenes(kept, scenes)
+    setKeptScenes(new Set(reachable.map((s) => s.id)))
     const plan = offlinePlan(kept, scenes, sounds, pads)
-    const timer = window.setTimeout(() => syncOffline(plan), SETTLE_MS)
+    const timer = window.setTimeout(() => syncOffline(plan, offlineReads(reachable)), SETTLE_MS)
     return () => window.clearTimeout(timer)
   }, [enabled, ids, collections, scenes, sounds, pads, online])
 

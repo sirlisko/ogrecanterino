@@ -12,11 +12,12 @@ function load(): string[] {
   }
 }
 
-/** Collections kept on this device, and how far each one's download has got. */
-export const useOffline = create<{ ids: string[]; status: Record<string, OfflineStatus> }>(() => ({
-  ids: load(),
-  status: {},
-}))
+/** Collections kept on this device, how far each one's download has got, and the scenes they reach. */
+export const useOffline = create<{
+  ids: string[]
+  status: Record<string, OfflineStatus>
+  sceneIds: ReadonlySet<string>
+}>(() => ({ ids: load(), status: {}, sceneIds: new Set() }))
 
 export function setKeptOffline(ids: string[]) {
   useOffline.setState({ ids })
@@ -34,6 +35,8 @@ export function keepOffline(id: string, on: boolean) {
   // Asks the browser not to clear the downloads when space runs low. It may say no.
   if (on) void navigator.storage?.persist?.().catch(() => false)
 }
+
+export const setKeptScenes = (sceneIds: ReadonlySet<string>) => useOffline.setState({ sceneIds })
 
 export const setOfflineStatus = (status: Record<string, OfflineStatus>) =>
   useOffline.setState({ status })
