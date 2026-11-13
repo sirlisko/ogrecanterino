@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useMe } from '../../api/me.ts'
 import { usePlayer } from '../../audio/store.ts'
 import { Button } from '../../ui/Button.tsx'
+import { OfflineToggle } from '../offline/OfflineToggle.tsx'
 import { matchesQuery, SceneSearch } from '../scenes/SceneSearch.tsx'
 import { AddScenesDialog } from './AddScenesDialog.tsx'
 import { CollectionDialog } from './CollectionDialog.tsx'
@@ -53,7 +54,8 @@ export function CollectionScenes({
           {unavailable > 0 &&
             ` ${unavailable} scene${unavailable === 1 ? ' is' : 's are'} no longer shared with you.`}
         </p>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-x-4 gap-y-2">
+          <OfflineToggle collectionId={collection.id} />
           {searchable && <SceneSearch value={query} onChange={setQuery} />}
           {canEdit && (
             <Button className="whitespace-nowrap" onClick={() => setEditing(true)}>
