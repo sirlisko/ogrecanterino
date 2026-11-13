@@ -5,6 +5,7 @@ import { CreditsPage } from '../features/credits/CreditsPage.tsx'
 import { EditorPage } from '../features/editor/EditorPage.tsx'
 import { LibraryPage } from '../features/library/LibraryPage.tsx'
 import { LoginPage } from '../features/login/LoginPage.tsx'
+import { NeedsConnection } from '../features/offline/NeedsConnection.tsx'
 import { OfflineSync } from '../features/offline/OfflineSync.tsx'
 import { PlayerPage } from '../features/player/PlayerPage.tsx'
 import { useOfferLastSession } from '../features/player/useLastSession.ts'
@@ -38,7 +39,14 @@ export function App() {
         <Route element={<Layout />}>
           <Route index element={<ScenesPage />} />
           <Route path="scenes/:id" element={<PlayerPage />} />
-          <Route path="scenes/:id/edit" element={<EditorPage />} />
+          <Route
+            path="scenes/:id/edit"
+            element={
+              <NeedsConnection>
+                <EditorPage />
+              </NeedsConnection>
+            }
+          />
           <Route path="library" element={<LibraryPage />} />
           <Route path="credits" element={<CreditsPage />} />
           <Route path="login" element={<Navigate to="/" replace />} />

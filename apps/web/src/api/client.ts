@@ -8,6 +8,11 @@ export class ApiError extends Error {
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (init.method && init.method !== 'GET' && !navigator.onLine)
+    throw new ApiError(
+      0,
+      "You're offline, so this can't be saved. Try again when you're back online.",
+    )
   const isForm = init.body instanceof FormData
   const res = await fetch(path, {
     ...init,

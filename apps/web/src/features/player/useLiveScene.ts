@@ -65,7 +65,8 @@ export function useLiveScene(id: string | undefined) {
       const next = fn(current)
       replace(next)
       engine.updateScene(next)
-      changed(canEdit)
+      // Offline, changes still reach the audio; they're saved with the next change made online.
+      changed(canEdit && navigator.onLine)
     },
     [canEdit, changed, replace],
   )

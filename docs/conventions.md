@@ -71,4 +71,6 @@ Anything the GM auditions must go through `engine.preview`/`togglePreview`, neve
 - **The service worker only exists in a production build.** Test offline against `pnpm build` served
   by the API server (`WEB_DIST`), and restart it after rebuilding. Played files also sit in the
   browser's HTTP cache, so a download can succeed with the server's files gone; clear that cache to
-  test a failed download.
+  test a failed download. Playwright's `setOffline` didn't change `navigator.onLine` in the MCP
+  browser; CDP's `Network.emulateNetworkConditions` does. Stopping the server instead tests a
+  device that has a network but can't reach the app.

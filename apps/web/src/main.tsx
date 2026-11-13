@@ -18,7 +18,12 @@ registerServiceWorker()
 const router = createBrowserRouter([{ path: '*', element: <App /> }])
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+  defaultOptions: {
+    // Offline, the service worker answers reads from the device, so they should still be tried.
+    queries: { retry: 1, refetchOnWindowFocus: false, networkMode: 'offlineFirst' },
+    // A change made offline fails at once with a clear message instead of replaying later.
+    mutations: { networkMode: 'always' },
+  },
 })
 
 createRoot(document.getElementById('root') as HTMLElement).render(

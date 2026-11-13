@@ -92,7 +92,9 @@ streamed leaves after an hour of silence, even if the tab is closed in the meant
   primitives with no app knowledge.
 - **Offline:** `features/offline` works out which files the collections kept on this device need
   and downloads them into the `ogre-offline-files` cache. The service worker (`sw/sw.ts`, built to
-  `dist/sw.js`) answers `/audio/*` and `/banners/*` from that cache when it holds a copy.
+  `dist/sw.js`) answers `/audio/*` and `/banners/*` from that cache when it holds a copy, keeps
+  the built app and fonts, and, while a collection is kept, falls back to the last answer to each
+  API read (`ogre-offline-api`) when the server can't be reached.
 
 ### Audio engine
 

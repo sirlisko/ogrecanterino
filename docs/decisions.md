@@ -23,6 +23,30 @@ only worked out once the library, scenes, collections and pads have all loaded, 
 list would make needed files look unused and get them deleted. Logging out removes every download,
 since they're files behind the login.
 
+### Offline, the app opens from the device
+
+The service worker keeps the built app, replaced with each build, and the Google Fonts it uses.
+While a collection is kept it also stores the last answer to each API read; the sync asks again
+for the ones the app had already loaded before anything was kept. Pages and reads go to the
+network first and fall back to the stored copy, at once when there's no network and after 5 s
+when the server doesn't answer, so a reachable server always wins. Discord's status is never
+stored, since an old copy would claim a stream that isn't there. Service workers need HTTPS,
+which production has.
+
+TanStack Query runs queries offline (`offlineFirst`) so the worker gets to answer them. Mutations
+run straight away (`always`) and fail with a message, instead of the default of queuing until the
+network returns and then replaying over whatever other GMs changed in the meantime.
+
+### Offline, the table plays and editing waits
+
+A banner says the app is offline. The editor doesn't open, and other changes are refused with a
+message saying to try again online. Changes at the table, like ambience switches, still change the
+sound and are saved with the next change made online. Scenes outside the kept collections say "Not
+on this device", since their sounds probably won't load.
+
+Considered and not done: editing offline with a queue that syncs later. It needs merging with what
+other GMs changed meanwhile, and the group prepares sessions online anyway.
+
 ### The service worker slices byte ranges itself
 
 Media elements ask for audio in byte ranges, and Safari won't play a range request answered with
