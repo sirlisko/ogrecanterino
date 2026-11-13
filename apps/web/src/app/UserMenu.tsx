@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { api } from '../api/client.ts'
 import { useMe } from '../api/me.ts'
 import { keys } from '../api/keys.ts'
+import { forgetOffline } from '../features/offline/sync.ts'
 import { SettingsDialog } from '../features/settings/SettingsDialog.tsx'
 import { Menu, MenuItem } from '../ui/Menu.tsx'
 
@@ -14,6 +15,8 @@ export function UserMenu() {
 
   const logout = async () => {
     await api('/auth/logout', { method: 'POST' })
+    // Downloads are login-gated files; they shouldn't outlive the session on a shared device.
+    await forgetOffline().catch(() => undefined)
     qc.setQueryData(keys.me, null)
   }
 
