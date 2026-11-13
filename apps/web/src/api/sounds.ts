@@ -4,12 +4,13 @@ import { useCallback, useMemo } from 'react'
 import { api, json } from './client.ts'
 import { keys } from './keys.ts'
 
-export const useSounds = () =>
-  useQuery({
-    queryKey: keys.sounds,
-    queryFn: () => api<Sound[]>('/api/sounds'),
-    staleTime: 5 * 60_000,
-  })
+export const soundsQuery = {
+  queryKey: keys.sounds,
+  queryFn: () => api<Sound[]>('/api/sounds'),
+  staleTime: 5 * 60_000,
+}
+
+export const useSounds = () => useQuery(soundsQuery)
 
 export type SoundStatus = 'loading' | 'missing' | 'ready'
 

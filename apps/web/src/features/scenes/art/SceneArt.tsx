@@ -4,6 +4,7 @@ import { drawScene, PALETTES } from './compose.ts'
 import { artFor, artForTags } from './kinds.ts'
 import { hashText, seededRandom } from './random.ts'
 import { LIGHTS } from './useSceneGlow.ts'
+import { bannerUrl } from './bannerUrl.ts'
 
 type ArtScene = Pick<Scene, 'id' | 'tags' | 'bannerPath' | 'data'>
 
@@ -36,7 +37,7 @@ export function SceneArt({
         ref={glowRef}
         aria-hidden
         className={`bg-cover bg-center ${className}`}
-        style={{ backgroundImage: `url(/banners/${encodeURIComponent(scene.bannerPath)})` }}
+        style={{ backgroundImage: `url(${bannerUrl(scene.bannerPath)})` }}
       />
     )
   }
